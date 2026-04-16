@@ -74,11 +74,14 @@ expand_home() {
 
 normalize_target() {
 	local raw_target
+	local chosen_target
 	if [[ -z "$TARGET_ARG" ]]; then
-		TARGET_ARG="$(choose_target_arg)"
+		chosen_target="$(choose_target_arg)"
+		TARGET_ARG="$(printf '%s\n' "$chosen_target" | sed 's/\r$//' | awk 'NF { value = $0 } END { print value }')"
 	fi
 
 	raw_target="$(expand_home "${TARGET_ARG:-$DEFAULT_TARGET}")"
+	raw_target="$(printf '%s' "$raw_target" | tr -d '\r')"
 	[[ -n "$raw_target" ]] || fail "Install target cannot be empty."
 	[[ "$raw_target" != *$'\n'* ]] || fail "Install target cannot contain newlines."
 
