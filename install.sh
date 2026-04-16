@@ -85,14 +85,18 @@ normalize_target() {
 
 choose_target_arg() {
 	if [[ "$NO_UI" == "1" ]]; then
+		log "UI disabled. Using default install folder ${DEFAULT_TARGET}."
 		printf '%s\n' "$DEFAULT_TARGET"
 		return 0
 	fi
 
 	if [[ "$(uname -s)" != "Darwin" ]] || ! command_exists osascript; then
+		log "macOS folder picker is unavailable. Using default install folder ${DEFAULT_TARGET}."
 		printf '%s\n' "$DEFAULT_TARGET"
 		return 0
 	fi
+
+	log "Opening macOS folder picker..."
 
 	local selected
 	selected="$(
@@ -107,10 +111,12 @@ APPLESCRIPT
 	)"
 
 	if [[ -n "$selected" ]]; then
+		log "Folder selected: ${selected%/}"
 		printf '%s\n' "${selected%/}"
 		return 0
 	fi
 
+	log "Folder picker was cancelled. Using default install folder ${DEFAULT_TARGET}."
 	printf '%s\n' "$DEFAULT_TARGET"
 }
 
@@ -246,11 +252,13 @@ choose_app_port() {
 	local existing_port=""
 	if existing_port="$(detect_existing_target_port 2>/dev/null)"; then
 		APP_PORT="$existing_port"
+		log "Existing install already uses localhost:${APP_PORT}. Reusing that port."
 		return 0
 	fi
 
 	if ! port_is_listening "$DEFAULT_PORT"; then
 		APP_PORT="$DEFAULT_PORT"
+		log "Using default port ${DEFAULT_PORT}."
 		return 0
 	fi
 
@@ -264,6 +272,7 @@ choose_app_port() {
 }
 
 scaffold_install_dir() {
+	log "Writing runtime files into ${TARGET_DIR}..."
 	mkdir -p "$TARGET_DIR" "$TARGET_DIR/n8n_data" "$STATE_DIR"
 
 	write_dockerfile
@@ -273,6 +282,7 @@ scaffold_install_dir() {
 }
 
 write_install_state() {
+	log "Recording install state..."
 	cat >"$STATE_DIR/install-state.json" <<EOF
 {
   "installedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -318,6 +328,7 @@ ensure_homebrew_available() {
 		fail "Homebrew is required. Re-run with AUTOMATION_INSTALLER_ASSUME_YES=1 to install it automatically."
 	fi
 
+	log "Homebrew is not installed. Installing it now..."
 	run_cmd "Installing Homebrew..." /bin/bash -c "NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
 
 	if ! brew_bin="$(find_brew_binary 2>/dev/null)"; then
@@ -349,6 +360,7 @@ ensure_docker_desktop_installed() {
 		return 0
 	fi
 
+	log "Docker Desktop is not installed. Installing it now..."
 	local brew_bin
 	brew_bin="$(ensure_homebrew_available)"
 	run_cmd "Installing Docker Desktop with Homebrew..." "$brew_bin" install --cask docker-desktop
@@ -371,6 +383,7 @@ start_docker_desktop() {
 
 wait_for_docker_ready() {
 	local attempt
+	log "Waiting for Docker Desktop to become ready..."
 	for attempt in $(seq 1 60); do
 		if docker_info_okay; then
 			log "Docker Desktop is ready."
@@ -434,6 +447,7 @@ open_n8n() {
 
 main() {
 	parse_args "$@"
+	log "Starting Automation installer..."
 	normalize_target
 	choose_app_port
 
@@ -451,6 +465,7 @@ main() {
 	ensure_install_port_available
 	start_stack
 	open_n8n
+	log "Open n8n at: http://localhost:${APP_PORT}"
 	log "Automation is ready in $TARGET_DIR"
 }
 
