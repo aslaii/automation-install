@@ -16,11 +16,11 @@ NO_UI="${AUTOMATION_INSTALLER_NO_UI:-0}"
 INSTALL_SOURCE="${AUTOMATION_INSTALLER_SOURCE:-https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh}"
 
 log() {
-	printf '[Automation] %s\n' "$*"
+	printf '[Automation] %s\n' "$*" >&2
 }
 
 step() {
-	printf '\n[Automation] Step %s: %s\n' "$1" "$2"
+	printf '\n[Automation] Step %s: %s\n' "$1" "$2" >&2
 }
 
 fail() {
