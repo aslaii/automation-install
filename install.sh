@@ -10,6 +10,7 @@ STATE_DIR=""
 SKIP_DOCKER="${AUTOMATION_INSTALLER_SKIP_DOCKER:-0}"
 SKIP_OPEN="${AUTOMATION_INSTALLER_SKIP_OPEN:-0}"
 ASSUME_YES="${AUTOMATION_INSTALLER_ASSUME_YES:-1}"
+NO_UI="${AUTOMATION_INSTALLER_NO_UI:-0}"
 INSTALL_SOURCE="${AUTOMATION_INSTALLER_SOURCE:-https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh}"
 
 log() {
@@ -33,6 +34,7 @@ Environment:
   AUTOMATION_INSTALLER_SKIP_DOCKER=1  Scaffold files only
   AUTOMATION_INSTALLER_SKIP_OPEN=1    Do not open localhost:5678 after startup
   AUTOMATION_INSTALLER_ASSUME_YES=1   Install prerequisites non-interactively
+  AUTOMATION_INSTALLER_NO_UI=1        Skip macOS folder picker and use defaults
 EOF
 }
 
@@ -66,6 +68,10 @@ expand_home() {
 
 normalize_target() {
 	local raw_target
+	if [[ -z "$TARGET_ARG" ]]; then
+		TARGET_ARG="$(choose_target_arg)"
+	fi
+
 	raw_target="$(expand_home "${TARGET_ARG:-$DEFAULT_TARGET}")"
 	[[ -n "$raw_target" ]] || fail "Install target cannot be empty."
 	[[ "$raw_target" != *$'\n'* ]] || fail "Install target cannot contain newlines."
@@ -73,6 +79,37 @@ normalize_target() {
 	mkdir -p "$raw_target"
 	TARGET_DIR="$(cd "$raw_target" && pwd)"
 	STATE_DIR="$TARGET_DIR/.automation"
+}
+
+choose_target_arg() {
+	if [[ "$NO_UI" == "1" ]]; then
+		printf '%s\n' "$DEFAULT_TARGET"
+		return 0
+	fi
+
+	if [[ "$(uname -s)" != "Darwin" ]] || ! command_exists osascript; then
+		printf '%s\n' "$DEFAULT_TARGET"
+		return 0
+	fi
+
+	local selected
+	selected="$(
+		osascript <<'APPLESCRIPT'
+try
+	set selectedFolder to choose folder with prompt "Choose where to install Automation:"
+	return POSIX path of selectedFolder
+on error number -128
+	return ""
+end try
+APPLESCRIPT
+	)"
+
+	if [[ -n "$selected" ]]; then
+		printf '%s\n' "${selected%/}"
+		return 0
+	fi
+
+	printf '%s\n' "$DEFAULT_TARGET"
 }
 
 command_exists() {
