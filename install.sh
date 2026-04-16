@@ -323,6 +323,21 @@ find_brew_binary() {
 	return 1
 }
 
+ensure_admin_access() {
+	if [[ "$(uname -s)" != "Darwin" ]]; then
+		return 0
+	fi
+
+	if ! command_exists sudo; then
+		fail "sudo is required to install Homebrew and Docker Desktop on macOS."
+	fi
+
+	log "Administrator access is required. macOS may prompt for your password now."
+	if ! sudo -v; then
+		fail "Administrator privileges were not granted. Please rerun from an admin account or preinstall Homebrew and Docker Desktop."
+	fi
+}
+
 ensure_homebrew_available() {
 	local brew_bin=""
 	if brew_bin="$(find_brew_binary 2>/dev/null)"; then
@@ -336,6 +351,7 @@ ensure_homebrew_available() {
 	fi
 
 	log "Homebrew is not installed. Installing it now..."
+	ensure_admin_access
 	run_cmd "Installing Homebrew..." /bin/bash -c "NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
 
 	if ! brew_bin="$(find_brew_binary 2>/dev/null)"; then
@@ -379,6 +395,7 @@ install_docker_desktop_for_current_user() {
 	install_binary="$app_path/Contents/MacOS/install"
 	[[ -x "$install_binary" ]] || fail "Docker Desktop install helper is missing."
 	current_user="${USER:-$(id -un)}"
+	ensure_admin_access
 	run_cmd "Running Docker Desktop installer for ${current_user}..." "$install_binary" --accept-license "--user=${current_user}"
 }
 
