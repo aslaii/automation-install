@@ -138,6 +138,11 @@ run_cmd() {
 	"$@"
 }
 
+print_intro() {
+	log "Do not run this installer with 'sudo bash'."
+	log "The installer will request admin access only when it is actually needed."
+}
+
 write_dockerfile() {
 	cat >"$TARGET_DIR/Dockerfile" <<'EOF'
 FROM alpine:3.22 AS poppler
@@ -352,12 +357,14 @@ ensure_homebrew_available() {
 
 	log "Homebrew is not installed. Installing it now..."
 	ensure_admin_access
+	log "Homebrew may take a few minutes to install. You should see Homebrew output below."
 	run_cmd "Installing Homebrew..." /bin/bash -c "NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
 
 	if ! brew_bin="$(find_brew_binary 2>/dev/null)"; then
 		fail "Homebrew installation completed but brew was not found on disk."
 	fi
 
+	log "Homebrew installed successfully at $brew_bin."
 	printf '%s\n' "$brew_bin"
 }
 
@@ -386,7 +393,9 @@ ensure_docker_desktop_installed() {
 	log "Docker Desktop is not installed. Installing it now..."
 	local brew_bin
 	brew_bin="$(ensure_homebrew_available)"
+	log "Docker Desktop download/install may take a few minutes."
 	run_cmd "Installing Docker Desktop with Homebrew..." "$brew_bin" install --cask docker-desktop
+	log "Docker Desktop installation command finished."
 }
 
 install_docker_desktop_for_current_user() {
@@ -472,6 +481,7 @@ open_n8n() {
 main() {
 	parse_args "$@"
 	log "Starting Automation installer..."
+	print_intro
 	step "1/5" "Choose install folder"
 	normalize_target
 	step "2/5" "Choose port"
