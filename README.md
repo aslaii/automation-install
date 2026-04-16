@@ -31,6 +31,7 @@ bash ./install.sh --target "$HOME/Automation"
 - Installs Docker Desktop if missing
 - Creates a runtime folder with `Dockerfile`, `docker-compose.yml`, `.env.example`, `n8n_data/`, and `.automation/install-state.json`
 - Starts `n8n` on `http://localhost:5678`
+- If `5678` is already busy, automatically falls back to `http://localhost:5679`
 
 ## Optional Environment Flags
 
@@ -44,4 +45,5 @@ AUTOMATION_INSTALLER_NO_UI=1 curl -fsSL https://raw.githubusercontent.com/aslaii
 
 - macOS only
 - Docker/Homebrew installation can still trigger permission, license, or admin prompts
-- If port `5678` is already in use, the installer stops and tells you to free it
+- If `5678` is already in use, the installer tries `5679`
+- If both `5678` and `5679` are in use, the installer stops and tells you to free one

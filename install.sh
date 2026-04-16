@@ -2,11 +2,13 @@
 
 set -euo pipefail
 
-PORT="5678"
+DEFAULT_PORT="5678"
+FALLBACK_PORT="5679"
 DEFAULT_TARGET="$HOME/Automation"
 TARGET_ARG=""
 TARGET_DIR=""
 STATE_DIR=""
+APP_PORT=""
 SKIP_DOCKER="${AUTOMATION_INSTALLER_SKIP_DOCKER:-0}"
 SKIP_OPEN="${AUTOMATION_INSTALLER_SKIP_OPEN:-0}"
 ASSUME_YES="${AUTOMATION_INSTALLER_ASSUME_YES:-1}"
@@ -32,7 +34,7 @@ Options:
 
 Environment:
   AUTOMATION_INSTALLER_SKIP_DOCKER=1  Scaffold files only
-  AUTOMATION_INSTALLER_SKIP_OPEN=1    Do not open localhost:5678 after startup
+  AUTOMATION_INSTALLER_SKIP_OPEN=1    Do not open localhost after startup
   AUTOMATION_INSTALLER_ASSUME_YES=1   Install prerequisites non-interactively
   AUTOMATION_INSTALLER_NO_UI=1        Skip macOS folder picker and use defaults
 EOF
@@ -149,7 +151,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5678:5678"
+      - "__APP_PORT__:5678"
     environment:
       - N8N_HOST=localhost
       - N8N_PORT=5678
@@ -165,6 +167,7 @@ services:
       - ./n8n_data:/home/node/.n8n
     restart: unless-stopped
 EOF
+	sed -i '' "s/__APP_PORT__/${APP_PORT}/g" "$TARGET_DIR/docker-compose.yml"
 }
 
 write_env_example() {
@@ -215,6 +218,49 @@ docker compose down
 
 Visit `http://localhost:5678`
 EOF
+	sed -i '' "s/5678/${APP_PORT}/g" "$TARGET_DIR/INSTALLER.md"
+}
+
+detect_existing_target_port() {
+	local compose_file="$TARGET_DIR/docker-compose.yml"
+	if [[ ! -f "$compose_file" ]]; then
+		return 1
+	fi
+
+	local detected
+	detected="$(grep -E '^[[:space:]]*-[[:space:]]*"[0-9]+:5678"' "$compose_file" | sed -E 's/.*"([0-9]+):5678".*/\1/' | head -n 1)"
+	if [[ -n "$detected" ]]; then
+		printf '%s\n' "$detected"
+		return 0
+	fi
+
+	return 1
+}
+
+port_is_listening() {
+	local port="$1"
+	lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
+}
+
+choose_app_port() {
+	local existing_port=""
+	if existing_port="$(detect_existing_target_port 2>/dev/null)"; then
+		APP_PORT="$existing_port"
+		return 0
+	fi
+
+	if ! port_is_listening "$DEFAULT_PORT"; then
+		APP_PORT="$DEFAULT_PORT"
+		return 0
+	fi
+
+	if ! port_is_listening "$FALLBACK_PORT"; then
+		APP_PORT="$FALLBACK_PORT"
+		log "Port ${DEFAULT_PORT} is busy. Using ${FALLBACK_PORT} instead."
+		return 0
+	fi
+
+	fail "Ports ${DEFAULT_PORT} and ${FALLBACK_PORT} are both in use. Free one of them and rerun the installer."
 }
 
 scaffold_install_dir() {
@@ -232,6 +278,7 @@ write_install_state() {
   "installedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
   "source": "${INSTALL_SOURCE}",
   "installRoot": "${TARGET_DIR}",
+  "appPort": "${APP_PORT}",
   "runtimeFiles": [
     "Dockerfile",
     "docker-compose.yml",
@@ -367,8 +414,8 @@ ensure_install_port_available() {
 		return 0
 	fi
 
-	if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
-		fail "Port ${PORT} is already in use. Stop the existing local stack on that port, or rerun against the target that already owns it."
+	if lsof -nP -iTCP:"$APP_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+		fail "Port ${APP_PORT} is already in use. Stop the existing local stack on that port, or rerun against the target that already owns it."
 	fi
 }
 
@@ -382,14 +429,16 @@ open_n8n() {
 		return 0
 	fi
 
-	run_cmd "Opening n8n..." open "http://localhost:${PORT}"
+	run_cmd "Opening n8n..." open "http://localhost:${APP_PORT}"
 }
 
 main() {
 	parse_args "$@"
 	normalize_target
+	choose_app_port
 
 	log "Installing into $TARGET_DIR"
+	log "Using localhost:${APP_PORT}"
 	scaffold_install_dir
 	write_install_state
 
