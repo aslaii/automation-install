@@ -19,6 +19,10 @@ log() {
 	printf '[Automation] %s\n' "$*"
 }
 
+step() {
+	printf '\n[Automation] Step %s: %s\n' "$1" "$2"
+}
+
 fail() {
 	printf '[Automation] %s\n' "$*" >&2
 	exit 1
@@ -448,11 +452,14 @@ open_n8n() {
 main() {
 	parse_args "$@"
 	log "Starting Automation installer..."
+	step "1/5" "Choose install folder"
 	normalize_target
+	step "2/5" "Choose port"
 	choose_app_port
 
 	log "Installing into $TARGET_DIR"
 	log "Using localhost:${APP_PORT}"
+	step "3/5" "Write runtime files"
 	scaffold_install_dir
 	write_install_state
 
@@ -461,9 +468,11 @@ main() {
 		return 0
 	fi
 
+	step "4/5" "Check Docker and start n8n"
 	ensure_docker_desktop_ready
 	ensure_install_port_available
 	start_stack
+	step "5/5" "Open n8n"
 	open_n8n
 	log "Open n8n at: http://localhost:${APP_PORT}"
 	log "Automation is ready in $TARGET_DIR"
