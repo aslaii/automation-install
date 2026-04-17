@@ -118,15 +118,36 @@ cd scripts && node index.js --units-organic --date 2026-04-07 --source sheet --d
 cd scripts && node verify-latest-units-organic-run.js
 ```
 
-Workflow-local parity diagnostics are separate from the live runner and intentionally expose current drift from `../workflows/Get Units Organic.json` without editing the workflow yet:
+Workflow-local parity diagnostics are separate from the live runner and now lock the aligned `Get Units Organic` workflow contract (`SP Create Units Organic Report` → `SP Parse Units Organic by SKU` → sheet read → compute → sheet update):
 
 ```bash
+cd scripts && node tests/units-organic-tests.js --grep "workflow json parity|workflow local runner|workflow compute node"
 cd scripts && node run-units-organic-workflow-local.js --json
 # or
 cd scripts && npm run workflow:units-organic -- --json
 ```
 
-The JSON summary reports parser status, sheet-input status, workflow/local compute status, update mismatch counts, capped mismatch previews, and report-only or sheet-only SKU previews so S03 can inspect current drift mechanically.
+The `--json` command is the first-stop parity diagnostic surface. It emits a machine-readable summary with:
+
+- `parser.localStatus` / `parser.workflowStatus` — parser contract health for the local extractor and checked-in workflow node
+- `compute.localStatus` / `compute.workflowStatus` — compute contract health for the local implementation and checked-in workflow node
+- `compute.mismatchCount` — row-targeted update mismatches between local expected writebacks and workflow-emitted writebacks
+- `compute.mismatchPreview` — capped mismatch details (`sku`, expected value, actual value) for fast inspection without flooding logs
+- `compute.reportOnlySkuCount` / `compute.reportOnlySkus` — SKUs present in the Amazon report but absent from the sheet target set
+- `compute.sheetOnlySkuCount` / `compute.sheetOnlySkus` — SKUs present in the sheet target set but absent from the Amazon report
+
+Interpretation after the S03 alignment:
+
+- `localStatus === "ok"` and `workflowStatus === "ok"` with `mismatchCount === 0` means workflow/local parity is locked and any remaining SKU deltas are outside the writeback target set, not a contract regression.
+- Non-zero `reportOnly` or `sheetOnly` buckets with `mismatchCount === 0` are residual business/data drift diagnostics. Investigate fixture/report freshness, sheet membership, or expected target-set scope before changing workflow logic.
+- Non-empty `mismatchPreview` means the checked-in workflow and local compute contract disagree on concrete row updates. Treat that as workflow/local drift and inspect the referenced SKU rows before trusting either surface.
+- Any unexpected summary shape or non-JSON output should fail the verification command immediately; do not hand-wave parse issues, because automation depends on this surface being machine-readable.
+
+A copy-pasteable slice gate that enforces the improved baseline versus the old S02 mismatch freeze is:
+
+```bash
+cd scripts && node tests/units-organic-tests.js --grep "workflow json parity|workflow local runner|workflow compute node" && node -e "const { execSync } = require('node:child_process'); const raw = execSync('node run-units-organic-workflow-local.js --json', { encoding: 'utf8' }); const summary = JSON.parse(raw); if (summary.compute.mismatchCount >= 17) throw new Error('mismatch count did not improve from S02 baseline'); if (summary.compute.localStatus !== 'ok' || summary.compute.workflowStatus !== 'ok') throw new Error('compute parity status not ok'); console.log('mismatchCount', summary.compute.mismatchCount);" && npm test
+```
 
 The newest `runs/units-organic-*.json` artifact is the durable proof surface. Success runs retain lifecycle/report metadata plus per-SKU `totalUnits`, `adUnits`, and `salesOrganicQty`; auth, report, parse, and compute failures remain stage-specific in the saved artifact and surface through the verifier. Sheet-source load failures remain compute-stage failures with `source=sheet` context so verifier/debug surfaces expose credential, timeout, or row-shape drift instead of masking it.
 

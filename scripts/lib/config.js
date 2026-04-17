@@ -2,7 +2,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 
 const ENV_PATH = path.join(__dirname, '..', '.env');
-dotenv.config({ path: ENV_PATH });
+dotenv.config({ path: ENV_PATH, quiet: true });
 
 function loadConfig({ source, env = process.env } = {}) {
   const config = {
