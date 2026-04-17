@@ -10,7 +10,11 @@ const { loadSalesOrganicFromGoogleSheet } = require('../lib/sources/google-sheet
 const { runWithArgs } = require('../index');
 const { runGetSalesOrganic, computeSalesOrganic } = require('../features/sales-organic');
 const { main: verifyLatestSalesOrganicRunMain, verifySalesOrganicRun, findLatestSalesOrganicRun } = require('../verify-latest-sales-organic-run');
-const { runWorkflowLocally } = require('../run-sales-organic-workflow-local');
+const {
+  runWorkflowLocally,
+  readWorkflow,
+  runWorkflowCompute,
+} = require('../run-sales-organic-workflow-local');
 
 const tests = [
   {
@@ -184,6 +188,18 @@ const tests = [
   {
     name: 'workflow sales organic parser node keeps fail-closed contract and renamed references',
     fn: testWorkflowParserNodeContract,
+  },
+  {
+    name: 'workflow compute node scans shifted sheet headers and keeps row-limited updates',
+    fn: testWorkflowComputeNodeScansShiftedHeaders,
+  },
+  {
+    name: 'workflow compute node rejects malformed sheet numerics with source context',
+    fn: testWorkflowComputeNodeRejectsMalformedSheetNumeric,
+  },
+  {
+    name: 'workflow compute node keeps static header and clamp contract markers',
+    fn: testWorkflowComputeNodeContract,
   },
   {
     name: 'workflow local runner matches current April 15 sheet updates',
@@ -1093,6 +1109,70 @@ function testWorkflowParserNodeContract() {
   assert.match(parserCode, /parseWarning/);
   assert.match(statusUrl, /SP Create Sales Organic Report/);
   assert.deepStrictEqual((workflow.connections || {})['SP Parse Sales Organic by SKU']?.main?.[0]?.[0]?.node, 'Webhook Read Google Sheet');
+}
+
+function testWorkflowComputeNodeScansShiftedHeaders() {
+  const workflow = readWorkflow(path.resolve(__dirname, '../../workflows/Get Sales Organic.json'));
+  const sheetValues = [
+    [],
+    ['meta', 'ignore me'],
+    ['SKU', 'AD SALES', 'SALES ORGANIC'],
+    ['GOOD-SKU', 12.34, ''],
+    ['IMG', 99, ''],
+    ['GOOD-SKU_TOTALS', 99, ''],
+  ];
+
+  const updates = runWorkflowCompute(workflow, {
+    sheetValues,
+    parsedBySku: {
+      'GOOD-SKU': { totalSales: 50.67 },
+    },
+    sheetName: 'Sheet1',
+  });
+
+  const normalizedUpdates = JSON.parse(JSON.stringify(updates));
+
+  assert.deepStrictEqual(normalizedUpdates, {
+    valueInputOption: 'USER_ENTERED',
+    data: [
+      {
+        range: 'Sheet1!C4',
+        values: [[38.33]],
+      },
+    ],
+  });
+}
+
+function testWorkflowComputeNodeRejectsMalformedSheetNumeric() {
+  const workflow = readWorkflow(path.resolve(__dirname, '../../workflows/Get Sales Organic.json'));
+  const sheetValues = [
+    ['note'],
+    ['SKU', 'AD_SALES_$', 'SALES_ORGANIC_$'],
+    ['BAD-SKU', 'nope', ''],
+  ];
+
+  assert.throws(
+    () => runWorkflowCompute(workflow, {
+      sheetValues,
+      parsedBySku: {
+        'BAD-SKU': { totalSales: 10 },
+      },
+      sheetName: 'Sheet1',
+    }),
+    /Invalid numeric value for adSales source=sheet row 3 sku BAD-SKU/,
+  );
+}
+
+function testWorkflowComputeNodeContract() {
+  const workflow = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../workflows/Get Sales Organic.json'), 'utf8'));
+  const computeNode = (workflow.nodes || []).find((node) => node.name === 'Code in JavaScript');
+  const code = computeNode?.parameters?.jsCode || '';
+
+  assert.match(code, /headerRowIndex/);
+  assert.match(code, /Math\.min\(rows.length, 12\)/);
+  assert.match(code, /source=sheet/);
+  assert.match(code, /Math\.max\(0, totalSales - adSales\)/);
+  assert.match(code, /SP Parse Sales Organic by SKU/);
 }
 
 async function testWorkflowLocalRunnerRejectsMalformedNumericLikeLocalParser() {

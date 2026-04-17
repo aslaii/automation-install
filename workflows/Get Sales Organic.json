@@ -16,45 +16,45 @@
         592
       ],
       "id": "1f347c51-dab2-401c-b0e8-e01d1324238c",
-      "name": "When clicking \u2018Execute workflow\u2019"
+      "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "name": "\u2705START_DATE",
-              "value": "={{ $json[\"\u2705START_DATE\"] || \"\" }}",
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705END_DATE",
-              "value": "={{ $json[\"\u2705END_DATE\"] || \"\" }}",
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705SPREADSHEET_ID",
-              "value": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705SHEET_NAME",
-              "value": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705RANGE",
-              "value": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
               "type": "string"
             },
             {
@@ -82,7 +82,7 @@
     },
     {
       "parameters": {
-        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"\u2705SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"\u2705SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"\u2705RANGE\"])) }}",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"✅RANGE\"])) }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -110,7 +110,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"\u2705SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -140,7 +140,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst totalsBySku = $('SP Parse Sales Organic by SKU').first().json.bySku || {};\nconst sheetName = $('Set Credentials').first().json['\u2705SHEET_NAME'];\n\nconst headerRow = values[0] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst adSalesCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'ADSALES');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SALESORGANIC');\n\nif (skuCol === -1 || adSalesCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU, AD_SALES_$, and SALES_ORGANIC_$ columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  const totalSales = toNumber(totalsBySku[sku]?.totalSales || 0);\n  const adSales = toNumber(row[adSalesCol] || 0);\n  const salesOrganic = Number(Math.max(0, totalSales - adSales).toFixed(2));\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[salesOrganic]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined || v === '') return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction parseSheetNumber(value, context) {\n  if (value === undefined || value === null || String(value).trim() === '') return 0;\n  const parsed = Number(String(value ?? '').replace(/[\\s,$]/g, ''));\n  if (!Number.isFinite(parsed)) {\n    throw new Error(`Invalid numeric value for ${context}`);\n  }\n  return Number(parsed.toFixed(2));\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nfunction findHeaderIndex(headerRow, aliases) {\n  const normalizedAliases = aliases.map(normalizeHeader);\n  return headerRow.findIndex((cell) => normalizedAliases.includes(normalizeHeader(cell)));\n}\n\nfunction findPrimaryHeaderRow(rows, requiredAliasGroups) {\n  for (let index = 0; index < Math.min(rows.length, 12); index += 1) {\n    const row = rows[index] || [];\n    const hasAll = requiredAliasGroups.every((aliases) => findHeaderIndex(row, aliases) !== -1);\n    if (hasAll) {\n      return { index, row };\n    }\n  }\n\n  return { index: 0, row: rows[0] || [] };\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = Array.isArray(sheet.values) ? sheet.values : [];\nconst parserOutput = $('SP Parse Sales Organic by SKU').first().json || {};\nif (!parserOutput.bySku || typeof parserOutput.bySku !== 'object') {\n  throw new Error('Missing parser totals payload from SP Parse Sales Organic by SKU');\n}\nconst totalsBySku = parserOutput.bySku;\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst headerInfo = findPrimaryHeaderRow(values, [\n  ['SKU'],\n  ['AD_SALES_$', 'AD SALES', 'ADSALES'],\n]);\nconst headerRowIndex = headerInfo.index;\nconst headerRow = headerInfo.row || [];\nconst skuCol = findHeaderIndex(headerRow, ['SKU']);\nconst adSalesCol = findHeaderIndex(headerRow, ['AD_SALES_$', 'AD SALES', 'ADSALES']);\nconst targetCol = findHeaderIndex(headerRow, ['SALES_ORGANIC_$', 'SALES ORGANIC', 'SALESORGANIC']);\n\nif (skuCol === -1 || adSalesCol === -1 || targetCol === -1) {\n  throw new Error('source=sheet missing required SKU, AD_SALES_$, and SALES_ORGANIC_$ columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = headerRowIndex + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  const totalSales = toNumber(totalsBySku[sku]?.totalSales || 0);\n  const adSales = parseSheetNumber(row[adSalesCol], `adSales source=sheet row ${i + 1} sku ${sku}`);\n  const salesOrganic = Number(Math.max(0, totalSales - adSales).toFixed(2));\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[salesOrganic]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -186,7 +186,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"reportType\": \"GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL\",\n  \"marketplaceIds\": [\"{{ $('Set Credentials').item.json['\u2705AMAZON_MARKETPLACE_ID'] }}\"],\n  \"dataStartTime\": \"{{ $('Set Credentials').item.json['\u2705START_DATE'] }}T00:00:00Z\",\n  \"dataEndTime\": \"{{ $('Set Credentials').item.json['\u2705END_DATE'] }}T23:59:59Z\"\n}",
+        "jsonBody": "={\n  \"reportType\": \"GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL\",\n  \"marketplaceIds\": [\"{{ $('Set Credentials').item.json['✅AMAZON_MARKETPLACE_ID'] }}\"],\n  \"dataStartTime\": \"{{ $('Set Credentials').item.json['✅START_DATE'] }}T00:00:00Z\",\n  \"dataEndTime\": \"{{ $('Set Credentials').item.json['✅END_DATE'] }}T23:59:59Z\"\n}",
         "options": {}
       },
       "id": "38f5efd8-3748-4275-b501-b89f0da050af",
@@ -398,38 +398,38 @@
         "assignments": {
           "assignments": [
             {
-              "name": "\u2705START_DATE",
-              "value": "={{ $json[\"\u2705START_DATE\"] || \"\" }}",
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705END_DATE",
-              "value": "={{ $json[\"\u2705END_DATE\"] || \"\" }}",
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705SPREADSHEET_ID",
-              "value": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705SHEET_NAME",
-              "value": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705RANGE",
-              "value": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "\u2705AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
               "type": "string"
             },
             {
@@ -589,7 +589,7 @@
         ]
       ]
     },
-    "When clicking \u2018Execute workflow\u2019": {
+    "When clicking ‘Execute workflow’": {
       "main": [
         [
           {
