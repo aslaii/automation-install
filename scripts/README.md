@@ -95,6 +95,26 @@ The verifier inspects only the newest `runs/sales-organic-*.json` artifact and c
 
 The local Sales Organic runner treats Amazon order-report `item-price` as total sales input, includes `Shipped` and `Pending` rows, excludes `Cancelled` and unsupported statuses, aggregates duplicate SKU rows, and clamps negative `salesOrganic` values to zero.
 
+## Workflow parity and retained mismatch scope
+
+Static workflow parity coverage is now available via:
+
+```bash
+cd scripts && node tests/sales-organic-tests.js --grep "workflow json parity"
+```
+
+That grep-able parity block fails loudly if `../workflows/Get Sales Organic.json` drifts on contract-critical invariants: Sales Organic node names, parser fail-closed numerics and warnings, sheet header scanning, sentinel-row filtering, `Math.max(0, totalSales - adSales)` clamping, parser-to-sheet node wiring, and target-column-only `SALES_ORGANIC_$` writeback.
+
+Intentional retained mismatch for later live rollout: the repo-local artifact path is broader than the checked-in workflow writeback path. Local computation and run artifacts keep report-only / ad-sales-only SKU boundaries inspectable in JSON summaries and warnings, but the workflow compute node still emits only row-limited Google Sheet updates for retained sheet rows in the target `SALES_ORGANIC_$` column. It does not create extra diagnostic rows in the sheet for report-only SKUs or widen writeback beyond that target column.
+
+Evidence pointers:
+
+- `scripts/tests/sales-organic-tests.js`
+  - `compute keeps report-only and ad-sales-only skus inspectable in sheet mode`
+  - `workflow json parity locks the checked-in Sales Organic contract`
+- `scripts/features/sales-organic/index.js` → `computeSalesOrganic()`
+- `scripts/run-sales-organic-workflow-local.js` → `compareUpdateMaps()` and local/workflow parity summary output
+
 ## Local env
 
 Uses `scripts/.env`.

@@ -202,6 +202,14 @@ const tests = [
     fn: testWorkflowComputeNodeContract,
   },
   {
+    name: 'workflow json parity locks the checked-in Sales Organic contract',
+    fn: testWorkflowJsonParityContract,
+  },
+  {
+    name: 'workflow json parity helpers fail loudly on missing nodes and drift markers',
+    fn: testWorkflowJsonParityFailureModes,
+  },
+  {
     name: 'workflow local runner matches current April 15 sheet updates',
     fn: testWorkflowLocalRunnerMatchesApril15Fixture,
   },
@@ -1175,6 +1183,40 @@ function testWorkflowComputeNodeContract() {
   assert.match(code, /SP Parse Sales Organic by SKU/);
 }
 
+function testWorkflowJsonParityContract() {
+  assertWorkflowJsonParity(readSalesOrganicWorkflowFixture());
+}
+
+function testWorkflowJsonParityFailureModes() {
+  const workflow = readSalesOrganicWorkflowFixture();
+
+  const missingNodeWorkflow = deepCloneJson(workflow);
+  missingNodeWorkflow.nodes = (missingNodeWorkflow.nodes || []).filter((node) => node.name !== 'SP Parse Sales Organic by SKU');
+  assert.throws(
+    () => assertWorkflowJsonParity(missingNodeWorkflow),
+    /\[workflow json parity\] missing node: SP Parse Sales Organic by SKU/,
+  );
+
+  const parserWarningRegression = deepCloneJson(workflow);
+  const parserNode = getNodeByName(parserWarningRegression, 'SP Parse Sales Organic by SKU');
+  parserNode.parameters.jsCode = parserNode.parameters.jsCode.replace(
+    "parseWarning: skuCount === 0 ? 'Order report has no qualifying SKU rows' : null",
+    "parseWarning: null",
+  );
+  assert.throws(
+    () => assertWorkflowJsonParity(parserWarningRegression),
+    /\[workflow json parity\] parser warning invariant missing/,
+  );
+
+  const headerRegression = deepCloneJson(workflow);
+  const computeNode = getNodeByName(headerRegression, 'Code in JavaScript');
+  computeNode.parameters.jsCode = computeNode.parameters.jsCode.replace(/Math\.min\(rows.length, 12\)/, '1');
+  assert.throws(
+    () => assertWorkflowJsonParity(headerRegression),
+    /\[workflow json parity\] header scan invariant missing/,
+  );
+}
+
 async function testWorkflowLocalRunnerRejectsMalformedNumericLikeLocalParser() {
   const tmpDir = await fs.promises.mkdtemp(path.join(__dirname, 'tmp-sales-organic-workflow-runner-'));
   const reportPath = path.join(tmpDir, 'invalid-report.txt');
@@ -1203,6 +1245,89 @@ async function testWorkflowLocalRunnerRejectsMalformedNumericLikeLocalParser() {
   } finally {
     await fs.promises.rm(tmpDir, { recursive: true, force: true });
   }
+}
+
+function readSalesOrganicWorkflowFixture() {
+  return JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../workflows/Get Sales Organic.json'), 'utf8'));
+}
+
+function deepCloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function getNodeByName(workflow, nodeName) {
+  return (workflow?.nodes || []).find((node) => node.name === nodeName);
+}
+
+function getNodeOrThrow(workflow, nodeName) {
+  const node = getNodeByName(workflow, nodeName);
+  if (!node) {
+    throw new Error(`[workflow json parity] missing node: ${nodeName}`);
+  }
+  return node;
+}
+
+function assertCodeInvariant(code, pattern, message) {
+  if (!pattern.test(code)) {
+    throw new Error(`[workflow json parity] ${message}`);
+  }
+}
+
+function assertConnectionInvariant(workflow, fromNode, toNode) {
+  const actualTarget = workflow?.connections?.[fromNode]?.main?.[0]?.[0]?.node;
+  if (actualTarget !== toNode) {
+    throw new Error(`[workflow json parity] connection mismatch: ${fromNode} -> ${toNode}`);
+  }
+}
+
+function assertWorkflowJsonParity(workflow) {
+  if (!workflow || !Array.isArray(workflow.nodes) || !workflow.connections || typeof workflow.connections !== 'object') {
+    throw new Error('[workflow json parity] malformed workflow shape');
+  }
+
+  const nodeNames = new Set(workflow.nodes.map((node) => node.name));
+  if (!nodeNames.has('SP Create Sales Organic Report')) {
+    throw new Error('[workflow json parity] missing node: SP Create Sales Organic Report');
+  }
+  if (!nodeNames.has('SP Parse Sales Organic by SKU')) {
+    throw new Error('[workflow json parity] missing node: SP Parse Sales Organic by SKU');
+  }
+  if (nodeNames.has('SP Create Returns Report')) {
+    throw new Error('[workflow json parity] stale Returns node name present: SP Create Returns Report');
+  }
+  if (nodeNames.has('SP Parse Returns by SKU')) {
+    throw new Error('[workflow json parity] stale Returns node name present: SP Parse Returns by SKU');
+  }
+
+  const parserNode = getNodeOrThrow(workflow, 'SP Parse Sales Organic by SKU');
+  const computeNode = getNodeOrThrow(workflow, 'Code in JavaScript');
+  const statusNode = getNodeOrThrow(workflow, 'SP Check Report Status');
+  const parserCode = parserNode.parameters?.jsCode || '';
+  const computeCode = computeNode.parameters?.jsCode || '';
+  const statusUrl = statusNode.parameters?.url || '';
+
+  assertCodeInvariant(parserCode, /throw new Error\('Could not locate sku, sales, and quantity columns in orders report'\)/, 'parser header invariant missing');
+  assertCodeInvariant(parserCode, /Invalid numeric value for \$\{context\}/, 'parser fail-closed numeric invariant missing');
+  assertCodeInvariant(parserCode, /parseWarning: skuCount === 0 \? 'Order report has no qualifying SKU rows' : null/, 'parser warning invariant missing');
+  assertCodeInvariant(parserCode, /const sales = parseRequiredNumber\(cols\[salesIdx\], `sales \$\{rowContext\}`\);/, 'parser sales fail-closed row context invariant missing');
+  assertCodeInvariant(parserCode, /const units = parseRequiredNumber\(cols\[qtyIdx\], `quantity \$\{rowContext\}`\);/, 'parser quantity fail-closed row context invariant missing');
+
+  assertCodeInvariant(computeCode, /Math\.min\(rows.length, 12\)/, 'header scan invariant missing');
+  assertCodeInvariant(computeCode, /const headerRowIndex = headerInfo.index;/, 'header row derivation invariant missing');
+  assertCodeInvariant(computeCode, /for \(let i = headerRowIndex \+ 1; i < values.length; i\+\+\)/, 'header row offset invariant missing');
+  assertCodeInvariant(computeCode, /\^SKU\$/, 'sentinel SKU skip invariant missing');
+  assertCodeInvariant(computeCode, /\^IMG\$/, 'sentinel IMG skip invariant missing');
+  assertCodeInvariant(computeCode, /_TOTALS\$/, 'sentinel totals skip invariant missing');
+  assertCodeInvariant(computeCode, /source=sheet missing required SKU, AD_SALES_\$, and SALES_ORGANIC_\$ columns/, 'missing-column fail-closed invariant missing');
+  assertCodeInvariant(computeCode, /parseSheetNumber\(row\[adSalesCol\], `adSales source=sheet row \$\{i \+ 1\} sku \$\{sku\}`\)/, 'sheet numeric fail-closed invariant missing');
+  assertCodeInvariant(computeCode, /Math\.max\(0, totalSales - adSales\)/, 'formula clamp invariant missing');
+  assertCodeInvariant(computeCode, /range: `\$\{sheetName\}!\$\{targetColA1\}\$\{i \+ 1\}`/, 'target-column writeback invariant missing');
+  assertCodeInvariant(computeCode, /Missing parser totals payload from SP Parse Sales Organic by SKU/, 'parser dependency invariant missing');
+
+  assertCodeInvariant(statusUrl, /SP Create Sales Organic Report/, 'status node report-id reference invariant missing');
+  assertConnectionInvariant(workflow, 'SP Parse Sales Organic by SKU', 'Webhook Read Google Sheet');
+  assertConnectionInvariant(workflow, 'Webhook Read Google Sheet', 'Code in JavaScript');
+  assertConnectionInvariant(workflow, 'Code in JavaScript', 'Webhook Update Google Sheet');
 }
 
 function buildVerifierSuccessReport(overrides = {}) {
