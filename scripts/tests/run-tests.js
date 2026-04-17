@@ -4,6 +4,7 @@ const { extractBsr } = require('../lib/extract/bsr');
 const { extractSpreadsheetId, loadConfig } = require('../lib/config');
 const { fetchBsrForProduct, normalizeBsrError, computeRetryDelayMs, parseRetryAfterMs } = require('../features/bsr');
 const { runSalesOrganicTests } = require('./sales-organic-tests');
+const { runUnitsOrganicTests } = require('./units-organic-tests');
 
 function testParseDateRange() {
   assert.deepStrictEqual(parseDateRange('2026-04-07'), {
@@ -207,6 +208,7 @@ async function main(deps = {}) {
   const argv = deps.argv || process.argv.slice(2);
   const runBsrTestsFn = deps.runBsrTests || runBsrTests;
   const runSalesOrganicTestsFn = deps.runSalesOrganicTests || runSalesOrganicTests;
+  const runUnitsOrganicTestsFn = deps.runUnitsOrganicTests || runUnitsOrganicTests;
   const log = deps.log || console.log;
   const runBsrOnly = argv.includes('--bsr-only');
 
@@ -214,6 +216,7 @@ async function main(deps = {}) {
 
   if (!runBsrOnly) {
     await runSalesOrganicTestsFn();
+    await runUnitsOrganicTestsFn();
   }
 
   log(runBsrOnly ? 'BSR-only test run passed.' : 'All tests passed.');
