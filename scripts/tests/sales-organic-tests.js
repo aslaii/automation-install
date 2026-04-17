@@ -9,6 +9,7 @@ const { loadAdSalesFromFile } = require('../lib/sources/ad-sales-file');
 const { loadSalesOrganicFromGoogleSheet } = require('../lib/sources/google-sheet');
 const { runWithArgs } = require('../index');
 const { runGetSalesOrganic, computeSalesOrganic } = require('../features/sales-organic');
+const { verifySalesOrganicRun, findLatestSalesOrganicRun } = require('../scripts/verify-sales-organic-run');
 
 const tests = [
   {
@@ -150,6 +151,22 @@ const tests = [
   {
     name: 'test runner invokes sales-organic coverage when npm test runs',
     fn: testRunTestsMainInvokesSalesOrganicCoverage,
+  },
+  {
+    name: 'latest-run verifier rejects missing sales-organic artifacts',
+    fn: testVerifyRunRejectsMissingArtifacts,
+  },
+  {
+    name: 'latest-run verifier enforces warning semantics on successful artifacts',
+    fn: testVerifyRunSuccessWarningSemantics,
+  },
+  {
+    name: 'latest-run verifier rejects malformed success artifacts missing required fields',
+    fn: testVerifyRunRejectsMalformedSuccessArtifact,
+  },
+  {
+    name: 'latest-run verifier accepts failed artifacts with failure shape',
+    fn: testVerifyRunAcceptsFailureArtifact,
   },
   {
     name: 'compute runner builds sales organic artifact rows from file source',
@@ -801,6 +818,133 @@ async function testRunTestsMainInvokesSalesOrganicCoverage() {
   assert(logs.includes('All tests passed.'));
 }
 
+async function testVerifyRunRejectsMissingArtifacts() {
+  const tmpDir = await fs.promises.mkdtemp(path.join(__dirname, 'tmp-sales-organic-runs-'));
+  try {
+    assert.throws(
+      () => findLatestSalesOrganicRun(tmpDir),
+      /No sales-organic JSON runs found/,
+    );
+  } finally {
+    await fs.promises.rm(tmpDir, { recursive: true, force: true });
+  }
+}
+
+function testVerifyRunSuccessWarningSemantics() {
+  const report = buildVerifierSuccessReport();
+  const result = verifySalesOrganicRun(report, { filePath: '/tmp/sales-organic-success.json' });
+  assert.deepStrictEqual(result, {
+    status: 'success',
+    stage: 'compute',
+    itemCount: 3,
+    warningCount: 2,
+    mismatchCount: 1,
+  });
+
+  const noWarningReport = buildVerifierSuccessReport({
+    source: 'file',
+    request: { source: 'file' },
+    items: [
+      {
+        sku: 'MATCH',
+        totalSales: 50,
+        totalUnits: 2,
+        adSales: 20,
+        salesOrganic: 30,
+        expectedSalesOrganic: 30,
+        expectedSalesPpc: 20,
+        organicDelta: 0,
+        comparisonStatus: 'match',
+        source: 'file',
+        reportPresent: true,
+        adSalesPresent: true,
+      },
+    ],
+    comparison: { source: 'file', tolerance: 0.01, mismatches: [] },
+    summary: {
+      parsedSkuCount: 1,
+      adSalesSkuCount: 1,
+      computedSkuCount: 1,
+      matchedSkuCount: 1,
+      mismatchedSkuCount: 0,
+      missingExpectedSkuCount: 0,
+    },
+    warnings: [],
+  });
+
+  assert.doesNotThrow(() => verifySalesOrganicRun(noWarningReport, { filePath: '/tmp/sales-organic-no-warning.json' }));
+}
+
+function testVerifyRunRejectsMalformedSuccessArtifact() {
+  const report = buildVerifierSuccessReport();
+  delete report.summary.matchedSkuCount;
+  assert.throws(
+    () => verifySalesOrganicRun(report, { filePath: '/tmp/sales-organic-malformed.json' }),
+    /Expected summary matchedSkuCount to be an integer/,
+  );
+}
+
+function testVerifyRunAcceptsFailureArtifact() {
+  const report = {
+    metric: 'sales-organic',
+    source: 'file',
+    startedAt: '2026-04-17T10:00:00.000Z',
+    completedAt: '2026-04-17T10:00:01.000Z',
+    dateRange: {
+      startDate: '2026-04-15',
+      endDate: '2026-04-15',
+      sameDay: true,
+    },
+    request: {
+      date: '2026-04-15',
+      endDate: '2026-04-15',
+      source: 'file',
+      delayMs: 0,
+    },
+    stage: 'compute',
+    status: 'failed',
+    summary: {
+      status: 'failed',
+      stage: 'compute',
+      attempts: { create: 1, poll: 2 },
+      lifecyclePhases: ['create-report', 'poll-report', 'download-report', 'compute'],
+      reportId: 'r1',
+      reportDocumentId: 'd1',
+      processingStatus: 'DONE',
+    },
+    lifecycle: [
+      { stage: 'create-report', attempt: 1, status: 'success', reportId: 'r1' },
+      { stage: 'poll-report', attempt: 1, status: 'DONE', reportId: 'r1', reportDocumentId: 'd1' },
+      { stage: 'download-report', attempt: 1, status: 'success', reportId: 'r1', reportDocumentId: 'd1' },
+      { stage: 'compute', attempt: 1, status: 'error', message: 'duplicate SKU rows' },
+    ],
+    error: {
+      message: 'duplicate SKU rows',
+      code: null,
+      httpStatus: null,
+      timeout: false,
+    },
+    reportInfo: {
+      reportType: 'GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL',
+      reportId: 'r1',
+      reportDocumentId: 'd1',
+      processingStatus: 'DONE',
+    },
+    items: [],
+  };
+
+  assert.deepStrictEqual(
+    verifySalesOrganicRun(report, { filePath: '/tmp/sales-organic-failure.json' }),
+    {
+      status: 'failed',
+      stage: 'compute',
+      itemCount: 0,
+      warningCount: 0,
+      mismatchCount: 0,
+    },
+  );
+}
+
 async function testRunnerComputeFromFileSource() {
   let savedReport = null;
   await runGetSalesOrganic(
@@ -879,6 +1023,140 @@ async function testRunnerComputeFailureArtifactForAmbiguousFileInput() {
   assert.strictEqual(savedReport.lifecycle.at(-1).stage, 'compute');
   assert.strictEqual(savedReport.lifecycle.at(-1).status, 'error');
   assert.strictEqual(printedReport.reportPath, '/tmp/sales-organic-compute-failure.json');
+}
+
+function buildVerifierSuccessReport(overrides = {}) {
+  const defaultItems = [
+    {
+      sku: 'MATCH',
+      totalSales: 50,
+      totalUnits: 2,
+      adSales: 20,
+      salesOrganic: 30,
+      expectedSalesOrganic: 30,
+      expectedSalesPpc: 20,
+      organicDelta: 0,
+      comparisonStatus: 'match',
+      source: 'file',
+      reportPresent: true,
+      adSalesPresent: true,
+    },
+    {
+      sku: 'REPORT_ONLY',
+      totalSales: 10,
+      totalUnits: 1,
+      adSales: 0,
+      salesOrganic: 10,
+      expectedSalesOrganic: null,
+      expectedSalesPpc: null,
+      organicDelta: null,
+      comparisonStatus: 'no-expected',
+      source: 'sheet',
+      reportPresent: true,
+      adSalesPresent: false,
+    },
+    {
+      sku: 'MISMATCH',
+      totalSales: 40,
+      totalUnits: 3,
+      adSales: 5,
+      salesOrganic: 35,
+      expectedSalesOrganic: 30,
+      expectedSalesPpc: 5,
+      organicDelta: 5,
+      comparisonStatus: 'mismatch',
+      source: 'file',
+      reportPresent: true,
+      adSalesPresent: true,
+    },
+  ];
+
+  const report = {
+    metric: 'sales-organic',
+    source: 'sheet',
+    startedAt: '2026-04-17T10:00:00.000Z',
+    completedAt: '2026-04-17T10:00:01.000Z',
+    dateRange: {
+      startDate: '2026-04-15',
+      endDate: '2026-04-15',
+      sameDay: true,
+    },
+    request: {
+      date: '2026-04-15',
+      endDate: '2026-04-15',
+      source: 'sheet',
+      delayMs: 0,
+    },
+    stage: 'compute',
+    status: 'success',
+    summary: {
+      status: 'success',
+      stage: 'compute',
+      attempts: { create: 1, poll: 2 },
+      lifecyclePhases: ['create-report', 'poll-report', 'download-report', 'parse', 'compute'],
+      reportId: 'r1',
+      reportDocumentId: 'd1',
+      downloadedBytes: 123,
+      parsedSkuCount: 3,
+      adSalesSkuCount: 2,
+      computedSkuCount: 3,
+      matchedSkuCount: 1,
+      mismatchedSkuCount: 1,
+      missingExpectedSkuCount: 1,
+    },
+    lifecycle: [
+      { stage: 'create-report', attempt: 1, status: 'success', reportId: 'r1' },
+      { stage: 'poll-report', attempt: 1, status: 'IN_QUEUE', reportId: 'r1', reportDocumentId: null },
+      { stage: 'poll-report', attempt: 2, status: 'DONE', reportId: 'r1', reportDocumentId: 'd1' },
+      { stage: 'download-report', attempt: 1, status: 'document-ready', reportId: 'r1', reportDocumentId: 'd1' },
+      { stage: 'download-report', attempt: 2, status: 'success', reportId: 'r1', reportDocumentId: 'd1', bytes: 123 },
+      { stage: 'parse', attempt: 1, status: 'success', message: '' },
+      { stage: 'compute', attempt: 1, status: 'success', message: 'Computed 3 SKU rows' },
+    ],
+    reportInfo: {
+      reportType: 'GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL',
+      reportId: 'r1',
+      reportDocumentId: 'd1',
+      processingStatus: 'DONE',
+      contentType: 'text/plain; charset=utf-8',
+    },
+    comparison: {
+      source: 'sheet',
+      tolerance: 0.01,
+      mismatches: [
+        {
+          sku: 'MISMATCH',
+          totalSales: 40,
+          adSales: 5,
+          salesOrganic: 35,
+          expectedSalesOrganic: 30,
+          organicDelta: 5,
+        },
+      ],
+    },
+    items: defaultItems,
+    warnings: [
+      '1 report SKUs were outside the comparison target set.',
+      '1 SKU rows differ from the expected Sales Organic fixture.',
+    ],
+  };
+
+  return deepMerge(report, overrides);
+}
+
+function deepMerge(base, overrides) {
+  if (Array.isArray(overrides)) return overrides;
+  if (!overrides || typeof overrides !== 'object') return overrides === undefined ? base : overrides;
+
+  const output = { ...base };
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value && typeof value === 'object' && !Array.isArray(value) && base[key] && typeof base[key] === 'object' && !Array.isArray(base[key])) {
+      output[key] = deepMerge(base[key], value);
+    } else {
+      output[key] = value;
+    }
+  }
+  return output;
 }
 
 function buildAxiosStub(steps, requestLog = []) {

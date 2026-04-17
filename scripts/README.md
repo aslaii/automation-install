@@ -49,9 +49,8 @@ Run the local runners directly:
 cd scripts && node index.js --bsr --date 2026-04-07
 cd scripts && node index.js --bsr --date 2026-04-07 --source sheet
 cd scripts && node index.js --bsr --date 2026-04-15 --source file
-cd scripts && node index.js --sales-organic --date 2026-04-07
-cd scripts && node index.js --sales-organic --date 2026-04-07 --source file --delay-ms 0
-cd scripts && node index.js --sales-organic --date 2026-04-07 --source sheet --delay-ms 0
+cd scripts && node index.js --sales-organic --date 2026-04-15 --source file --delay-ms 0
+cd scripts && node index.js --sales-organic --date 2026-04-15 --source sheet --delay-ms 0
 ```
 
 Verify the latest Sales Organic run artifact without re-reading older runs:
@@ -67,18 +66,20 @@ cd scripts && npm run verify:sales-organic-run
 File mode remains the default source, so the reproducible local proof path is:
 
 ```bash
-cd scripts && node index.js --sales-organic --date YYYY-MM-DD --source file --delay-ms 0
+cd scripts && node index.js --sales-organic --date 2026-04-15 --source file --delay-ms 0
 cd scripts && node scripts/verify-sales-organic-run.js
 ```
 
-Optional sheet parity flow:
+The file-first input contract now fails closed for ambiguous or malformed local fixtures. Expect the run to stop with actionable row/file context when `data/sales-organic-input.json` has duplicate `date`+`sku` rows for the requested date, malformed numeric values, missing required fields, or zero rows for the requested date.
+
+Optional sheet parity flow (diagnostics only; does not change the default source):
 
 ```bash
-cd scripts && node index.js --sales-organic --date YYYY-MM-DD --source sheet --delay-ms 0
+cd scripts && node index.js --sales-organic --date 2026-04-15 --source sheet --delay-ms 0
 cd scripts && node scripts/verify-sales-organic-run.js
 ```
 
-The verifier inspects only the newest `runs/sales-organic-*.json` artifact and checks the contract for lifecycle phases, summary fields, per-SKU totals, ad sales, organic sales, and failure/error shape.
+The verifier inspects only the newest `runs/sales-organic-*.json` artifact and checks the hardened contract for lifecycle phases, summary counters, per-SKU totals, comparison mismatch parity, warning semantics, and failure/error shape.
 
 ## Sources
 
