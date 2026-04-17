@@ -62,6 +62,7 @@ function loadConfig({ source, metric = null, env = process.env } = {}) {
     },
     salesPpc: {
       fileInput: path.join(__dirname, '..', 'data', 'sales-ppc-input.json'),
+      comparisonTolerance: parsePositiveNumber(env.SALES_PPC_COMPARISON_TOLERANCE, 0.01, 'SALES_PPC_COMPARISON_TOLERANCE'),
       report: {
         namePrefix: env.SALES_PPC_REPORT_NAME_PREFIX || 'SKU_Sales_PPC',
         adProduct: env.SALES_PPC_AD_PRODUCT || 'SPONSORED_PRODUCTS',
@@ -69,7 +70,7 @@ function loadConfig({ source, metric = null, env = process.env } = {}) {
         format: env.SALES_PPC_REPORT_FORMAT || 'GZIP_JSON',
         timeUnit: env.SALES_PPC_TIME_UNIT || 'DAILY',
         groupBy: parseJsonStringArray(env.SALES_PPC_GROUP_BY, ['advertiser'], 'SALES_PPC_GROUP_BY'),
-        columns: parseJsonStringArray(env.SALES_PPC_COLUMNS, ['advertisedSku', 'sales7d', 'attributedSales7d'], 'SALES_PPC_COLUMNS'),
+        columns: parseJsonStringArray(env.SALES_PPC_COLUMNS, ['advertisedSku', 'sales7d', 'attributedSalesSameSku7d'], 'SALES_PPC_COLUMNS'),
       },
       polling: {
         maxAttempts: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS, 10, 'AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS'),

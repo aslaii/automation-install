@@ -89,6 +89,73 @@ function printSalesOrganicReport(report, reportPath) {
   console.log(`[Sales Organic] Report saved: ${reportPath}`);
 }
 
+function printSalesPpcReport(report, reportPath) {
+  console.log('\n[Sales PPC] Summary');
+  console.table([{
+    status: report.status,
+    stage: report.stage,
+    createAttempts: report.summary?.attempts?.create || 0,
+    pollAttempts: report.summary?.attempts?.poll || 0,
+    parsedRows: report.summary?.parsedRowCount || 0,
+    parsedSkus: report.summary?.parsedSkuCount || 0,
+    computedSkus: report.summary?.computedSkuCount || 0,
+    mismatches: report.summary?.mismatchedSkuCount || 0,
+    preferredSalesField: report.summary?.preferredSalesField || '',
+    processingStatus: report.reportInfo?.processingStatus || '',
+    reportId: report.reportInfo?.reportId || '',
+    reportDocumentId: report.reportInfo?.reportDocumentId || '',
+  }]);
+
+  if (report.lifecycle?.length) {
+    console.log('[Sales PPC] Lifecycle');
+    console.table(report.lifecycle.map((entry) => ({
+      stage: entry.stage,
+      attempt: entry.attempt,
+      status: entry.status,
+      httpStatus: entry.httpStatus || '',
+      bytes: entry.bytes || '',
+      message: entry.message || '',
+    })));
+  }
+
+  if (report.items?.length) {
+    console.log('[Sales PPC] Items');
+    console.table(report.items.map((item) => ({
+      sku: item.sku,
+      actual: item.reportSalesPpc,
+      expected: item.expectedSalesPpc ?? '',
+      delta: item.salesDelta ?? '',
+      field: item.provenance?.chosenField || '',
+      fallbackRows: item.provenance?.fallbackRows || 0,
+      status: item.comparisonStatus,
+    })));
+  }
+
+  if (report.comparison?.mismatches?.length) {
+    console.log('[Sales PPC] Mismatches');
+    console.table(report.comparison.mismatches.map((item) => ({
+      sku: item.sku,
+      actual: item.reportSalesPpc,
+      expected: item.expectedSalesPpc,
+      delta: item.salesDelta,
+      field: item.chosenField || '',
+      fallbackRows: item.fallbackRows,
+    })));
+  }
+
+  if (report.warnings?.length) {
+    for (const warning of report.warnings) {
+      console.warn(`[Sales PPC] Warning: ${warning}`);
+    }
+  }
+
+  if (report.error) {
+    console.error(`[Sales PPC] Error: ${report.error.message}`);
+  }
+
+  console.log(`[Sales PPC] Report saved: ${reportPath}`);
+}
+
 function printUnitsOrganicReport(report, reportPath) {
   console.log('\n[Units Organic] Summary');
   console.table([{
@@ -157,5 +224,6 @@ function printUnitsOrganicReport(report, reportPath) {
 module.exports = {
   printBsrReport,
   printSalesOrganicReport,
+  printSalesPpcReport,
   printUnitsOrganicReport,
 };
