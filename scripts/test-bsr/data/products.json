@@ -1,0 +1,134 @@
+[
+  {
+    "sku": "Choco-12pack-1200g",
+    "asin": "B0FZ68HPM2"
+  },
+  {
+    "sku": "Choco-Blueberry-100g",
+    "asin": "B0FZ65RH16"
+  },
+  {
+    "sku": "Choco-Brownie-100g",
+    "asin": "B0FZ5PPSP3"
+  },
+  {
+    "sku": "Choco-Caramel-100g",
+    "asin": "B0FZ5NHGQ8"
+  },
+  {
+    "sku": "Choco-Coconut-100g",
+    "asin": "B0G1FDD267"
+  },
+  {
+    "sku": "Choco-Cookie-100g",
+    "asin": "B0FZ69Y433"
+  },
+  {
+    "sku": "Choco-Dark-100g",
+    "asin": "B0FZ5VSSXH"
+  },
+  {
+    "sku": "Choco-Dark-200g",
+    "asin": "B0FZ6C1BN2"
+  },
+  {
+    "sku": "Choco-Hazelnut-100g",
+    "asin": "B0FZ6G1BZC"
+  },
+  {
+    "sku": "Choco-Matcha-100g",
+    "asin": "B0G1FL5MKG"
+  },
+  {
+    "sku": "Choco-Milk-100g",
+    "asin": "B0FZ5VPR5Q"
+  },
+  {
+    "sku": "Choco-Milk-200g",
+    "asin": "B0FZ5T3DK4"
+  },
+  {
+    "sku": "Choco-Orange-100g",
+    "asin": "B0FZ5MRWJ5"
+  },
+  {
+    "sku": "Choco-Pumpkin-100g",
+    "asin": "B0FZ61M15L"
+  },
+  {
+    "sku": "Choco-Raspberry-160g",
+    "asin": "B0FZ5SZKDD"
+  },
+  {
+    "sku": "Choco-Strawberry-100g",
+    "asin": "B0FZ5TS62B"
+  },
+  {
+    "sku": "Choco-White-100g",
+    "asin": "B0FZ5XNZTT"
+  },
+  {
+    "sku": "Choco-White-200g",
+    "asin": "B0G1FGJ81B"
+  },
+  {
+    "sku": "Cone-DubaiMint-6pack-450g",
+    "asin": "B0FZ5QZ62D"
+  },
+  {
+    "sku": "Cone-StrawCookie-6pack-450g",
+    "asin": "B0FZ5MS4SB"
+  },
+  {
+    "sku": "Dried-Kadayif-10KG",
+    "asin": "B0F7LX896Y"
+  },
+  {
+    "sku": "Dried-Kadayif-180gm",
+    "asin": "B0F9WZ117F"
+  },
+  {
+    "sku": "Dried-Kadayif-400gm",
+    "asin": "B0F7LZFZTT"
+  },
+  {
+    "sku": "Dried-Kadayif-5KG",
+    "asin": "B0F7LYMD1W"
+  },
+  {
+    "sku": "Roasted-Kadayif-10KG",
+    "asin": "B0F9RSWGFZ"
+  },
+  {
+    "sku": "Roasted-Kadayif-5KG",
+    "asin": "B0F9RSHT3B"
+  },
+  {
+    "sku": "Roasted-Kataifi-180g",
+    "asin": "B0GDMPMB2X"
+  },
+  {
+    "sku": "Roasted-Kataifi-400g",
+    "asin": "B0GDMFCD5N"
+  },
+  {
+    "sku": "Pistachio-Butter-200g-New2",
+    "asin": "B0G2KZGRNH"
+  },
+  {
+    "sku": "Pistachio-Cream-1kg-New2",
+    "asin": "B0G2LC4FHK"
+  },
+  {
+    "sku": "Pistachio-Cream-200g-New2",
+    "asin": "B0G2L7V5L9"
+  },
+  {
+    "sku": "Pistachio-Cream-5kg-New2",
+    "asin": "B0G2LC7N6C"
+  },
+  {
+    "sku": "Pistachio-Sauce-700g-New2",
+    "asin": "B0G2LBZ9HS"
+  }
+]
