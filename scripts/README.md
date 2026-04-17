@@ -118,6 +118,16 @@ cd scripts && node index.js --units-organic --date 2026-04-07 --source sheet --d
 cd scripts && node verify-latest-units-organic-run.js
 ```
 
+Workflow-local parity diagnostics are separate from the live runner and intentionally expose current drift from `../workflows/Get Units Organic.json` without editing the workflow yet:
+
+```bash
+cd scripts && node run-units-organic-workflow-local.js --json
+# or
+cd scripts && npm run workflow:units-organic -- --json
+```
+
+The JSON summary reports parser status, sheet-input status, workflow/local compute status, update mismatch counts, capped mismatch previews, and report-only or sheet-only SKU previews so S03 can inspect current drift mechanically.
+
 The newest `runs/units-organic-*.json` artifact is the durable proof surface. Success runs retain lifecycle/report metadata plus per-SKU `totalUnits`, `adUnits`, and `salesOrganicQty`; auth, report, parse, and compute failures remain stage-specific in the saved artifact and surface through the verifier. Sheet-source load failures remain compute-stage failures with `source=sheet` context so verifier/debug surfaces expose credential, timeout, or row-shape drift instead of masking it.
 
 ## Sources

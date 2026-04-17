@@ -11,6 +11,7 @@
     "verify:sales-organic-run": "node verify-latest-sales-organic-run.js",
     "verify:units-organic-run": "node verify-latest-units-organic-run.js",
     "workflow:sales-organic": "node run-sales-organic-workflow-local.js",
+    "workflow:units-organic": "node run-units-organic-workflow-local.js",
     "bsr": "node index.js --bsr",
     "sales-organic": "node index.js --sales-organic",
     "units-organic": "node index.js --units-organic"
