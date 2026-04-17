@@ -7,7 +7,7 @@
     "test": "node tests/run-tests.js",
     "test:bsr": "node tests/run-tests.js --bsr-only",
     "test:sales-organic": "node tests/sales-organic-tests.js",
-    "verify:sales-organic-run": "node scripts/verify-sales-organic-run.js",
+    "verify:sales-organic-run": "node verify-latest-sales-organic-run.js",
     "bsr": "node index.js --bsr",
     "sales-organic": "node index.js --sales-organic"
   },

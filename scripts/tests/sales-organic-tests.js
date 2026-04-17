@@ -9,7 +9,7 @@ const { loadAdSalesFromFile } = require('../lib/sources/ad-sales-file');
 const { loadSalesOrganicFromGoogleSheet } = require('../lib/sources/google-sheet');
 const { runWithArgs } = require('../index');
 const { runGetSalesOrganic, computeSalesOrganic } = require('../features/sales-organic');
-const { verifySalesOrganicRun, findLatestSalesOrganicRun } = require('../scripts/verify-sales-organic-run');
+const { verifySalesOrganicRun, findLatestSalesOrganicRun } = require('../verify-latest-sales-organic-run');
 
 const tests = [
   {
