@@ -1,0 +1,740 @@
+{
+  "name": "Get Ad Spend",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        224
+      ],
+      "id": "d24dd15e-535d-4096-b3cb-4679b10836e7",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅COLUMNS",
+              "value": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ACCESS_TOKEN",
+              "value": "={{ $json.AMAZON_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ADS_CLIENT_ID",
+              "value": "={{ $json.AMAZON_ADS_CLIENT_ID || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ADS_PROFILE_ID",
+              "value": "={{ $json.AMAZON_ADS_PROFILE_ID || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "GOOGLE_ACCESS_TOKEN",
+              "value": "={{ $json.GOOGLE_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1072,
+        128
+      ],
+      "id": "7c2ada18-6cbc-4dd5-a952-819a1672427f",
+      "name": "Set Credentials"
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.max(60, Number($json.nextWaitSeconds || 60)) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -176,
+        128
+      ],
+      "id": "13655785-5f52-4832-be51-2d6372fd3887",
+      "name": "Wait",
+      "webhookId": "fb1d0ad9-152c-4ebc-bb06-cc4534464931"
+    },
+    {
+      "parameters": {
+        "url": "=https://advertising-api.amazon.com/reporting/reports/{{ $if($('Extract Report Id From Error').isExecuted, $('Extract Report Id From Error').item.json.reportId, $('Send a Request for Report').item.json.reportId) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Amazon-Advertising-API-ClientId",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ADS_CLIENT_ID }}"
+            },
+            {
+              "name": "Amazon-Advertising-API-Scope",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ADS_PROFILE_ID }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.createasyncreportrequest.v3+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        48,
+        64
+      ],
+      "id": "5c901a69-4836-4640-a464-be3c89c997f5",
+      "name": "Check if its okay",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6dc1f201-1399-4fbe-b87e-159bc4991fe2",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        128
+      ],
+      "id": "ca5570f7-14ff-48fc-ab57-370c25493359",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://advertising-api.amazon.com/reporting/reports",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Amazon-Advertising-API-ClientId",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ADS_CLIENT_ID }}"
+            },
+            {
+              "name": "Amazon-Advertising-API-Scope",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ADS_PROFILE_ID }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.createasyncreportrequest.v3+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"SKU_Ads_Spend_{{$now.toISO()}}\",\n  \"startDate\": \"{{ $('Set Credentials').first().json['✅START_DATE'] }}\",\n  \"endDate\": \"{{ $('Set Credentials').first().json['✅END_DATE'] }}\",\n  \"configuration\": {\n    \"adProduct\": \"SPONSORED_PRODUCTS\",\n    \"reportTypeId\": \"spAdvertisedProduct\",\n    \"format\": \"GZIP_JSON\",\n    \"timeUnit\": \"DAILY\",\n    \"groupBy\": [\"advertiser\"],\n    \"columns\": {{ $('Set Credentials').first().json[\"✅COLUMNS\"] }}\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -848,
+        128
+      ],
+      "id": "42a880f5-61ac-448b-8b34-4c6538315a2b",
+      "name": "Send a Request for Report",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        720,
+        128
+      ],
+      "id": "2b8b3587-8d32-4c73-a120-112c74878a11",
+      "name": "Download the File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        128
+      ],
+      "id": "0a34f540-8d10-4314-aa99-4bf678f05bd3",
+      "name": "Decompress"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "82e38b85-a2dc-4377-a438-afbf307e9425",
+              "leftValue": "={{ $json.error.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -624,
+        128
+      ],
+      "id": "bf557797-c034-4f94-af4b-f2ea1b66f1ca",
+      "name": "If error"
+    },
+    {
+      "parameters": {
+        "jsCode": "const errorMsg = String($input.first().json.error?.message || '');\nconst match = errorMsg.match(/duplicate of\\s*:\\s*([a-f0-9-]+)/i);\n\nif (!match) {\n  throw new Error(errorMsg || 'Amazon Ads create-report request failed without duplicate report id');\n}\n\nreturn [{ json: { reportId: match[1] } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        64
+      ],
+      "id": "dcf87a39-8dc5-43f6-b5dc-02777f35ac43",
+      "name": "Extract Report Id From Error"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "binaryPropertyName": "file_0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        128
+      ],
+      "id": "98b13e14-5d6c-49e5-8740-f0ccdf72b6f7",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"✅RANGE\"])) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.GOOGLE_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8175b974-ff94-45f2-80cc-9159fef9ea8d",
+      "name": "Webhook Read Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1392,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.GOOGLE_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "97ccafb9-8b41-4ebb-a646-7e4f985437ad",
+      "name": "Webhook Update Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1840,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n  function toNumber(v) {\n    if (v === null || v === undefined) return 0;\n    const s = String(v).replace(/[$,%\\s,]/g, '');\n    const n = Number(s);\n    return Number.isFinite(n) ? n : 0;\n  }\n\n  function colToA1(colIndex1Based) {\n    let n = colIndex1Based;\n    let out = '';\n    while (n > 0) {\n      const m = (n - 1) % 26;\n      out = String.fromCharCode(65 + m) + out;\n      n = Math.floor((n - 1) / 26);\n    }\n    return out;\n  }\n\n  const sheet = $json; // from Webhook Read Google Sheet\n  const values = sheet.values || [];\n  const reportData = $('Extract from File').first().json.data || [];\n  const sheetName = $('Set Credentials').first().json[\"✅SHEET_NAME\"];\n\n  // 1) Aggregate Amazon cost by SKU\n  const adsBySku = new Map();\n  for (const r of reportData) {\n    const sku = (r.advertisedSku || '').trim();\n    if (!sku) continue;\n    const cost = toNumber(r.cost);\n    adsBySku.set(sku, (adsBySku.get(sku) || 0) + cost);\n  }\n\n  // 2) Detect header row (last row that has SKU + ADS-like column)\n  const adsHeaderNames = new Set(['ADS', 'ADS_SPEND', 'Ads spend', 'Ads Spend', 'ads',\n  'ads_spend']);\n  let headerRowIdx = -1;\n  let skuCol = -1;\n  let adsCol = -1;\n\n  for (let i = 0; i < Math.min(values.length, 12); i++) {\n    const row = values[i] || [];\n    const skuIdx = row.findIndex(c => String(c).trim().toUpperCase() === 'SKU');\n    if (skuIdx === -1) continue;\n\n    let adsIdx = -1;\n    for (let j = 0; j < row.length; j++) {\n      const name = String(row[j] || '').trim();\n      if (adsHeaderNames.has(name)) {\n        adsIdx = j;\n        break;\n      }\n    }\n    if (adsIdx !== -1) {\n      headerRowIdx = i;\n      skuCol = skuIdx;\n      adsCol = adsIdx;\n    }\n  }\n\n  if (headerRowIdx === -1 || skuCol === -1 || adsCol === -1) {\n    throw new Error('Could not find header row with SKU and ADS column');\n  }\n\n  // 3) Build Google batch updates\n  const data = [];\n  const missingSkus = [];\n\n  for (let i = headerRowIdx + 1; i < values.length; i++) {\n    const row = values[i] || [];\n    const sku = String(row[skuCol] || '').trim();\n    if (!sku) continue;\n\n    if (!adsBySku.has(sku)) continue;\n\n    const newAds = Number(adsBySku.get(sku).toFixed(2));\n    const rowNumber = i + 1; // sheet is 1-based\n    const adsColA1 = colToA1(adsCol + 1);\n\n    data.push({\n      range: `${sheetName}!${adsColA1}${rowNumber}`,\n      values: [[newAds]]\n    });\n  }\n\n  // Optional: SKUs from report not found in sheet\n  for (const sku of adsBySku.keys()) {\n    const found = values.slice(headerRowIdx + 1).some(r => String((r || [])[skuCol] ||\n  '').trim() === sku);\n    if (!found) missingSkus.push(sku);\n  }\n\n  return [{\n    json: {\n      valueInputOption: 'USER_ENTERED',\n      data,\n    }\n  }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        128
+      ],
+      "id": "a24dfd0a-77de-4ec3-bf79-ad6405a81384",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "AMZ_AUTH - v4\n\n",
+        "height": 432,
+        "width": 2464,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        -144
+      ],
+      "id": "b048eaa0-f415-43d9-bf96-e0f8c5b56975",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "GOOGLE SHEET\n",
+        "height": 352,
+        "width": 1120,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        -64
+      ],
+      "id": "c6ec8aac-ae28-44dc-8a7c-6bf2b47708c5",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseRetryAfterSeconds(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;\n}\n\nfunction nextBackoffSeconds(previousAttempt, retryAfterSeconds) {\n  const capped = Math.min(300, 60 * (2 ** Math.max(1, previousAttempt + 1)));\n  const jitter = Math.floor(Math.random() * 31);\n  return Math.max(capped + jitter, retryAfterSeconds || 0, 60);\n}\n\nconst input = $input.first().json || {};\nconst previousAttempt = Number(input.pollAttempt || 0);\nconst error = input.error || null;\nconst rawStatus = String(input.status || '').toUpperCase();\n\nif (error) {\n  const message = String(error.message || input.message || 'Unknown polling error');\n  const httpCode = Number(error.httpCode || input.httpCode || 0);\n  const retryAfterSeconds = parseRetryAfterSeconds(error.retryAfter || error.headers?.['retry-after'] || error.response?.headers?.['retry-after']);\n\n  if (httpCode === 429 || message.toLowerCase().includes('too many requests')) {\n    return [{\n      json: {\n        ...input,\n        status: 'THROTTLED',\n        pollAttempt: previousAttempt + 1,\n        nextWaitSeconds: nextBackoffSeconds(previousAttempt, retryAfterSeconds),\n      },\n    }];\n  }\n\n  throw new Error(message);\n}\n\nif (rawStatus === 'FAILED' || rawStatus === 'CANCELLED') {\n  throw new Error(`Amazon Ads report ${rawStatus}: ${input.failureReason || 'No failure reason provided'}`);\n}\n\nif (rawStatus === 'COMPLETED') {\n  return [{\n    json: {\n      ...input,\n      status: 'COMPLETED',\n      pollAttempt: previousAttempt,\n    },\n  }];\n}\n\nreturn [{\n  json: {\n    ...input,\n    status: rawStatus || 'PENDING',\n    pollAttempt: previousAttempt + 1,\n    nextWaitSeconds: nextBackoffSeconds(previousAttempt, 0),\n  },\n}];"
+      },
+      "id": "93ae358e-5671-4b0b-b515-1794ae84b96d",
+      "name": "Normalize Poll Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "561f0488-4a8d-4e2d-8d41-bc98ff1c47d0",
+      "name": "When executed by another workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1520,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅COLUMNS",
+              "value": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ACCESS_TOKEN",
+              "value": "={{ $json.AMAZON_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ADS_CLIENT_ID",
+              "value": "={{ $json.AMAZON_ADS_CLIENT_ID || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ADS_PROFILE_ID",
+              "value": "={{ $json.AMAZON_ADS_PROFILE_ID || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "GOOGLE_ACCESS_TOKEN",
+              "value": "={{ $json.GOOGLE_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "METRIC_KEY",
+              "value": "={{ $json.METRIC_KEY || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "WORKFLOW_NAME",
+              "value": "={{ $json.WORKFLOW_NAME || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "ORCHESTRATOR_RUN_ID",
+              "value": "={{ $json.ORCHESTRATOR_RUN_ID || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "014bf1ee-3ba3-44a9-9db2-85b224e6eeee",
+      "name": "Orchestrator Input Adapter",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1296,
+        128
+      ],
+      "notes": "write-health-check"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Check if its okay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Download the File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a Request for Report": {
+      "main": [
+        [
+          {
+            "node": "If error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download the File": {
+      "main": [
+        [
+          {
+            "node": "Decompress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decompress": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If error": {
+      "main": [
+        [
+          {
+            "node": "Extract Report Id From Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Report Id From Error": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Read Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Webhook Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if its okay": {
+      "main": [
+        [
+          {
+            "node": "Normalize Poll Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Poll Status": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Input Adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When executed by another workflow": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Input Adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Input Adapter": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "Send a Request for Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Webhook Read Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromAList",
+    "availableInMCP": true,
+    "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
+  },
+  "versionId": "80a9a12e-98f1-488c-8334-94231b118683",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "nWQo0Pz3qHzQO0My",
+  "tags": []
+}

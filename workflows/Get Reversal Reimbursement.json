@@ -1,0 +1,657 @@
+{
+  "name": "Get Reversal Reimbursement",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        4064,
+        592
+      ],
+      "id": "c70e8fff-734f-4bf4-8f91-35dcc5259508",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ACCESS_TOKEN",
+              "value": "={{ $json.AMAZON_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "GOOGLE_ACCESS_TOKEN",
+              "value": "={{ $json.GOOGLE_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4512,
+        496
+      ],
+      "id": "eebf39d8-6b2a-46bb-b763-72bf4321b07c",
+      "name": "Set Credentials"
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"✅RANGE\"])) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.GOOGLE_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "961cb674-73f7-4b32-9ff0-7872c82f0d77",
+      "name": "Webhook Read Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6752,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.GOOGLE_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "8192301b-d01d-4ce4-9849-47f93807c988",
+      "name": "Webhook Update Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        7200,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst reimbursementsObj = $('SP Parse Returns by SKU').first().json.reimbursementsBySku || {};\nconst sheetName = $('Set Credentials').first().json[\"✅SHEET_NAME\"];\n\nlet headerRowIdx = -1;\nlet skuCol = -1;\nfor (let i = 0; i < Math.min(values.length, 12); i++) {\n  const row = values[i] || [];\n  const foundSkuCol = row.findIndex((c) => String(c).trim().toUpperCase() === 'SKU');\n  if (foundSkuCol !== -1) {\n    headerRowIdx = i;\n    skuCol = foundSkuCol;\n    break;\n  }\n}\nif (headerRowIdx === -1 || skuCol === -1) {\n  throw new Error('Could not find SKU header column');\n}\n\nconst targetColA1 = 'S';\nconst data = [];\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  const amount = Number((toNumber(reimbursementsObj[sku] || 0) * -1).toFixed(2));\n  data.push({ range: `${sheetName}!${targetColA1}${i + 1}`, values: [[amount]] });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6976,
+        496
+      ],
+      "id": "16c5656c-984e-4c0e-87fd-755e371bd0ea",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "GOOGLE SHEET\n",
+        "height": 512,
+        "width": 1104,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6480,
+        144
+      ],
+      "id": "88096ca6-5eb8-48cb-bb5b-1316cbdab3fe",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportType\": \"GET_FBA_REIMBURSEMENTS_DATA\",\n  \"marketplaceIds\": [\"{{ $('Set Credentials').item.json['✅AMAZON_MARKETPLACE_ID'] }}\"],\n  \"dataStartTime\": \"{{ $('Set Credentials').item.json['✅START_DATE'] }}T00:00:00Z\",\n  \"dataEndTime\": \"{{ $('Set Credentials').item.json['✅END_DATE'] }}T23:59:59Z\"\n}",
+        "options": {}
+      },
+      "id": "a6eff9de-2521-4ea0-84d8-651a946987d0",
+      "name": "SP Create Returns Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4736,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.max(60, Number($json.nextWaitSeconds || 60)) }}"
+      },
+      "id": "3464184c-1f3f-4e92-bb47-fbda2725ba7e",
+      "name": "SP Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4960,
+        496
+      ],
+      "webhookId": "6cd673f9-0c0a-4ea0-8889-16635e5cd494"
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create Returns Report').item.json.reportId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8dc5603e-0fb6-4b60-b854-22d726041552",
+      "name": "SP Check Report Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5184,
+        432
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "11fa5373-bef8-477a-a2ee-f1f61005f843",
+              "leftValue": "={{ $json.processingStatus }}",
+              "rightValue": "DONE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d30223bd-f8fe-45f6-82c7-63a0267b292c",
+      "name": "SP If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5632,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/documents/{{ $('SP Check Report Status').item.json.reportDocumentId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "24792947-5a3d-46da-a7e7-f650bc6ff91e",
+      "name": "SP Get Report Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5856,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "0a4efb2c-9526-41b1-af12-cfd6715fb161",
+      "name": "SP Download Report File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6080,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\n\nfunction toNumber(input) {\n  if (input === null || input === undefined || input === '') return 0;\n  const n = Number(String(input).replace(/[\\s,$]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { reimbursementsBySku: {}, skuCount: 0, parseWarning: 'SP Extract Report Text returned empty text' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { reimbursementsBySku: {}, skuCount: 0, parseWarning: 'No data rows in reimbursements report' } }];\n}\n\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => header.toLowerCase().replace(/[^a-z0-9]/g, ''));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\n\nconst skuIdx = pickIndex(['sku','merchantsku','sellersku']);\nconst amountIdx = pickIndex(['amounttotal','amountperunit']);\nif (skuIdx === -1 || amountIdx === -1) {\n  throw new Error('Could not locate sku and amount-total columns. Headers found: ' + headers.join(', '));\n}\n\nconst reimbursementsBySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n  const amount = toNumber(cols[amountIdx]);\n  reimbursementsBySku[sku] = Number(((reimbursementsBySku[sku] || 0) + amount).toFixed(2));\n}\n\nreturn [{\n  json: {\n    reimbursementsBySku,\n    skuCount: Object.keys(reimbursementsBySku).length,\n    sampleRows: lines.slice(0, 5),\n    parseWarning: Object.keys(reimbursementsBySku).length ? null : 'No reimbursement rows found',\n  },\n}];"
+      },
+      "id": "87406d7e-082d-451f-88e5-cf7b47785ecf",
+      "name": "SP Parse Returns by SKU",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6528,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "AMZ_AUTH -> REFUND\n",
+        "height": 496,
+        "width": 2448,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4352,
+        160
+      ],
+      "id": "39bc48dc-0cfd-45ff-afef-77bc5a48aad0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "reportText",
+        "options": {
+          "encoding": "utf8",
+          "stripBOM": true
+        }
+      },
+      "id": "31cea750-d2c2-47e3-9910-d2d55d6cd741",
+      "name": "SP Extract Report Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        6304,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseRetryAfterSeconds(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;\n}\n\nfunction nextBackoffSeconds(previousAttempt, retryAfterSeconds) {\n  const capped = Math.min(300, 60 * (2 ** Math.max(1, previousAttempt + 1)));\n  const jitter = Math.floor(Math.random() * 31);\n  return Math.max(capped + jitter, retryAfterSeconds || 0, 60);\n}\n\nconst input = $input.first().json || {};\nconst previousAttempt = Number(input.pollAttempt || 0);\nconst error = input.error || null;\nconst rawStatus = String(input.processingStatus || '').toUpperCase();\n\nif (error) {\n  const message = String(error.message || input.message || 'Unknown polling error');\n  const httpCode = Number(error.httpCode || input.httpCode || 0);\n  const retryAfterSeconds = parseRetryAfterSeconds(error.retryAfter || error.headers?.['retry-after'] || error.response?.headers?.['retry-after']);\n\n  if (httpCode === 429 || message.toLowerCase().includes('too many requests') || message.toLowerCase().includes('thrott')) {\n    return [{\n      json: {\n        ...input,\n        processingStatus: 'THROTTLED',\n        pollAttempt: previousAttempt + 1,\n        nextWaitSeconds: nextBackoffSeconds(previousAttempt, retryAfterSeconds),\n      },\n    }];\n  }\n\n  throw new Error(message);\n}\n\nif (rawStatus === 'FATAL' || rawStatus === 'CANCELLED') {\n  throw new Error(`SP report ${rawStatus}: ${input.processingEndTime || input.reportId || 'No report details provided'}`);\n}\n\nif (rawStatus === 'DONE') {\n  return [{\n    json: {\n      ...input,\n      processingStatus: 'DONE',\n      pollAttempt: previousAttempt,\n    },\n  }];\n}\n\nreturn [{\n  json: {\n    ...input,\n    processingStatus: rawStatus || 'IN_PROGRESS',\n    pollAttempt: previousAttempt + 1,\n    nextWaitSeconds: nextBackoffSeconds(previousAttempt, 0),\n  },\n}];"
+      },
+      "id": "f99c6590-6d50-4b67-ace5-90e4e68ae22c",
+      "name": "SP Normalize Poll Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5408,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "8490b5de-1904-41b8-b6f9-71da41bb07e2",
+      "name": "When executed by another workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        4064,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ACCESS_TOKEN",
+              "value": "={{ $json.AMAZON_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "GOOGLE_ACCESS_TOKEN",
+              "value": "={{ $json.GOOGLE_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "METRIC_KEY",
+              "value": "={{ $json.METRIC_KEY || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "WORKFLOW_NAME",
+              "value": "={{ $json.WORKFLOW_NAME || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "ORCHESTRATOR_RUN_ID",
+              "value": "={{ $json.ORCHESTRATOR_RUN_ID || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d8f5f0f3-c71e-462d-b388-ae36530ceb34",
+      "name": "Orchestrator Input Adapter",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4288,
+        496
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "SP Create Returns Report": {
+      "main": [
+        [
+          {
+            "node": "SP Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Wait": {
+      "main": [
+        [
+          {
+            "node": "SP Check Report Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP If": {
+      "main": [
+        [
+          {
+            "node": "SP Get Report Document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Get Report Document": {
+      "main": [
+        [
+          {
+            "node": "SP Download Report File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Download Report File": {
+      "main": [
+        [
+          {
+            "node": "SP Extract Report Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Read Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Webhook Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Extract Report Text": {
+      "main": [
+        [
+          {
+            "node": "SP Parse Returns by SKU",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Check Report Status": {
+      "main": [
+        [
+          {
+            "node": "SP Normalize Poll Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Normalize Poll Status": {
+      "main": [
+        [
+          {
+            "node": "SP If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Input Adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When executed by another workflow": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Input Adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Input Adapter": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "SP Create Returns Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Parse Returns by SKU": {
+      "main": [
+        [
+          {
+            "node": "Webhook Read Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromAList",
+    "availableInMCP": true,
+    "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
+  },
+  "versionId": "7ebd2bde-e3cf-444d-8f1f-29a58095ebe9",
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "fsJgfd11tF3nPprY",
+  "tags": []
+}

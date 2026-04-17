@@ -1,0 +1,474 @@
+{
+  "name": "Get BSR",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        4064,
+        464
+      ],
+      "id": "9621347b-f113-460d-99b2-dea15c113379",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ACCESS_TOKEN",
+              "value": "={{ $json.AMAZON_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "GOOGLE_ACCESS_TOKEN",
+              "value": "={{ $json.GOOGLE_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4512,
+        384
+      ],
+      "id": "48c2042a-1a1a-44fd-a7d7-0511d1f535e9",
+      "name": "Set Credentials",
+      "notes": "Use ✅START_DATE and ✅END_DATE for every run. Same-day runs are valid. This workflow keeps snapshot semantics and stores the chosen range as operator metadata."
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"✅RANGE\"])) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.GOOGLE_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "563dbd14-c214-47f8-9920-ea18f3a46534",
+      "name": "Webhook Read Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4736,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.GOOGLE_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "9ea7a85a-3ed0-48d1-9e60-13dc8241fdba",
+      "name": "Webhook Update Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5632,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractBsr(payload) {\n  const ranks = [];\n  const seen = new Set();\n  function walk(value) {\n    if (!value || typeof value !== 'object') return;\n    if (Array.isArray(value)) {\n      for (const item of value) walk(item);\n      return;\n    }\n    for (const [key, child] of Object.entries(value)) {\n      if (key.toLowerCase() === 'rank') {\n        const n = Number(child);\n        if (Number.isFinite(n) && n > 0 && !seen.has(n)) {\n          seen.add(n);\n          ranks.push(n);\n        }\n      }\n      walk(child);\n    }\n  }\n  walk(payload);\n  if (!ranks.length) return '';\n  return Math.min(...ranks);\n}\nconst originalItems = $('Build BSR Requests').all();\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\nconst data = [];\nfor (const item of $input.all()) {\n  const source = item.json || {};\n  const originalIndex = item.pairedItem && typeof item.pairedItem.item === 'number' ? item.pairedItem.item : -1;\n  const original = originalIndex >= 0 ? (originalItems[originalIndex]?.json || {}) : {};\n  const rowNumber = original.rowNumber;\n  const rank = extractBsr(source);\n  if (!rowNumber) continue;\n  data.push({ range: `${sheetName}!F${rowNumber}`, values: [[rank]] });\n}\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5408,
+        192
+      ],
+      "id": "a757ec9c-650e-43c2-affd-07c5f5e2da89",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "AMZ_AUTH -> REFUND\n",
+        "height": 544,
+        "width": 1968,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3952,
+        160
+      ],
+      "id": "f88f405f-ac0c-4e11-8b33-6fcf448bde61",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sheet = $input.first().json || {};\nconst values = sheet.values || [];\nlet headerRowIdx = -1;\nlet skuCol = -1;\nlet asinCol = -1;\nfor (let i = 0; i < Math.min(values.length, 12); i++) {\n  const row = values[i] || [];\n  const foundSkuCol = row.findIndex((c) => String(c).trim().toUpperCase() === 'SKU');\n  const foundAsinCol = row.findIndex((c) => String(c).trim().toUpperCase() === 'ASIN');\n  if (foundSkuCol !== -1) {\n    headerRowIdx = i;\n    skuCol = foundSkuCol;\n  }\n  if (foundAsinCol !== -1) {\n    asinCol = foundAsinCol;\n  }\n}\nif (headerRowIdx === -1 || skuCol === -1 || asinCol === -1) {\n  throw new Error('Could not find SKU and ASIN header columns');\n}\nconst items = [];\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  const asin = String(row[asinCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  if (!asin || !/^[A-Z0-9]{10}$/i.test(asin)) continue;\n  items.push({ json: { rowNumber: i + 1, sku, asin: asin.toUpperCase() } });\n}\nreturn items;"
+      },
+      "id": "build-bsr-requests",
+      "name": "Build BSR Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4960,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/catalog/2022-04-01/items/{{ $json.asin }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "marketplaceIds",
+              "value": "={{ $('Set Credentials').first().json['✅AMAZON_MARKETPLACE_ID'] }}"
+            },
+            {
+              "name": "includedData",
+              "value": "salesRanks"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sp-get-bsr",
+      "name": "SP Get BSR by ASIN",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5408,
+        384
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 1500,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "bsr-split-batches",
+      "name": "BSR Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        5184,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1.5
+      },
+      "id": "bsr-wait",
+      "name": "BSR Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5632,
+        464
+      ],
+      "webhookId": "1e4020f7-c0d0-4330-a3fe-5e60016158b8"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c76f8b42-f765-4880-b7b1-748293f3dbc2",
+      "name": "When executed by another workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        4064,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ACCESS_TOKEN",
+              "value": "={{ $json.AMAZON_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "GOOGLE_ACCESS_TOKEN",
+              "value": "={{ $json.GOOGLE_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "METRIC_KEY",
+              "value": "={{ $json.METRIC_KEY || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "WORKFLOW_NAME",
+              "value": "={{ $json.WORKFLOW_NAME || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "ORCHESTRATOR_RUN_ID",
+              "value": "={{ $json.ORCHESTRATOR_RUN_ID || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4f9a6f75-91c1-44a9-a823-f2146916ddf9",
+      "name": "Orchestrator Input Adapter",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4288,
+        384
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Webhook Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Read Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Build BSR Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build BSR Requests": {
+      "main": [
+        [
+          {
+            "node": "BSR Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BSR Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP Get BSR by ASIN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Get BSR by ASIN": {
+      "main": [
+        [
+          {
+            "node": "BSR Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BSR Wait": {
+      "main": [
+        [
+          {
+            "node": "BSR Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Input Adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When executed by another workflow": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Input Adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Input Adapter": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "Webhook Read Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromAList",
+    "availableInMCP": true,
+    "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
+  },
+  "versionId": "e0d9ba2f-3c5f-44c4-80d2-2154b19590a6",
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "zC5vJ22Tb7i4dli8",
+  "tags": []
+}

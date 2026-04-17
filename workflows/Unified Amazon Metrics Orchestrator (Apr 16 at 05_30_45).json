@@ -1,0 +1,2615 @@
+{
+  "name": "Unified Amazon Metrics Orchestrator (Apr 16 at 05:30:45)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3104,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const registry = [\n  { metricKey: 'bsr', displayName: 'Get BSR', workflowId: 'zC5vJ22Tb7i4dli8', dateMode: 'snapshot-metadata' },\n  { metricKey: 'ads_spend', displayName: 'Get Ad Spend', workflowId: 'nWQo0Pz3qHzQO0My', dateMode: 'range-ready' },\n  { metricKey: 'ctr', displayName: 'Get CTR', workflowId: 'wJaKKBJzcgUUoahu', dateMode: 'range-ready' },\n  { metricKey: 'refunds', displayName: 'Get Refund', workflowId: 'mV21sXm6RdaCfPet', dateMode: 'range-ready' },\n  { metricKey: 'sales_ppc', displayName: 'Get Sales PPC', workflowId: 'PzN4mNPLpYAS85WV', dateMode: 'range-ready' },\n  { metricKey: 'clicks', displayName: 'Get Clicks', workflowId: 'iVZAWiAvfBrQVOpi', dateMode: 'range-ready' },\n  { metricKey: 'units_ppc', displayName: 'Get Units PPC', workflowId: '0D4iLq9dHrac09vy', dateMode: 'range-ready' },\n  { metricKey: 'fba_fbm_stock', displayName: 'Get FBA/FBM Stock', workflowId: 'T6pc0F0RULowHQu0', dateMode: 'snapshot-metadata' },\n  { metricKey: 'sales_organic', displayName: 'Get Sales Organic', workflowId: 'KTNa277JLZ8hDZ89', dateMode: 'range-ready' },\n  { metricKey: 'units_organic', displayName: 'Get Units Organic', workflowId: 'siWvymzWJu7Ns1VG', dateMode: 'range-ready' },\n  { metricKey: 'reversal_reimbursement', displayName: 'Get Reversal Reimbursement', workflowId: 'fsJgfd11tF3nPprY', dateMode: 'range-ready' },\n  { metricKey: 'fba_per_unit_fulfillment_fee', displayName: 'Get FBAPerUnitFulfillmentFee', workflowId: 'TLMr85JcV4bwDySu', dateMode: 'snapshot-metadata' },\n];\nconst raw = String($json.INCLUDE_LIST || '').trim();\nconst selectedMetrics = raw ? [...new Set(raw.split(',').map((value) => value.trim()).filter(Boolean))] : [];\nreturn [{\n  json: {\n    '✅START_DATE': $json['✅START_DATE'],\n    '✅END_DATE': $json['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': $json['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': $json['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': $json['✅SHEET_NAME'],\n    '✅RANGE': $json['✅RANGE'],\n    '✅COLUMNS': $json['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': $json['✅AMAZON_MARKETPLACE_ID'],\n    INCLUDE_LIST: $json.INCLUDE_LIST || '',\n    selectedMetrics,\n    runAll: selectedMetrics.length === 0,\n    auth: $json.auth,\n    summary: [],\n    registry,\n  },\n}];"
+      },
+      "id": "9ab7ff96-a858-4f5d-89dd-6eae4df70259",
+      "name": "Build Workflow Registry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1088,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[0];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "6f1f4940-cac1-4c5e-a305-5b0e5a18ec8e",
+      "name": "Prepare BSR",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -864,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219195530-w673vpowl"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c8bdd615-a4fd-40e1-be87-1528dfe3925b",
+      "name": "If Run BSR",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -672,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "zC5vJ22Tb7i4dli8",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/zC5vJ22Tb7i4dli8",
+          "cachedResultName": "Get BSR"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "fb40ff56-767e-4a9a-9b65-1225a195b237",
+      "name": "Execute Get BSR",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -448,
+        -80
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "47af6bf1-e25a-44f5-a236-155e21b305d5",
+      "name": "Record BSR Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare BSR').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "d4902b5d-86c7-407b-904a-74e4643870cb",
+      "name": "Record BSR Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[1];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "d5231521-f556-4a61-a80c-39d8ea654841",
+      "name": "Prepare Ads Spend",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219195530-1mlclze7l"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7fd11713-9dd0-42af-b134-0f213fc1af9d",
+      "name": "If Run Ads Spend",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -656,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "nWQo0Pz3qHzQO0My",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/nWQo0Pz3qHzQO0My",
+          "cachedResultName": "Get Ad Spend"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
+            "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
+            "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "3392ad08-f3b4-4c3d-b377-c07fe38faaba",
+      "name": "Execute Get Ad Spend",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        336
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "5cdd2e35-07f8-4a0e-a3ec-5e0451ed5c44",
+      "name": "Record Ads Spend Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare Ads Spend').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "14741451-39d9-4d2b-a81c-eccba0432b65",
+      "name": "Record Ads Spend Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[2];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "9f6bcb0c-b45d-402f-bd84-94896ac9cad8",
+      "name": "Prepare CTR",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219195530-769ga5ajo"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0e504471-06b3-4e78-8a4e-b488067e5ffa",
+      "name": "If Run CTR",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -656,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "wJaKKBJzcgUUoahu",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/wJaKKBJzcgUUoahu",
+          "cachedResultName": "Get CTR"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
+            "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
+            "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "9e989c67-e1ff-4af0-a656-8ed0f710888a",
+      "name": "Execute Get CTR",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        784
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "a5f61042-7217-48ee-8d54-f567b17f5c3c",
+      "name": "Record CTR Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare CTR').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "10cd865b-1cdf-4689-be86-7579af209a4a",
+      "name": "Record CTR Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[3];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "014ea787-3a17-42e2-9f18-fae1bd2df197",
+      "name": "Prepare Refunds",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219262311-sqtd06d15"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "191d627f-2425-48b9-888a-6351ceeeec73",
+      "name": "If Run Refunds",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -672,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "mV21sXm6RdaCfPet",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/mV21sXm6RdaCfPet",
+          "cachedResultName": "Get Refund"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "56019631-1cb1-46d6-8ead-f6aea89a2abe",
+      "name": "Execute Get Refund",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -448,
+        1232
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "28755819-0ba5-488a-90e0-ce4b2553e2fe",
+      "name": "Record Refunds Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        1424
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare Refunds').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "b84d2228-768e-4b99-9170-4cf4be5235d8",
+      "name": "Record Refunds Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[4];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "218e26b7-e206-45aa-8de4-49775c4915ba",
+      "name": "Prepare Sales PPC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219262312-emr06zy39"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "be60610d-8f18-4e1b-a321-c03a36785515",
+      "name": "If Run Sales PPC",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "PzN4mNPLpYAS85WV",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/PzN4mNPLpYAS85WV",
+          "cachedResultName": "Get Sales PPC"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
+            "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
+            "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "6ade0ff4-2695-4a01-afe3-d29fb8d3edb0",
+      "name": "Execute Get Sales PPC",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        -96
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "b16cf5d6-bc58-4eed-9039-2e2340375fc1",
+      "name": "Record Sales PPC Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare Sales PPC').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "8aeed525-0407-4a8a-bbed-36e739ac7cf4",
+      "name": "Record Sales PPC Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[5];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "2a032e4e-d0ad-406a-8ca7-bf86a339fbc3",
+      "name": "Prepare Clicks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219262312-a6mfacnbn"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e89aa871-3f7c-4054-8cd4-74a36847c3ca",
+      "name": "If Run Clicks",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "iVZAWiAvfBrQVOpi",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/iVZAWiAvfBrQVOpi",
+          "cachedResultName": "Get Clicks"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
+            "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
+            "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "3caf5926-0323-4a37-b459-813601554e68",
+      "name": "Execute Get Clicks",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        368
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "aa995847-83b2-49df-b0bb-801d7cc5a834",
+      "name": "Record Clicks Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare Clicks').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "7dbe5c77-f18d-4f53-99d0-303c15b6e47d",
+      "name": "Record Clicks Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[6];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "a22b1b4a-1745-4196-82a5-cd05526647d9",
+      "name": "Prepare Units PPC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219262314-hkf5p7d9l"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3a282ae5-31a0-4494-9e36-c71217311707",
+      "name": "If Run Units PPC",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "0D4iLq9dHrac09vy",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/0D4iLq9dHrac09vy",
+          "cachedResultName": "Get Units PPC"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
+            "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
+            "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "476b695d-1d9f-4976-8e68-5466fc848ceb",
+      "name": "Execute Get Units PPC",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        768
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "3929d186-c21b-4b0e-8acb-4ea5373bb8ba",
+      "name": "Record Units PPC Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare Units PPC').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "f9a0ba0f-8474-421d-874f-b0dd08bbb5c4",
+      "name": "Record Units PPC Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[7];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "d09a65ac-875a-4ac6-a072-a969bf2f651b",
+      "name": "Prepare FBA FBM Stock",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219342022-orcafvm1w"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "109a6faa-0960-453a-b459-92e592f0834a",
+      "name": "If Run FBA FBM Stock",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "T6pc0F0RULowHQu0",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/T6pc0F0RULowHQu0",
+          "cachedResultName": "Get FBA/FBM Stock"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "785b3593-6a02-4286-9c0e-0c50c74b74a3",
+      "name": "Execute Get FBA FBM Stock",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        1184
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "3b47e002-dd02-463d-9c27-d26850581202",
+      "name": "Record FBA FBM Stock Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        1376
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare FBA FBM Stock').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "beee0549-fb36-4919-9acd-b831bdf133da",
+      "name": "Record FBA FBM Stock Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[8];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "db4b23af-306f-46bd-a5eb-06403b5270f4",
+      "name": "Prepare Sales Organic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219342023-9u8o2opiw"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ce91917e-4b8c-430d-8542-9613377b1e26",
+      "name": "If Run Sales Organic",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1488,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "KTNa277JLZ8hDZ89",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/KTNa277JLZ8hDZ89",
+          "cachedResultName": "Get Sales Organic"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "c593bfb8-6871-488b-9e2d-e049617fbf00",
+      "name": "Execute Get Sales Organic",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        -96
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "f3e6dbcd-450d-4218-9961-7da6a222d57a",
+      "name": "Record Sales Organic Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare Sales Organic').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "528be04d-d640-4f8c-9a5e-1b0f5300b51e",
+      "name": "Record Sales Organic Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[9];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "d997313b-c415-41e8-9310-4290f548642d",
+      "name": "Prepare Units Organic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219342023-26qh32of0"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f12cae94-6b43-4ee9-8b27-1a15851e4d9f",
+      "name": "If Run Units Organic",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1488,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "siWvymzWJu7Ns1VG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/siWvymzWJu7Ns1VG",
+          "cachedResultName": "Get Units Organic"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "28eec36f-a197-47fc-ac61-33a33e233718",
+      "name": "Execute Get Units Organic",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        368
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "ecfc4e8f-c4d3-4e13-8d09-01828a3e9772",
+      "name": "Record Units Organic Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare Units Organic').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "2dbc4d63-2b7d-4dd5-af01-18453e33d5c4",
+      "name": "Record Units Organic Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[10];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "90030a24-34e0-4b53-9751-31ff0d1b775c",
+      "name": "Prepare Reversal Reimbursement",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219342023-vrtnak5l2"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9b3b8777-5cb3-4405-ac4c-8817b19e009d",
+      "name": "If Run Reversal Reimbursement",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1488,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "fsJgfd11tF3nPprY",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/fsJgfd11tF3nPprY",
+          "cachedResultName": "Get Reversal Reimbursement"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "9e1ccde3-363c-47d3-8825-5c956ba171d5",
+      "name": "Execute Get Reversal Reimbursement",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        768
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "2f6ba68f-ff72-42b6-a37e-8c74300e4d78",
+      "name": "Record Reversal Reimbursement Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare Reversal Reimbursement').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "d6c8dee0-9f0d-49c8-975e-3ca7cbe50afd",
+      "name": "Record Reversal Reimbursement Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.registry[11];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
+      },
+      "id": "b349784d-971a-4812-a7d8-50598cc97ac0",
+      "name": "Prepare FBA Per Unit Fulfillment Fee",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776219342024-g43qh5ul2"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "06a341d1-bb2f-49fe-9045-7914d9b444b6",
+      "name": "If Run FBA Per Unit Fulfillment Fee",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1504,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "TLMr85JcV4bwDySu",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/TLMr85JcV4bwDySu",
+          "cachedResultName": "Get FBAPerUnitFulfillmentFee"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
+            "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
+            "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
+            "WORKFLOW_NAME": "={{ $json.currentMetric?.displayName || \"\" }}",
+            "ORCHESTRATOR_RUN_ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "2f6db2f0-94c3-4500-995b-a8c07fb862f7",
+      "name": "Execute Get FBAPerUnitFulfillmentFee",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        1232
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "180a069e-aa39-4a22-a131-0a8bfc0fafd7",
+      "name": "Record FBA Per Unit Fulfillment Fee Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        1424
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('Prepare FBA Per Unit Fulfillment Fee').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
+      },
+      "id": "c2d5b882-a1cb-4b9d-a526-4c676b848ec3",
+      "name": "Record FBA Per Unit Fulfillment Fee Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nreturn [{ json: { summary: input.summary || [] } }];"
+      },
+      "id": "cb2054c8-299b-414e-86a3-b578d73d746f",
+      "name": "Final Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2672,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.amazon.com/auth/o2/token",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "=refresh_token"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $json[\"✅AMAZON_ADS_REFRESH_TOKEN\"] }}"
+            },
+            {
+              "name": "client_id",
+              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_ID\"] }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_SECRET\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "131724be-1194-4fa4-ad8e-87fd0c534d33",
+      "name": "Mint Amazon Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2656,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all();"
+      },
+      "id": "04c59770-30d9-42ea-9d31-b768024eef39",
+      "name": "Refresh Amazon Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2432,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth2.googleapis.com/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "urn:ietf:params:oauth:grant-type:jwt-bearer"
+            },
+            {
+              "name": "assertion",
+              "value": "={{ $json.assertion }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2a201658-f325-423c-b8dc-7da5cad61342",
+      "name": "Mint Google Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1984,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all();"
+      },
+      "id": "13be27ef-0fcb-4dfa-83f2-ba8e40ec6978",
+      "name": "Refresh Google Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1760,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const seed = $('Set Credentials').first().json;\nconst input = $input.first().json;\nconst issuedAt = new Date().toISOString();\n\nconst refreshBufferSeconds = Number(seed.AUTH_REFRESH_BUFFER_SECONDS || input.AUTH_REFRESH_BUFFER_SECONDS || 300);\n\nconst amazonAdsNode = $('Mint Amazon Access Token').first().json;\nconst googleNode = $('Mint Google Access Token').first().json;\nconst spNode = $('Mint SP Access Token').first().json;\n\nconst amazonExpiresIn = Number(amazonAdsNode.expires_in || 3600);\nconst googleExpiresIn = Number(googleNode.expires_in || 3600);\nconst spExpiresIn = Number(spNode.expires_in || 3600);\n\nreturn [{\n  json: {\n    ...seed,\n    ...input,\n    auth: {\n      amazon: {\n        accessToken: amazonAdsNode.access_token,\n        clientId: seed['✅AMAZON_ADS_CLIENT_ID'],\n        profileId: seed['✅AMAZON_ADS_PROFILE_ID'],\n        issuedAt,\n        expiresAt: new Date(Date.now() + amazonExpiresIn * 1000).toISOString(),\n        spAccessToken: spNode.access_token,\n        spIssuedAt: issuedAt,\n        spExpiresAt: new Date(Date.now() + spExpiresIn * 1000).toISOString(),\n      },\n      google: {\n        accessToken: googleNode.access_token,\n        scope: seed['✅GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets',\n        issuedAt: seed.googleIssuedAt || input.googleIssuedAt || issuedAt,\n        expiresAt: seed.googleExpiresAt || input.googleExpiresAt || new Date(Date.now() + googleExpiresIn * 1000).toISOString(),\n      },\n      meta: {\n        refreshBufferSeconds,\n      },\n    },\n  },\n}];"
+      },
+      "id": "196cd93e-f36a-4b77-bb65-3a1677c07974",
+      "name": "Attach Shared Auth Bundle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1312,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76a6c500-c2c0-4339-8299-682826c4452b",
+              "name": "✅START_DATE",
+              "value": "2026-04-07",
+              "type": "string"
+            },
+            {
+              "id": "2a1915cd-7949-44ff-952b-9ab2aa6365f5",
+              "name": "✅END_DATE",
+              "value": "2026-04-07",
+              "type": "string"
+            },
+            {
+              "id": "6944e5f6-f22f-4bf8-9746-13b9e5ee8f91",
+              "name": "INCLUDE_LIST",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "d2a87c47-b55e-4641-90c9-4b7c204d8955",
+              "name": "✅AMAZON_ADS_CLIENT_ID",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "f6bcc963-0897-455c-ac16-e86f3deca6ef",
+              "name": "✅AMAZON_ADS_CLIENT_SECRET",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "6e513cbb-157d-4f5b-a18f-6f2b212157f5",
+              "name": "✅AMAZON_ADS_REFRESH_TOKEN",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "15f4bb08-6a83-4e2f-bf3f-706b362ee4af",
+              "name": "✅AMAZON_ADS_PROFILE_ID",
+              "value": "873689645456341",
+              "type": "string"
+            },
+            {
+              "id": "55f35d9b-4dd4-4594-af0c-08185938f2ac",
+              "name": "✅AMAZON_SP_CLIENT_ID",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "2aa06f79-f2f4-4d4f-8a4a-bf328f2de798",
+              "name": "✅AMAZON_SP_CLIENT_SECRET: ",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "518c7b45-f2de-42ad-b944-6342308f9e41",
+              "name": "✅AMAZON_SP_REFRESH_TOKEN",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "d02eed0a-85e5-4723-97a0-2ef963c0cb91",
+              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "fe461a50-becf-4868-9675-eba1f00317b1",
+              "name": "✅GOOGLE_PRIVATE_KEY",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "51f84e29-8590-46e0-bb22-c92f5900bcd7",
+              "name": "✅GOOGLE_SCOPE",
+              "value": "https://www.googleapis.com/auth/spreadsheets",
+              "type": "string"
+            },
+            {
+              "id": "297bd6d8-b645-41fa-baf6-9ac1a3b4a682",
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "https://docs.google.com/spreadsheets/d/1RSbTS6Y1idmbG_LHUhCSPNx341eYxvUJty_Oxs9gK2o/",
+              "type": "string"
+            },
+            {
+              "id": "c0aec1b6-f8fc-49fd-82aa-03fbb686df99",
+              "name": "✅SHEET_NAME",
+              "value": "MOBILITY",
+              "type": "string"
+            },
+            {
+              "id": "163475ec-2602-4c9e-9200-3277ef26934d",
+              "name": "✅RANGE",
+              "value": "A:BD",
+              "type": "string"
+            },
+            {
+              "id": "05c6613c-5ce9-418b-9067-8ca2a91dec71",
+              "name": "✅COLUMNS",
+              "value": "[\"cost\", \"clicks\", \"impressions\", \"advertisedAsin\", \"advertisedSku\"]",
+              "type": "string"
+            },
+            {
+              "id": "e05654b1-70f3-45f6-ba57-3f3b7bb1a8bf",
+              "name": "✅SPREADSHEET_ID",
+              "value": "1RSbTS6Y1idmbG_LHUhCSPNx341eYxvUJty_Oxs9gK2o",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "ATVPDKIKX0DER",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2880,
+        720
+      ],
+      "id": "cf0346ef-113a-4bf8-9537-56adc7df7f82",
+      "name": "Set Credentials"
+    },
+    {
+      "parameters": {
+        "jsCode": "function b64urlFromString(str) {\n  return Buffer.from(str, 'utf8')\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction b64urlFromBytes(bytes) {\n  return Buffer.from(bytes)\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction hexToBytes(hex) {\n  const out = new Uint8Array(hex.length / 2);\n  for (let i = 0; i < out.length; i++) {\n    out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);\n  }\n  return out;\n}\n\nfunction bytesToBigInt(bytes) {\n  let n = 0n;\n  for (let i = 0; i < bytes.length; i++) {\n    n = (n << 8n) | BigInt(bytes[i]);\n  }\n  return n;\n}\n\nfunction bigIntToBytes(num, length) {\n  const out = new Uint8Array(length);\n  let x = num;\n  for (let i = length - 1; i >= 0; i--) {\n    out[i] = Number(x & 0xffn);\n    x >>= 8n;\n  }\n  return out;\n}\n\nfunction modPow(base, exp, mod) {\n  let result = 1n;\n  let b = base % mod;\n  let e = exp;\n  while (e > 0n) {\n    if (e & 1n) result = (result * b) % mod;\n    b = (b * b) % mod;\n    e >>= 1n;\n  }\n  return result;\n}\n\nfunction readAsn1Element(bytes, offset) {\n  const tag = bytes[offset++];\n  const lenByte = bytes[offset++];\n  let length = 0;\n  if ((lenByte & 0x80) === 0) {\n    length = lenByte;\n  } else {\n    const numBytes = lenByte & 0x7f;\n    for (let i = 0; i < numBytes; i++) {\n      length = (length << 8) | bytes[offset++];\n    }\n  }\n  const valueStart = offset;\n  const valueEnd = valueStart + length;\n  return { tag, valueStart, valueEnd, nextOffset: valueEnd };\n}\n\nfunction readAsn1Integer(bytes, offset) {\n  const el = readAsn1Element(bytes, offset);\n  if (el.tag !== 0x02) throw new Error('Invalid ASN.1 INTEGER');\n  let start = el.valueStart;\n  while (start < el.valueEnd - 1 && bytes[start] === 0x00) start++;\n  return { value: bytesToBigInt(bytes.slice(start, el.valueEnd)), nextOffset: el.nextOffset };\n}\n\nfunction parsePkcs8RsaPrivateKey(pem) {\n  const der = Buffer.from(\n    pem\n      .replace(/-----BEGIN PRIVATE KEY-----/g, '')\n      .replace(/-----END PRIVATE KEY-----/g, '')\n      .replace(/\\s+/g, ''),\n    'base64'\n  );\n  const bytes = new Uint8Array(der);\n\n  const top = readAsn1Element(bytes, 0);\n  if (top.tag !== 0x30) throw new Error('Invalid PKCS#8');\n\n  let o = top.valueStart;\n  const version = readAsn1Element(bytes, o);\n  if (version.tag !== 0x02) throw new Error('Invalid PKCS#8 version');\n  o = version.nextOffset;\n\n  const alg = readAsn1Element(bytes, o);\n  if (alg.tag !== 0x30) throw new Error('Invalid PKCS#8 algorithm identifier');\n  o = alg.nextOffset;\n\n  const pk = readAsn1Element(bytes, o);\n  if (pk.tag !== 0x04) throw new Error('Invalid PKCS#8 privateKey');\n\n  const rsaBytes = bytes.slice(pk.valueStart, pk.valueEnd);\n  const rsaSeq = readAsn1Element(rsaBytes, 0);\n  if (rsaSeq.tag !== 0x30) throw new Error('Invalid RSAPrivateKey');\n\n  let r = rsaSeq.valueStart;\n  r = readAsn1Element(rsaBytes, r).nextOffset; // version\n  const nEl = readAsn1Integer(rsaBytes, r); r = nEl.nextOffset;\n  const eEl = readAsn1Integer(rsaBytes, r); r = eEl.nextOffset;\n  const dEl = readAsn1Integer(rsaBytes, r);\n\n  return {\n    n: nEl.value,\n    e: eEl.value,\n    d: dEl.value,\n  };\n}\n\nfunction rotr(x, n) {\n  return ((x >>> n) | (x << (32 - n))) >>> 0;\n}\n\nfunction sha256(msgBytes) {\n  const K = [\n    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,\n    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,\n    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,\n    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,\n    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,\n    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,\n    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,\n    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,\n  ];\n\n  const H = [\n    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,\n    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,\n  ];\n\n  const bitLen = msgBytes.length * 8;\n  const withOne = msgBytes.length + 1;\n  const padLen = (64 - ((withOne + 8) % 64)) % 64;\n  const totalLen = withOne + padLen + 8;\n  const data = new Uint8Array(totalLen);\n  data.set(msgBytes, 0);\n  data[msgBytes.length] = 0x80;\n  const hi = Math.floor(bitLen / 0x100000000);\n  const lo = bitLen >>> 0;\n  data[totalLen - 8] = (hi >>> 24) & 0xff;\n  data[totalLen - 7] = (hi >>> 16) & 0xff;\n  data[totalLen - 6] = (hi >>> 8) & 0xff;\n  data[totalLen - 5] = hi & 0xff;\n  data[totalLen - 4] = (lo >>> 24) & 0xff;\n  data[totalLen - 3] = (lo >>> 16) & 0xff;\n  data[totalLen - 2] = (lo >>> 8) & 0xff;\n  data[totalLen - 1] = lo & 0xff;\n\n  const W = new Uint32Array(64);\n\n  for (let i = 0; i < data.length; i += 64) {\n    for (let t = 0; t < 16; t++) {\n      const j = i + t * 4;\n      W[t] = ((data[j] << 24) | (data[j + 1] << 16) | (data[j + 2] << 8) | data[j + 3]) >>> 0;\n    }\n    for (let t = 16; t < 64; t++) {\n      const s0 = (rotr(W[t - 15], 7) ^ rotr(W[t - 15], 18) ^ (W[t - 15] >>> 3)) >>> 0;\n      const s1 = (rotr(W[t - 2], 17) ^ rotr(W[t - 2], 19) ^ (W[t - 2] >>> 10)) >>> 0;\n      W[t] = (((W[t - 16] + s0) >>> 0) + ((W[t - 7] + s1) >>> 0)) >>> 0;\n    }\n\n    let a = H[0], b = H[1], c = H[2], d = H[3];\n    let e = H[4], f = H[5], g = H[6], h = H[7];\n\n    for (let t = 0; t < 64; t++) {\n      const S1 = (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) >>> 0;\n      const ch = ((e & f) ^ (~e & g)) >>> 0;\n      const temp1 = (((((h + S1) >>> 0) + ch) >>> 0) + ((K[t] + W[t]) >>> 0)) >>> 0;\n      const S0 = (rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) >>> 0;\n      const maj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;\n      const temp2 = (S0 + maj) >>> 0;\n\n      h = g;\n      g = f;\n      f = e;\n      e = (d + temp1) >>> 0;\n      d = c;\n      c = b;\n      b = a;\n      a = (temp1 + temp2) >>> 0;\n    }\n\n    H[0] = (H[0] + a) >>> 0;\n    H[1] = (H[1] + b) >>> 0;\n    H[2] = (H[2] + c) >>> 0;\n    H[3] = (H[3] + d) >>> 0;\n    H[4] = (H[4] + e) >>> 0;\n    H[5] = (H[5] + f) >>> 0;\n    H[6] = (H[6] + g) >>> 0;\n    H[7] = (H[7] + h) >>> 0;\n  }\n\n  const out = new Uint8Array(32);\n  for (let i = 0; i < 8; i++) {\n    out[i * 4] = (H[i] >>> 24) & 0xff;\n    out[i * 4 + 1] = (H[i] >>> 16) & 0xff;\n    out[i * 4 + 2] = (H[i] >>> 8) & 0xff;\n    out[i * 4 + 3] = H[i] & 0xff;\n  }\n  return out;\n}\n\nfunction rsassaPkcs1V15Sha256Sign(messageUtf8, privateKeyPem) {\n  const key = parsePkcs8RsaPrivateKey(privateKeyPem);\n  const k = Math.ceil(key.n.toString(2).length / 8);\n\n  const hash = sha256(new TextEncoder().encode(messageUtf8));\n  const digestInfoPrefix = hexToBytes('3031300d060960864801650304020105000420');\n  const tLen = digestInfoPrefix.length + hash.length;\n  const psLen = k - tLen - 3;\n  if (psLen < 8) throw new Error('RSA key too short for PKCS#1 v1.5 SHA-256');\n\n  const em = new Uint8Array(k);\n  em[0] = 0x00;\n  em[1] = 0x01;\n  for (let i = 0; i < psLen; i++) em[2 + i] = 0xff;\n  em[2 + psLen] = 0x00;\n  em.set(digestInfoPrefix, 3 + psLen);\n  em.set(hash, 3 + psLen + digestInfoPrefix.length);\n\n  const m = bytesToBigInt(em);\n  const s = modPow(m, key.d, key.n);\n  return bigIntToBytes(s, k);\n}\n\nconst input = $input.first().json;\nconst serviceAccountEmail = $('Set Credentials').first().json[\"✅GOOGLE_SERVICE_ACCOUNT_EMAIL\"];\nconst privateKeyPem = String($('Set Credentials').first().json[\"✅GOOGLE_PRIVATE_KEY\"] || '').replace(/\\\\n/g, '\\n');\nconst scope = $('Set Credentials').first().json[\"✅GOOGLE_SCOPE\"] || 'https://www.googleapis.com/auth/spreadsheets.readonly';\n\nif (!serviceAccountEmail || !privateKeyPem) {\n  throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY');\n}\n\nconst now = Math.floor(Date.now() / 1000);\nconst header = { alg: 'RS256', typ: 'JWT' };\nconst payload = {\n  iss: serviceAccountEmail,\n  scope,\n  aud: 'https://oauth2.googleapis.com/token',\n  iat: now,\n  exp: now + 3600,\n};\n\nconst encodedHeader = b64urlFromString(JSON.stringify(header));\nconst encodedPayload = b64urlFromString(JSON.stringify(payload));\nconst signingInput = `${encodedHeader}.${encodedPayload}`;\n\nconst signatureBytes = rsassaPkcs1V15Sha256Sign(signingInput, privateKeyPem);\nconst signature = b64urlFromBytes(signatureBytes);\nconst assertion = `${signingInput}.${signature}`;\n\nreturn [\n  {\n    json: {\n      ...input,\n      assertion,\n    },\n  },\n];\n"
+      },
+      "id": "ccccc996-2d47-48fe-a659-6c8e16dc18de",
+      "name": "Build JWT Assertion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2208,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.amazon.com/auth/o2/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "=refresh_token"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_REFRESH_TOKEN\"] }}"
+            },
+            {
+              "name": "client_id",
+              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_CLIENT_ID\"] }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_CLIENT_SECRET: \"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "afc9b8b5-cf21-4e96-9860-7880ca67dd81",
+      "name": "Mint SP Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1536,
+        720
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Build Workflow Registry": {
+      "main": [
+        [
+          {
+            "node": "Prepare BSR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare BSR": {
+      "main": [
+        [
+          {
+            "node": "If Run BSR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run BSR": {
+      "main": [
+        [
+          {
+            "node": "Execute Get BSR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record BSR Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get BSR": {
+      "main": [
+        [
+          {
+            "node": "Record BSR Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record BSR Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Ads Spend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record BSR Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Ads Spend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Ads Spend": {
+      "main": [
+        [
+          {
+            "node": "If Run Ads Spend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Ads Spend": {
+      "main": [
+        [
+          {
+            "node": "Execute Get Ad Spend",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Ads Spend Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get Ad Spend": {
+      "main": [
+        [
+          {
+            "node": "Record Ads Spend Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Ads Spend Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare CTR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Ads Spend Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare CTR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare CTR": {
+      "main": [
+        [
+          {
+            "node": "If Run CTR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run CTR": {
+      "main": [
+        [
+          {
+            "node": "Execute Get CTR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record CTR Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get CTR": {
+      "main": [
+        [
+          {
+            "node": "Record CTR Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record CTR Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Refunds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record CTR Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Refunds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Refunds": {
+      "main": [
+        [
+          {
+            "node": "If Run Refunds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Refunds": {
+      "main": [
+        [
+          {
+            "node": "Execute Get Refund",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Refunds Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get Refund": {
+      "main": [
+        [
+          {
+            "node": "Record Refunds Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Refunds Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sales PPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Refunds Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sales PPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Sales PPC": {
+      "main": [
+        [
+          {
+            "node": "If Run Sales PPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Sales PPC": {
+      "main": [
+        [
+          {
+            "node": "Execute Get Sales PPC",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Sales PPC Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get Sales PPC": {
+      "main": [
+        [
+          {
+            "node": "Record Sales PPC Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Sales PPC Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Clicks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Sales PPC Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Clicks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Clicks": {
+      "main": [
+        [
+          {
+            "node": "If Run Clicks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Clicks": {
+      "main": [
+        [
+          {
+            "node": "Execute Get Clicks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Clicks Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get Clicks": {
+      "main": [
+        [
+          {
+            "node": "Record Clicks Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Clicks Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Units PPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Clicks Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Units PPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Units PPC": {
+      "main": [
+        [
+          {
+            "node": "If Run Units PPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Units PPC": {
+      "main": [
+        [
+          {
+            "node": "Execute Get Units PPC",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Units PPC Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get Units PPC": {
+      "main": [
+        [
+          {
+            "node": "Record Units PPC Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Units PPC Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare FBA FBM Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Units PPC Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare FBA FBM Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare FBA FBM Stock": {
+      "main": [
+        [
+          {
+            "node": "If Run FBA FBM Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run FBA FBM Stock": {
+      "main": [
+        [
+          {
+            "node": "Execute Get FBA FBM Stock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record FBA FBM Stock Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get FBA FBM Stock": {
+      "main": [
+        [
+          {
+            "node": "Record FBA FBM Stock Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record FBA FBM Stock Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sales Organic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record FBA FBM Stock Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sales Organic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Sales Organic": {
+      "main": [
+        [
+          {
+            "node": "If Run Sales Organic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Sales Organic": {
+      "main": [
+        [
+          {
+            "node": "Execute Get Sales Organic",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Sales Organic Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get Sales Organic": {
+      "main": [
+        [
+          {
+            "node": "Record Sales Organic Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Sales Organic Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Units Organic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Sales Organic Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Units Organic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Units Organic": {
+      "main": [
+        [
+          {
+            "node": "If Run Units Organic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Units Organic": {
+      "main": [
+        [
+          {
+            "node": "Execute Get Units Organic",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Units Organic Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get Units Organic": {
+      "main": [
+        [
+          {
+            "node": "Record Units Organic Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Units Organic Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Reversal Reimbursement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Units Organic Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Reversal Reimbursement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Reversal Reimbursement": {
+      "main": [
+        [
+          {
+            "node": "If Run Reversal Reimbursement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Reversal Reimbursement": {
+      "main": [
+        [
+          {
+            "node": "Execute Get Reversal Reimbursement",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Reversal Reimbursement Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get Reversal Reimbursement": {
+      "main": [
+        [
+          {
+            "node": "Record Reversal Reimbursement Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Reversal Reimbursement Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare FBA Per Unit Fulfillment Fee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Reversal Reimbursement Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare FBA Per Unit Fulfillment Fee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare FBA Per Unit Fulfillment Fee": {
+      "main": [
+        [
+          {
+            "node": "If Run FBA Per Unit Fulfillment Fee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run FBA Per Unit Fulfillment Fee": {
+      "main": [
+        [
+          {
+            "node": "Execute Get FBAPerUnitFulfillmentFee",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record FBA Per Unit Fulfillment Fee Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Get FBAPerUnitFulfillmentFee": {
+      "main": [
+        [
+          {
+            "node": "Record FBA Per Unit Fulfillment Fee Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record FBA Per Unit Fulfillment Fee Result": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record FBA Per Unit Fulfillment Fee Skipped": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mint Amazon Access Token": {
+      "main": [
+        [
+          {
+            "node": "Refresh Amazon Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refresh Amazon Token": {
+      "main": [
+        [
+          {
+            "node": "Build JWT Assertion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mint Google Access Token": {
+      "main": [
+        [
+          {
+            "node": "Refresh Google Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Shared Auth Bundle": {
+      "main": [
+        [
+          {
+            "node": "Build Workflow Registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "Mint Amazon Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build JWT Assertion": {
+      "main": [
+        [
+          {
+            "node": "Mint Google Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refresh Google Token": {
+      "main": [
+        [
+          {
+            "node": "Mint SP Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mint SP Access Token": {
+      "main": [
+        [
+          {
+            "node": "Attach Shared Auth Bundle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "6c56be0c-3013-473f-8b58-df9af791f75d",
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "Hh8rWhCpyt6n8QHT",
+  "tags": []
+}

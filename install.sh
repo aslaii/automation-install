@@ -14,6 +14,7 @@ SKIP_DOCKER="${AUTOMATION_INSTALLER_SKIP_DOCKER:-0}"
 SKIP_OPEN="${AUTOMATION_INSTALLER_SKIP_OPEN:-0}"
 ASSUME_YES="${AUTOMATION_INSTALLER_ASSUME_YES:-1}"
 NO_UI="${AUTOMATION_INSTALLER_NO_UI:-0}"
+REIMPORT_WORKFLOWS="${AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS:-0}"
 INSTALL_SOURCE="${AUTOMATION_INSTALLER_SOURCE:-https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh}"
 
 log() {
@@ -42,6 +43,7 @@ Environment:
   AUTOMATION_INSTALLER_SKIP_OPEN=1    Do not open localhost after startup
   AUTOMATION_INSTALLER_ASSUME_YES=1   Install prerequisites non-interactively
   AUTOMATION_INSTALLER_NO_UI=1        Skip macOS folder picker and use defaults
+  AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1  Reimport workflows even if already imported once
 EOF
 }
 
@@ -144,6 +146,10 @@ print_intro() {
 	log "The installer will request admin access only when it is actually needed."
 }
 
+source_base_url() {
+	printf '%s\n' "${INSTALL_SOURCE%/install.sh}"
+}
+
 write_dockerfile() {
 	cat >"$TARGET_DIR/Dockerfile" <<'EOF'
 FROM alpine:3.22 AS poppler
@@ -220,6 +226,7 @@ This folder was created by the self-contained `install.sh` installer.
 - `.env.example`
 - `n8n_data/`
 - `.automation/install-state.json`
+- `workflows/`
 
 ## Start Or Restart n8n
 
@@ -236,6 +243,16 @@ docker compose down
 ## Open n8n
 
 Visit `http://localhost:5678`
+
+## Workflow Import
+
+The installer imports the workflow JSON files from the bundled `workflows/` folder after n8n starts.
+
+If you need to import them again later, rerun the installer with:
+
+```bash
+AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 bash ./install.sh --target "$(pwd)"
+```
 EOF
 	sed -i '' "s/5678/${APP_PORT}/g" "$TARGET_DIR/INSTALLER.md"
 }
@@ -467,6 +484,82 @@ start_stack() {
 	run_cmd "Starting Automation stack..." docker compose -f "$TARGET_DIR/docker-compose.yml" up -d --build
 }
 
+wait_for_n8n_http() {
+	local attempt
+	log "Waiting for n8n to respond on http://localhost:${APP_PORT} ..."
+	for attempt in $(seq 1 60); do
+		if curl -fsS "http://localhost:${APP_PORT}" >/dev/null 2>&1; then
+			log "n8n is responding on http://localhost:${APP_PORT}."
+			return 0
+		fi
+		sleep 2
+	done
+
+	fail "n8n did not become reachable on http://localhost:${APP_PORT} within 2 minutes."
+}
+
+workflow_import_already_done() {
+	[[ "$REIMPORT_WORKFLOWS" != "1" && -f "$STATE_DIR/workflows-imported" ]]
+}
+
+download_workflows() {
+	local base_url manifest_url manifest_file workflow_dir entry workflow_url local_name
+	base_url="$(source_base_url)"
+	manifest_url="${base_url}/workflows/manifest.txt"
+	manifest_file="$STATE_DIR/workflows-manifest.txt"
+	workflow_dir="$TARGET_DIR/workflows"
+
+	if ! curl -fsSL "$manifest_url" -o "$manifest_file"; then
+		log "No workflow manifest found at ${manifest_url}. Skipping workflow import."
+		return 1
+	fi
+
+	rm -rf "$workflow_dir"
+	mkdir -p "$workflow_dir"
+
+	while IFS= read -r entry || [[ -n "$entry" ]]; do
+		[[ -n "$entry" ]] || continue
+		case "$entry" in
+		\#*) continue ;;
+		esac
+
+		workflow_url="${base_url}/workflows/${entry}"
+		local_name="$(basename "$entry")"
+		log "Downloading workflow file ${local_name} ..."
+		curl -fsSL "$workflow_url" -o "$workflow_dir/$local_name"
+	done <"$manifest_file"
+
+	return 0
+}
+
+import_workflows() {
+	local container_id remote_dir
+
+	if workflow_import_already_done; then
+		log "Workflows were already imported for this install. Skipping import."
+		return 0
+	fi
+
+	if ! download_workflows; then
+		return 0
+	fi
+
+	container_id="$(docker compose -f "$TARGET_DIR/docker-compose.yml" ps -q n8n)"
+	[[ -n "$container_id" ]] || fail "Could not find the running n8n container for workflow import."
+
+	remote_dir="/tmp/automation-workflows"
+	log "Copying workflow files into the n8n container..."
+	docker exec "$container_id" rm -rf "$remote_dir"
+	docker exec "$container_id" mkdir -p "$remote_dir"
+	docker cp "$TARGET_DIR/workflows/." "$container_id:${remote_dir}/"
+
+	log "Importing workflows into n8n..."
+	docker exec "$container_id" n8n import:workflow --separate --input="$remote_dir"
+	docker exec "$container_id" rm -rf "$remote_dir"
+	date -u +"%Y-%m-%dT%H:%M:%SZ" >"$STATE_DIR/workflows-imported"
+	log "Workflow import completed. Imported files are stored in $TARGET_DIR/workflows"
+}
+
 open_n8n() {
 	if [[ "$SKIP_OPEN" == "1" ]]; then
 		log "Skipping browser launch because AUTOMATION_INSTALLER_SKIP_OPEN=1."
@@ -480,14 +573,14 @@ main() {
 	parse_args "$@"
 	log "Starting Automation installer..."
 	print_intro
-	step "1/5" "Choose install folder"
+	step "1/6" "Choose install folder"
 	normalize_target
-	step "2/5" "Choose port"
+	step "2/6" "Choose port"
 	choose_app_port
 
 	log "Installing into $TARGET_DIR"
 	log "Using localhost:${APP_PORT}"
-	step "3/5" "Write runtime files"
+	step "3/6" "Write runtime files"
 	scaffold_install_dir
 	write_install_state
 
@@ -496,11 +589,14 @@ main() {
 		return 0
 	fi
 
-	step "4/5" "Check Docker and start n8n"
+	step "4/6" "Check Docker and start n8n"
 	ensure_docker_desktop_ready
 	ensure_install_port_available
 	start_stack
-	step "5/5" "Open n8n"
+	wait_for_n8n_http
+	step "5/6" "Import workflows"
+	import_workflows
+	step "6/6" "Open n8n"
 	open_n8n
 	log "Open n8n at: http://localhost:${APP_PORT}"
 	log "Automation is ready in $TARGET_DIR"

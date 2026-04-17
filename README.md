@@ -32,6 +32,7 @@ bash ./install.sh --target "$HOME/Automation"
 - Creates a runtime folder with `Dockerfile`, `docker-compose.yml`, `.env.example`, `n8n_data/`, and `.automation/install-state.json`
 - Starts `n8n` on `http://localhost:5678`
 - If `5678` is already busy, automatically falls back to `http://localhost:5679`
+- Downloads and imports the workflow JSON files bundled in `workflows/` after n8n starts
 
 ## Optional Environment Flags
 
@@ -39,7 +40,10 @@ bash ./install.sh --target "$HOME/Automation"
 AUTOMATION_INSTALLER_SKIP_DOCKER=1 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --target "/tmp/Automation"
 AUTOMATION_INSTALLER_SKIP_OPEN=1 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --target "/tmp/Automation"
 AUTOMATION_INSTALLER_NO_UI=1 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash
+AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash
 ```
+
+- `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1` forces workflow import again on an existing install.
 
 ## Notes
 

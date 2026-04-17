@@ -1,0 +1,1029 @@
+{
+  "name": "Get FBA/FBM Stock",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        4048,
+        528
+      ],
+      "id": "3281605d-0153-48c0-b254-a4bcbdddc804",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ACCESS_TOKEN",
+              "value": "={{ $json.AMAZON_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "GOOGLE_ACCESS_TOKEN",
+              "value": "={{ $json.GOOGLE_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4496,
+        432
+      ],
+      "id": "d8c77a59-dda8-4c45-9248-ea1e04259b6c",
+      "name": "Set Credentials",
+      "notes": "Use ✅START_DATE and ✅END_DATE for every run. Same-day runs are valid. This workflow keeps snapshot semantics and stores the chosen range as operator metadata for the FBA and FBM snapshots."
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"✅RANGE\"])) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.GOOGLE_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0c5e2345-5438-42d1-bc36-0c89de60e3e3",
+      "name": "Webhook Read Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        8976,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Set Credentials').first().json.GOOGLE_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "19636c5d-cf74-44e9-9de8-e2be926ee459",
+      "name": "Webhook Update Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        9424,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst fbaBySku = $('SP Parse Returns by SKU').first().json.bySku || {};\nconst fbmBySku = $('SP Parse FBM Stock by SKU').first().json.bySku || {};\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nlet headerRowIdx = -1;\nlet skuCol = -1;\nfor (let i = 0; i < Math.min(values.length, 12); i++) {\n  const row = values[i] || [];\n  const foundSkuCol = row.findIndex((c) => String(c).trim().toUpperCase() === 'SKU');\n  if (foundSkuCol !== -1) {\n    headerRowIdx = i;\n    skuCol = foundSkuCol;\n    break;\n  }\n}\nif (headerRowIdx === -1 || skuCol === -1) {\n  throw new Error('Could not find SKU header column');\n}\n\nconst stockColA1 = 'AP';\nconst data = [];\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  if (!/[A-Za-z0-9]/.test(sku) || sku.length < 3) continue;\n\n  const fba = fbaBySku[sku] || {};\n  const fbm = fbmBySku[sku] || {};\n  const stock = Number((toNumber(fba.fbaFulfillableQuantity) + toNumber(fbm.fbmQuantity)).toFixed(2));\n  data.push({ range: `${sheetName}!${stockColA1}${i + 1}`, values: [[stock]] });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9200,
+        368
+      ],
+      "id": "f4088b48-5e73-4032-8e9a-46145592b449",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "GOOGLE SHEET\n",
+        "height": 512,
+        "width": 1104,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        8592,
+        16
+      ],
+      "id": "ee782977-6ac8-4e07-a884-bee0566f954c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportType\": \"{{ $json.fbaReportType || 'GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA' }}\",\n  \"marketplaceIds\": [\"{{ $('Set Credentials').item.json['✅AMAZON_MARKETPLACE_ID'] }}\"]\n}",
+        "options": {}
+      },
+      "id": "1dbb1a0f-d4aa-4822-8c58-a8f4fdf46982",
+      "name": "SP Create Returns Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4720,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.max(60, Number($json.nextWaitSeconds || 60)) }}"
+      },
+      "id": "846cce94-9d95-485c-8528-87cda1416e78",
+      "name": "SP Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4944,
+        368
+      ],
+      "webhookId": "f775dac8-a224-49d7-a771-9ea5ebb658df"
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create Returns Report').item.json.reportId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0c6a47b1-e963-4035-b6f1-ab2c14542828",
+      "name": "SP Check Report Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5168,
+        288
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "11fa5373-bef8-477a-a2ee-f1f61005f843",
+              "leftValue": "={{ $json.processingStatus }}",
+              "rightValue": "DONE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c0168193-2ba9-4677-9c95-2ecde68deb61",
+      "name": "SP If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5840,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/documents/{{ $('SP Check Report Status').item.json.reportDocumentId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a4b2a132-d937-421a-befc-b55ae90a99b7",
+      "name": "SP Get Report Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6064,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "ddf6c3ab-7dd2-46aa-9617-5b3c504d1dc6",
+      "name": "SP Download Report File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6288,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\n\nfunction toNumber(input) {\n  if (input === null || input === undefined || input === '') return 0;\n  const n = Number(String(input).replace(/[\\s,$]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'FBA report text empty' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\n\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'FBA report has no data rows' } }];\n}\n\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => header.toLowerCase().replace(/[^a-z0-9]/g, ''));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\n\nconst skuIdx = pickIndex(['sku', 'sellersku', 'merchantsku']);\nconst fbaTotalIdx = pickIndex(['afntotalquantity']);\nconst fbaFulfillableIdx = pickIndex(['afnfulfillablequantity']);\nconst fbaUnsellableIdx = pickIndex(['afnunsellablequantity']);\nconst fbaReservedIdx = pickIndex(['afnreservedquantity']);\n\nif (skuIdx === -1) {\n  throw new Error('Could not locate SKU column in FBA stock report');\n}\n\nconst bySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n\n  const record = bySku[sku] || {\n    sku,\n    fbaTotalQuantity: 0,\n    fbaFulfillableQuantity: 0,\n    fbaUnsellableQuantity: 0,\n    fbaReservedQuantity: 0,\n    fbmQuantity: 0,\n  };\n\n  record.fbaFulfillableQuantity = Number((record.fbaFulfillableQuantity + (fbaFulfillableIdx === -1 ? 0 : toNumber(cols[fbaFulfillableIdx]))).toFixed(2));\n  record.fbaUnsellableQuantity = Number((record.fbaUnsellableQuantity + (fbaUnsellableIdx === -1 ? 0 : toNumber(cols[fbaUnsellableIdx]))).toFixed(2));\n  record.fbaReservedQuantity = Number((record.fbaReservedQuantity + (fbaReservedIdx === -1 ? 0 : toNumber(cols[fbaReservedIdx]))).toFixed(2));\n  if (fbaTotalIdx !== -1) {\n    record.fbaTotalQuantity = Number((record.fbaTotalQuantity + toNumber(cols[fbaTotalIdx])).toFixed(2));\n  } else {\n    record.fbaTotalQuantity = Number((record.fbaFulfillableQuantity + record.fbaUnsellableQuantity + record.fbaReservedQuantity).toFixed(2));\n  }\n\n  bySku[sku] = record;\n}\n\nreturn [{ json: { bySku, skuCount: Object.keys(bySku).length, parseWarning: null } }];"
+      },
+      "id": "d9c16acd-1118-44c9-9ff8-b636ebd26664",
+      "name": "SP Parse Returns by SKU",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6736,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "content": "AMZ_AUTH\n",
+        "height": 496,
+        "width": 688,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4320,
+        96
+      ],
+      "id": "21d590ef-d898-4440-afd7-ddd3310ade82",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "reportText",
+        "options": {
+          "encoding": "utf8",
+          "stripBOM": true
+        }
+      },
+      "id": "36dbe99a-829d-46d3-8e31-2c9bb91b2f47",
+      "name": "SP Extract Report Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        6512,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseRetryAfterSeconds(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;\n}\nfunction nextBackoffSeconds(previousAttempt, retryAfterSeconds) {\n  const capped = Math.min(300, 60 * (2 ** Math.max(1, previousAttempt + 1)));\n  const jitter = Math.floor(Math.random() * 31);\n  return Math.max(capped + jitter, retryAfterSeconds || 0, 60);\n}\nconst input = $input.first().json || {};\nconst previousAttempt = Number(input.pollAttempt || 0);\nconst error = input.error || null;\nconst rawStatus = String(input.processingStatus || '').toUpperCase();\nconst currentReportType = String(input.reportType || '').toUpperCase();\nif (error) {\n  const message = String(error.message || input.message || 'Unknown polling error');\n  const httpCode = Number(error.httpCode || input.httpCode || 0);\n  const retryAfterSeconds = parseRetryAfterSeconds(error.retryAfter || error.headers?.['retry-after'] || error.response?.headers?.['retry-after']);\n  if (httpCode === 429 || message.toLowerCase().includes('too many requests') || message.toLowerCase().includes('thrott')) {\n    return [{ json: { ...input, processingStatus: 'THROTTLED', pollAttempt: previousAttempt + 1, nextWaitSeconds: nextBackoffSeconds(previousAttempt, retryAfterSeconds), retryCreate: false } }];\n  }\n  throw new Error(message);\n}\nif (rawStatus === 'FATAL' || rawStatus === 'CANCELLED') {\n  if (currentReportType === 'GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA') {\n    return [{ json: { fbaReportType: 'GET_FBA_MYI_ALL_INVENTORY_DATA', retryCreate: true, previousFailedReportType: currentReportType, previousFailedStatus: rawStatus, pollAttempt: 0 } }];\n  }\n  throw new Error(`SP report ${rawStatus}: ${currentReportType || input.reportId || 'No report details provided'}`);\n}\nif (rawStatus === 'DONE') {\n  return [{ json: { ...input, processingStatus: 'DONE', pollAttempt: previousAttempt, retryCreate: false } }];\n}\nreturn [{ json: { ...input, processingStatus: rawStatus || 'IN_PROGRESS', pollAttempt: previousAttempt + 1, nextWaitSeconds: nextBackoffSeconds(previousAttempt, 0), retryCreate: false } }];"
+      },
+      "id": "4fefdbb1-6a1c-4236-b287-ac6a02c78ef7",
+      "name": "SP Normalize Poll Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5392,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportType\": \"GET_MERCHANT_LISTINGS_ALL_DATA\",\n  \"marketplaceIds\": [\"ATVPDKIKX0DER\"]\n}",
+        "options": {}
+      },
+      "id": "sp-create-fbm-report",
+      "name": "SP Create FBM Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6960,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.max(60, Number($json.nextWaitSeconds || 60)) }}"
+      },
+      "id": "sp-wait-fbm",
+      "name": "SP Wait FBM",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        7184,
+        368
+      ],
+      "webhookId": "f2ad2760-db2a-4c06-a0df-a5c9ba23420d"
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create FBM Report').item.json.reportId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sp-check-fbm-status",
+      "name": "SP Check FBM Report Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        7408,
+        288
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseRetryAfterSeconds(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;\n}\nfunction nextBackoffSeconds(previousAttempt, retryAfterSeconds) {\n  const capped = Math.min(300, 60 * (2 ** Math.max(1, previousAttempt + 1)));\n  const jitter = Math.floor(Math.random() * 31);\n  return Math.max(capped + jitter, retryAfterSeconds || 0, 60);\n}\nconst input = $input.first().json || {};\nconst previousAttempt = Number(input.pollAttempt || 0);\nconst error = input.error || null;\nconst rawStatus = String(input.processingStatus || '').toUpperCase();\nif (error) {\n  const message = String(error.message || input.message || 'Unknown polling error');\n  const httpCode = Number(error.httpCode || input.httpCode || 0);\n  const retryAfterSeconds = parseRetryAfterSeconds(error.retryAfter || error.headers?.['retry-after'] || error.response?.headers?.['retry-after']);\n  if (httpCode === 429 || message.toLowerCase().includes('too many requests') || message.toLowerCase().includes('thrott')) {\n    return [{ json: { ...input, processingStatus: 'THROTTLED', pollAttempt: previousAttempt + 1, nextWaitSeconds: nextBackoffSeconds(previousAttempt, retryAfterSeconds) } }];\n  }\n  throw new Error(message);\n}\nif (rawStatus === 'FATAL' || rawStatus === 'CANCELLED') {\n  throw new Error(`SP report ${rawStatus}: ${input.processingEndTime || input.reportId || 'No report details provided'}`);\n}\nif (rawStatus === 'DONE') {\n  return [{ json: { ...input, processingStatus: 'DONE', pollAttempt: previousAttempt } }];\n}\nreturn [{ json: { ...input, processingStatus: rawStatus || 'IN_PROGRESS', pollAttempt: previousAttempt + 1, nextWaitSeconds: nextBackoffSeconds(previousAttempt, 0) } }];"
+      },
+      "id": "sp-normalize-fbm",
+      "name": "SP Normalize FBM Poll Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7632,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.processingStatus }}",
+              "rightValue": "DONE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776134540687-uz3scx2co"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "sp-if-fbm",
+      "name": "SP If FBM",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        7856,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/documents/{{ $('SP Check FBM Report Status').item.json.reportDocumentId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sp-get-fbm-document",
+      "name": "SP Get FBM Report Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        8080,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "sp-download-fbm-file",
+      "name": "SP Download FBM Report File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        8304,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "reportText",
+        "options": {
+          "encoding": "utf8",
+          "stripBOM": true
+        }
+      },
+      "id": "sp-extract-fbm-text",
+      "name": "SP Extract FBM Report Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        8528,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\nfunction toNumber(input) {\n  if (input === null || input === undefined || input === '') return 0;\n  const n = Number(String(input).replace(/[\\s,$]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\nfunction isMerchantChannel(value) {\n  const normalized = String(value || '').trim().toUpperCase();\n  if (!normalized) return true;\n  if (normalized === 'DEFAULT' || normalized === 'MERCHANT' || normalized === 'MFN') return true;\n  return !normalized.includes('AMAZON');\n}\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'FBM report text empty' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'FBM report has no data rows' } }];\n}\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => header.toLowerCase().replace(/[^a-z0-9]/g, ''));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\nconst skuIdx = pickIndex(['sellersku', 'sku', 'merchantsku']);\nconst quantityIdx = pickIndex(['quantity']);\nconst fulfillmentChannelIdx = pickIndex(['fulfillmentchannel']);\nif (skuIdx === -1 || quantityIdx === -1) {\n  throw new Error('Could not locate seller-sku and quantity columns in FBM stock report');\n}\nconst bySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n  const channel = fulfillmentChannelIdx === -1 ? '' : String(cols[fulfillmentChannelIdx] || '').trim();\n  const fbmQuantity = isMerchantChannel(channel) ? toNumber(cols[quantityIdx]) : 0;\n  const record = bySku[sku] || { sku, fbaTotalQuantity: 0, fbaFulfillableQuantity: 0, fbaUnsellableQuantity: 0, fbaReservedQuantity: 0, fbmQuantity: 0 };\n  record.fbmQuantity = Number((record.fbmQuantity + fbmQuantity).toFixed(2));\n  bySku[sku] = record;\n}\nreturn [{ json: { bySku, skuCount: Object.keys(bySku).length, parseWarning: null } }];"
+      },
+      "id": "sp-parse-fbm-sku",
+      "name": "SP Parse FBM Stock by SKU",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8752,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "content": "AMZ_AUTH\n",
+        "height": 496,
+        "width": 3696,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5056,
+        32
+      ],
+      "id": "85fce1b0-35b9-4334-8b70-361802e517d6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ !!$json.retryCreate }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "condition-1776136949714-14najxzz4"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "sp-if-retry-fba-create",
+      "name": "SP If Retry FBA Create",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5616,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "be20fab8-5454-4655-b9e5-df56e18b914b",
+      "name": "When executed by another workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        4048,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "✅START_DATE",
+              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅END_DATE",
+              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SPREADSHEET_ID",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅SHEET_NAME",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅RANGE",
+              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "AMAZON_ACCESS_TOKEN",
+              "value": "={{ $json.AMAZON_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "GOOGLE_ACCESS_TOKEN",
+              "value": "={{ $json.GOOGLE_ACCESS_TOKEN || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "METRIC_KEY",
+              "value": "={{ $json.METRIC_KEY || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "WORKFLOW_NAME",
+              "value": "={{ $json.WORKFLOW_NAME || \"\" }}",
+              "type": "string"
+            },
+            {
+              "name": "ORCHESTRATOR_RUN_ID",
+              "value": "={{ $json.ORCHESTRATOR_RUN_ID || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f43d5c80-fa89-47ca-84e5-9ebeb4007b96",
+      "name": "Orchestrator Input Adapter",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4272,
+        432
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "SP Create Returns Report": {
+      "main": [
+        [
+          {
+            "node": "SP Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Wait": {
+      "main": [
+        [
+          {
+            "node": "SP Check Report Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP If": {
+      "main": [
+        [
+          {
+            "node": "SP Get Report Document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Get Report Document": {
+      "main": [
+        [
+          {
+            "node": "SP Download Report File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Download Report File": {
+      "main": [
+        [
+          {
+            "node": "SP Extract Report Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Parse Returns by SKU": {
+      "main": [
+        [
+          {
+            "node": "SP Create FBM Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Read Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Webhook Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Extract Report Text": {
+      "main": [
+        [
+          {
+            "node": "SP Parse Returns by SKU",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Check Report Status": {
+      "main": [
+        [
+          {
+            "node": "SP Normalize Poll Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Create FBM Report": {
+      "main": [
+        [
+          {
+            "node": "SP Wait FBM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Wait FBM": {
+      "main": [
+        [
+          {
+            "node": "SP Check FBM Report Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Check FBM Report Status": {
+      "main": [
+        [
+          {
+            "node": "SP Normalize FBM Poll Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Normalize FBM Poll Status": {
+      "main": [
+        [
+          {
+            "node": "SP If FBM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP If FBM": {
+      "main": [
+        [
+          {
+            "node": "SP Get FBM Report Document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP Wait FBM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Get FBM Report Document": {
+      "main": [
+        [
+          {
+            "node": "SP Download FBM Report File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Download FBM Report File": {
+      "main": [
+        [
+          {
+            "node": "SP Extract FBM Report Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Extract FBM Report Text": {
+      "main": [
+        [
+          {
+            "node": "SP Parse FBM Stock by SKU",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Normalize Poll Status": {
+      "main": [
+        [
+          {
+            "node": "SP If Retry FBA Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP If Retry FBA Create": {
+      "main": [
+        [
+          {
+            "node": "SP Create Returns Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Input Adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When executed by another workflow": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Input Adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Input Adapter": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "SP Create Returns Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Parse FBM Stock by SKU": {
+      "main": [
+        [
+          {
+            "node": "Webhook Read Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromAList",
+    "availableInMCP": true,
+    "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
+  },
+  "versionId": "3b8cb8fb-f852-40ad-8780-d3ee1093c5c8",
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "T6pc0F0RULowHQu0",
+  "tags": []
+}
