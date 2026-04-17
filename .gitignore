@@ -28,3 +28,9 @@ vendor/
 coverage/
 .cache/
 tmp/
+
+# Local agent/tooling state
+.agents/
+.claude/
+.mcp.json
+skills-lock.json
