@@ -77,6 +77,68 @@ async function loadSalesOrganicFromGoogleSheet(config, deps = {}) {
   };
 }
 
+async function loadUnitsOrganicFromGoogleSheet(config, deps = {}) {
+  const { values } = await readSheetValues(config, deps);
+  const headerInfo = findPrimaryHeaderRow(values, [
+    ['SKU'],
+    ['AD_UNITS', 'AD UNITS', 'ADUNITS'],
+  ]);
+  const headerRow = headerInfo.row || [];
+  const skuCol = findHeaderIndex(headerRow, ['SKU']);
+  const adUnitsCol = findHeaderIndex(headerRow, ['AD_UNITS', 'AD UNITS', 'ADUNITS']);
+  const salesOrganicQtyCol = findHeaderIndex(headerRow, [
+    'SALES_ORGANIC_QTY',
+    'SALES ORGANIC QTY',
+    'SALESORGANICQTY',
+    'SALES_ORGANIC',
+    'SALES ORGANIC',
+    'SALESORGANIC',
+  ]);
+
+  if (skuCol === -1 || adUnitsCol === -1) {
+    throw new Error('source=sheet missing required SKU and AD_UNITS columns');
+  }
+
+  const bySku = {};
+  for (let rowIndex = headerInfo.index + 1; rowIndex < values.length; rowIndex += 1) {
+    const row = values[rowIndex] || [];
+    const rowHasValues = row.some((cell) => String(cell ?? '').trim() !== '');
+    if (!rowHasValues) continue;
+
+    const sku = String(row[skuCol] || '').trim();
+    const adUnitsValue = row[adUnitsCol];
+    const expectedSalesOrganicQtyValue = salesOrganicQtyCol === -1 ? undefined : row[salesOrganicQtyCol];
+
+    if (!sku) {
+      const hasDataInTrackedColumns = String(adUnitsValue ?? '').trim() !== '' || String(expectedSalesOrganicQtyValue ?? '').trim() !== '';
+      if (hasDataInTrackedColumns) {
+        throw new Error(`source=sheet row ${rowIndex + 1} missing required SKU`);
+      }
+      continue;
+    }
+
+    if (/^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;
+
+    const context = `source=sheet row ${rowIndex + 1} sku ${sku}`;
+    bySku[sku] = {
+      sku,
+      adUnits: parseRequiredSheetNumber(adUnitsValue, `adUnits ${context}`),
+      expectedSalesOrganicQty: expectedSalesOrganicQtyValue === undefined || expectedSalesOrganicQtyValue === null || String(expectedSalesOrganicQtyValue).trim() === ''
+        ? null
+        : parseSheetNumber(expectedSalesOrganicQtyValue, `expectedSalesOrganicQty ${context}`),
+      expectedSalesPpcQty: parseRequiredSheetNumber(adUnitsValue, `expectedSalesPpcQty ${context}`),
+      rowNumber: rowIndex + 1,
+      source: 'sheet',
+    };
+  }
+
+  return {
+    bySku,
+    skuCount: Object.keys(bySku).length,
+    source: 'sheet',
+  };
+}
+
 async function readSheetValues(config, deps = {}) {
   try {
     const auth = deps.auth || new google.auth.JWT({
@@ -147,11 +209,20 @@ function parseSheetNumber(value, context) {
   return Number(parsed.toFixed(2));
 }
 
+function parseRequiredSheetNumber(value, context) {
+  if (value === undefined || value === null || String(value).trim() === '') {
+    throw new Error(`Missing numeric value for ${context}`);
+  }
+  return parseSheetNumber(value, context);
+}
+
 module.exports = {
   loadProductsFromGoogleSheet,
   loadSalesOrganicFromGoogleSheet,
+  loadUnitsOrganicFromGoogleSheet,
   readSheetValues,
   findHeaderIndex,
   normalizeHeader,
   parseSheetNumber,
+  parseRequiredSheetNumber,
 };
