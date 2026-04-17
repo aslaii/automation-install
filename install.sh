@@ -10,6 +10,7 @@ TARGET_DIR=""
 STATE_DIR=""
 APP_PORT=""
 BREW_BIN=""
+UPDATE_SETTINGS_ONLY="0"
 SKIP_DOCKER="${AUTOMATION_INSTALLER_SKIP_DOCKER:-0}"
 SKIP_OPEN="${AUTOMATION_INSTALLER_SKIP_OPEN:-0}"
 ASSUME_YES="${AUTOMATION_INSTALLER_ASSUME_YES:-1}"
@@ -32,10 +33,11 @@ fail() {
 
 usage() {
 	cat <<'EOF'
-Usage: bash ./install.sh [--target <path>]
+Usage: bash ./install.sh [--target <path>] [--update-settings]
 
 Options:
   --target <path>   Install runtime into this folder (default: ~/Automation)
+  --update-settings Rewrite runtime files and rebuild n8n without reimporting workflows
   --help            Show this help message
 
 Environment:
@@ -54,6 +56,10 @@ parse_args() {
 			[[ $# -ge 2 ]] || fail "Missing value for --target."
 			TARGET_ARG="$2"
 			shift 2
+			;;
+		--update-settings)
+			UPDATE_SETTINGS_ONLY="1"
+			shift
 			;;
 		--help | -h)
 			usage
@@ -144,6 +150,9 @@ run_cmd() {
 print_intro() {
 	log "Do not run this installer with 'sudo bash'."
 	log "The installer will request admin access only when it is actually needed."
+	if [[ "$UPDATE_SETTINGS_ONLY" == "1" ]]; then
+		log "Update mode enabled: runtime settings will be refreshed and n8n will be rebuilt."
+	fi
 }
 
 source_base_url() {
@@ -484,6 +493,13 @@ start_stack() {
 	run_cmd "Starting Automation stack..." docker compose -f "$TARGET_DIR/docker-compose.yml" up -d --build
 }
 
+stop_stack_if_present() {
+	if docker compose -f "$TARGET_DIR/docker-compose.yml" ps >/dev/null 2>&1; then
+		log "Stopping existing Automation stack before rebuild..."
+		docker compose -f "$TARGET_DIR/docker-compose.yml" down || true
+	fi
+}
+
 wait_for_n8n_http() {
 	local attempt
 	log "Waiting for n8n to respond on http://localhost:${APP_PORT} ..."
@@ -499,6 +515,9 @@ wait_for_n8n_http() {
 }
 
 workflow_import_already_done() {
+	if [[ "$UPDATE_SETTINGS_ONLY" == "1" && "$REIMPORT_WORKFLOWS" != "1" ]]; then
+		return 0
+	fi
 	[[ "$REIMPORT_WORKFLOWS" != "1" && -f "$STATE_DIR/workflows-imported" ]]
 }
 
@@ -601,6 +620,7 @@ main() {
 	step "4/6" "Check Docker and start n8n"
 	ensure_docker_desktop_ready
 	ensure_install_port_available
+	stop_stack_if_present
 	start_stack
 	wait_for_n8n_http
 	step "5/6" "Import workflows"

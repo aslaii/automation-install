@@ -16,6 +16,14 @@ On macOS, this opens a folder picker by default so the user can choose where to 
 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --target "$HOME/Automation"
 ```
 
+## Update n8n Settings Only
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --target "$HOME/Automation" --update-settings
+```
+
+This mode rewrites the runtime files, runs `docker compose down`, then `docker compose up -d --build`, and skips workflow reimport unless you also set `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1`.
+
 ## Safer Download-Then-Run
 
 ```bash
