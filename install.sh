@@ -586,6 +586,7 @@ print_final_checklist() {
 	printf '[Automation] 3. Fill in credentials and secrets inside n8n before running anything.\n' >&2
 	printf '[Automation] 4. Start with: Unified Amazon Metrics Orchestrator\n' >&2
 	printf '[Automation] 5. Imported workflows are inactive by default. Activate the ones you want after credentials are ready.\n' >&2
+	printf '[Automation] 6. To update an existing install later with the folder picker: curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --update-settings\n' >&2
 }
 
 open_n8n() {

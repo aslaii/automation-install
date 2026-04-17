@@ -18,6 +18,14 @@ curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/inst
 
 ## Update n8n Settings Only
 
+Picker-based update for an existing install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --update-settings
+```
+
+Explicit target update:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --target "$HOME/Automation" --update-settings
 ```
