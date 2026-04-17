@@ -16,22 +16,6 @@ On macOS, this opens a folder picker by default so the user can choose where to 
 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --target "$HOME/Automation"
 ```
 
-## Update n8n Settings Only
-
-Picker-based update for an existing install:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --update-settings
-```
-
-Explicit target update:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash -s -- --target "$HOME/Automation" --update-settings
-```
-
-This mode rewrites the runtime files, runs `docker compose down`, then `docker compose up -d --build`, and skips workflow reimport unless you also set `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1`.
-
 ## Safer Download-Then-Run
 
 ```bash
@@ -60,16 +44,6 @@ AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 curl -fsSL https://raw.githubuserconte
 ```
 
 - `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1` forces workflow import again on an existing install.
-
-## After Install
-
-The installer finishes by printing a short checklist:
-
-- open n8n
-- confirm imported workflows are present
-- fill in credentials and secrets
-- start with `Unified Amazon Metrics Orchestrator`
-- activate workflows after credentials are ready
 
 ## Notes
 
