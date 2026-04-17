@@ -80,6 +80,14 @@ const tests = [
     fn: testParserRejectsMalformedNumeric,
   },
   {
+    name: 'parser returns warnings for empty and non-qualifying payloads',
+    fn: testParserWarningsForEmptyAndFilteredPayloads,
+  },
+  {
+    name: 'parser handles quoted csv currency and quantity fields',
+    fn: testParserHandlesQuotedCsvFields,
+  },
+  {
     name: 'parser aggregates duplicate sku rows',
     fn: testParserAggregatesDuplicateSkuRows,
   },
@@ -132,8 +140,16 @@ const tests = [
     fn: testComputeHandlesEmptySkuSet,
   },
   {
+    name: 'compute keeps file source comparison scoped to expected skus only',
+    fn: testComputeFileModeTargetsExpectedSkusOnly,
+  },
+  {
     name: 'compute keeps report-only and ad-sales-only skus inspectable in sheet mode',
     fn: testComputeSheetModeIncludesJoinBoundarySkus,
+  },
+  {
+    name: 'test runner invokes sales-organic coverage when npm test runs',
+    fn: testRunTestsMainInvokesSalesOrganicCoverage,
   },
   {
     name: 'compute runner builds sales organic artifact rows from file source',
@@ -457,6 +473,49 @@ function testParserRejectsMalformedNumeric() {
     () => parseOrdersReport('sku\titem-price\tquantity\torder-status\nABC\tnope\t1\tShipped'),
     /Invalid numeric value for sales line 2 sku ABC/,
   );
+  assert.throws(
+    () => parseOrdersReport('sku\titem-price\tquantity\torder-status\nABC\t10.00\tNaN\tShipped'),
+    /Invalid numeric value for quantity line 2 sku ABC/,
+  );
+}
+
+function testParserWarningsForEmptyAndFilteredPayloads() {
+  assert.deepStrictEqual(parseOrdersReport(''), {
+    bySku: {},
+    skuCount: 0,
+    parseWarning: 'Order report text empty',
+  });
+
+  assert.deepStrictEqual(parseOrdersReport('sku\titem-price\tquantity\torder-status'), {
+    bySku: {},
+    skuCount: 0,
+    parseWarning: 'Order report has no data rows',
+  });
+
+  assert.deepStrictEqual(
+    parseOrdersReport([
+      'sku\titem-price\tquantity\torder-status',
+      'ABC\t10.00\t1\tCancelled',
+      'XYZ\t5.00\t1\tShipping',
+    ].join('\n')),
+    {
+      bySku: {},
+      skuCount: 0,
+      parseWarning: 'Order report has no qualifying SKU rows',
+    },
+  );
+}
+
+function testParserHandlesQuotedCsvFields() {
+  const parsed = parseOrdersReport([
+    'sku,item-price,quantity,order-status',
+    '"CSV-1","$1,234.56","2","Shipped"',
+    '"CSV-1","10.44","1","Pending"',
+  ].join('\n'));
+
+  assert.strictEqual(parsed.skuCount, 1);
+  assert.strictEqual(parsed.bySku['CSV-1'].totalSales, 1245);
+  assert.strictEqual(parsed.bySku['CSV-1'].totalUnits, 3);
 }
 
 function testParserAggregatesDuplicateSkuRows() {
@@ -670,6 +729,29 @@ function testComputeHandlesEmptySkuSet() {
   });
 }
 
+function testComputeFileModeTargetsExpectedSkusOnly() {
+  const computation = computeSalesOrganic({
+    parsedReport: {
+      bySku: {
+        EXPECTED: { sku: 'EXPECTED', totalSales: 50, totalUnits: 1 },
+        REPORT_ONLY: { sku: 'REPORT_ONLY', totalSales: 90, totalUnits: 2 },
+      },
+    },
+    adSalesInput: {
+      source: 'file',
+      bySku: {
+        EXPECTED: { sku: 'EXPECTED', adSales: 15, expectedSalesOrganic: 35, expectedSalesPpc: 15, source: 'file' },
+      },
+    },
+    tolerance: 0.01,
+  });
+
+  assert.deepStrictEqual(computation.items.map((item) => item.sku), ['EXPECTED']);
+  assert.strictEqual(computation.summary.skuCount, 1);
+  assert.strictEqual(computation.summary.extraReportSkuCount, 1);
+  assert.strictEqual(computation.mismatches.length, 0);
+}
+
 function testComputeSheetModeIncludesJoinBoundarySkus() {
   const computation = computeSalesOrganic({
     parsedReport: {
@@ -689,6 +771,34 @@ function testComputeSheetModeIncludesJoinBoundarySkus() {
   assert.deepStrictEqual(computation.items.map((item) => item.sku), ['AD_ONLY', 'REPORT_ONLY']);
   assert.strictEqual(computation.items.find((item) => item.sku === 'AD_ONLY').reportPresent, false);
   assert.strictEqual(computation.items.find((item) => item.sku === 'REPORT_ONLY').adSalesPresent, false);
+  assert.strictEqual(computation.items.find((item) => item.sku === 'REPORT_ONLY').comparisonStatus, 'no-expected');
+  assert.strictEqual(computation.summary.missingExpected, 1);
+}
+
+async function testRunTestsMainInvokesSalesOrganicCoverage() {
+  const originalArgv = process.argv;
+  const originalLog = console.log;
+  const logs = [];
+
+  try {
+    process.argv = ['node', 'tests/run-tests.js'];
+    console.log = (...args) => logs.push(args.join(' '));
+    await require('./run-tests').main({
+      runBsrTests: async () => {
+        logs.push('stub-bsr');
+      },
+      runSalesOrganicTests: async () => {
+        logs.push('stub-sales-organic');
+      },
+    });
+  } finally {
+    process.argv = originalArgv;
+    console.log = originalLog;
+  }
+
+  assert(logs.includes('stub-bsr'));
+  assert(logs.includes('stub-sales-organic'));
+  assert(logs.includes('All tests passed.'));
 }
 
 async function testRunnerComputeFromFileSource() {

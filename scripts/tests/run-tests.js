@@ -203,17 +203,20 @@ async function runBsrTests() {
   console.log('BSR tests passed.');
 }
 
-async function main() {
-  const argv = process.argv.slice(2);
+async function main(deps = {}) {
+  const argv = deps.argv || process.argv.slice(2);
+  const runBsrTestsFn = deps.runBsrTests || runBsrTests;
+  const runSalesOrganicTestsFn = deps.runSalesOrganicTests || runSalesOrganicTests;
+  const log = deps.log || console.log;
   const runBsrOnly = argv.includes('--bsr-only');
 
-  await runBsrTests();
+  await runBsrTestsFn();
 
   if (!runBsrOnly) {
-    await runSalesOrganicTests();
+    await runSalesOrganicTestsFn();
   }
 
-  console.log(runBsrOnly ? 'BSR-only test run passed.' : 'All tests passed.');
+  log(runBsrOnly ? 'BSR-only test run passed.' : 'All tests passed.');
 }
 
 if (require.main === module) {
@@ -225,4 +228,5 @@ if (require.main === module) {
 
 module.exports = {
   runBsrTests,
+  main,
 };
