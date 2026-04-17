@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 const { parseCliArgs } = require('./lib/cli');
-const { runGetBsr } = require('./get-bsr');
-const { runGetSalesOrganic } = require('./get-sales-organic');
+const { runGetBsr } = require('./features/bsr');
+const { runGetSalesOrganic } = require('./features/sales-organic');
 
 async function runWithArgs(argv, deps = {}) {
   const parse = deps.parseCliArgs || parseCliArgs;

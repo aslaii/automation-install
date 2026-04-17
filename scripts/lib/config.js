@@ -22,6 +22,13 @@ function loadConfig({ source, env = process.env } = {}) {
       sheetName: env.SHEET_NAME || 'N8N_DOWNLOAD',
       range: env.RANGE || 'A:BD',
     },
+    bsr: {
+      delayMs: parsePositiveInteger(env.BSR_DELAY_MS, 1500, 'BSR_DELAY_MS'),
+      maxAttempts: parsePositiveInteger(env.BSR_MAX_ATTEMPTS, 5, 'BSR_MAX_ATTEMPTS'),
+      requestTimeoutMs: parsePositiveInteger(env.BSR_REQUEST_TIMEOUT_MS, 30000, 'BSR_REQUEST_TIMEOUT_MS'),
+      baseRetryDelayMs: parsePositiveInteger(env.BSR_BASE_RETRY_DELAY_MS, 5000, 'BSR_BASE_RETRY_DELAY_MS'),
+      maxRetryDelayMs: parsePositiveInteger(env.BSR_MAX_RETRY_DELAY_MS, 60000, 'BSR_MAX_RETRY_DELAY_MS'),
+    },
     salesOrganic: {
       polling: {
         maxAttempts: parsePositiveInteger(env.SP_REPORT_POLL_MAX_ATTEMPTS, 10, 'SP_REPORT_POLL_MAX_ATTEMPTS'),

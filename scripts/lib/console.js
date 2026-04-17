@@ -12,6 +12,7 @@ function printBsrReport(report, reportPath) {
     sku: item.sku,
     asin: item.asin,
     status: item.status,
+    attempts: item.attempts || 1,
     bsr: item.bsr,
     displayGroup: item.preferredDisplay?.websiteDisplayGroup || '',
     classificationMin: item.classificationMin,
