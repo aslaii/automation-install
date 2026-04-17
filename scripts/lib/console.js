@@ -31,6 +31,9 @@ function printSalesOrganicReport(report, reportPath) {
     stage: report.stage,
     createAttempts: report.summary?.attempts?.create || 0,
     pollAttempts: report.summary?.attempts?.poll || 0,
+    parsedSkus: report.summary?.parsedSkuCount || 0,
+    computedSkus: report.summary?.computedSkuCount || 0,
+    mismatches: report.summary?.mismatchedSkuCount || 0,
     processingStatus: report.reportInfo?.processingStatus || '',
     reportId: report.reportInfo?.reportId || '',
     reportDocumentId: report.reportInfo?.reportDocumentId || '',
@@ -45,6 +48,31 @@ function printSalesOrganicReport(report, reportPath) {
       httpStatus: entry.httpStatus || '',
       bytes: entry.bytes || '',
       message: entry.message || '',
+    })));
+  }
+
+  if (report.items?.length) {
+    console.log('[Sales Organic] Items');
+    console.table(report.items.map((item) => ({
+      sku: item.sku,
+      totalSales: item.totalSales,
+      adSales: item.adSales,
+      salesOrganic: item.salesOrganic,
+      expected: item.expectedSalesOrganic ?? '',
+      delta: item.organicDelta ?? '',
+      status: item.comparisonStatus,
+    })));
+  }
+
+  if (report.comparison?.mismatches?.length) {
+    console.log('[Sales Organic] Mismatches');
+    console.table(report.comparison.mismatches.map((item) => ({
+      sku: item.sku,
+      totalSales: item.totalSales,
+      adSales: item.adSales,
+      actual: item.salesOrganic,
+      expected: item.expectedSalesOrganic,
+      delta: item.organicDelta,
     })));
   }
 

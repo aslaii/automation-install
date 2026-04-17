@@ -30,6 +30,8 @@ function loadConfig({ source, env = process.env } = {}) {
       maxRetryDelayMs: parsePositiveInteger(env.BSR_MAX_RETRY_DELAY_MS, 60000, 'BSR_MAX_RETRY_DELAY_MS'),
     },
     salesOrganic: {
+      fileInput: path.join(__dirname, '..', 'data', 'sales-organic-input.json'),
+      comparisonTolerance: parsePositiveNumber(env.SALES_ORGANIC_COMPARISON_TOLERANCE, 0.01, 'SALES_ORGANIC_COMPARISON_TOLERANCE'),
       polling: {
         maxAttempts: parsePositiveInteger(env.SP_REPORT_POLL_MAX_ATTEMPTS, 10, 'SP_REPORT_POLL_MAX_ATTEMPTS'),
         pollIntervalMs: parsePositiveInteger(env.SP_REPORT_POLL_INTERVAL_MS, 60000, 'SP_REPORT_POLL_INTERVAL_MS'),
@@ -76,6 +78,19 @@ function parsePositiveInteger(rawValue, fallback, envName) {
   const value = Number(rawValue);
   if (!Number.isInteger(value) || value <= 0) {
     throw new Error(`${envName} must be a positive integer`);
+  }
+
+  return value;
+}
+
+function parsePositiveNumber(rawValue, fallback, envName) {
+  if (rawValue === undefined || rawValue === null || rawValue === '') {
+    return fallback;
+  }
+
+  const value = Number(rawValue);
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`${envName} must be a non-negative number`);
   }
 
   return value;

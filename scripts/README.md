@@ -42,6 +42,10 @@ npm test
 - console summary
 - JSON report under `runs/`
 
+## Sales Organic rule
+
+The local Sales Organic runner currently treats Amazon order-report `item-price` as total sales input, including `Shipped` and `Pending` rows and excluding `Cancelled` rows.
+
 ## Local env
 
 Uses `scripts/.env`.

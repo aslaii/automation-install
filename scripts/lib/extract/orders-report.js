@@ -27,7 +27,8 @@ function parseOrdersReport(reportText) {
     throw new Error('Could not locate sku, sales, and quantity columns in orders report');
   }
 
-  const skipStatuses = new Set(['CANCELLED', 'PENDING']);
+  const skipStatuses = new Set(['CANCELLED']);
+  const includeStatuses = new Set(['SHIPPED', 'PENDING']);
   const bySku = {};
 
   for (let i = 1; i < lines.length; i += 1) {
@@ -37,19 +38,22 @@ function parseOrdersReport(reportText) {
 
     const status = statusIdx === -1 ? '' : String(cols[statusIdx] || '').trim().toUpperCase();
     if (skipStatuses.has(status)) continue;
+    if (statusIdx !== -1 && status && !includeStatuses.has(status)) continue;
 
-    const sales = toNumber(cols[salesIdx]);
-    const units = toNumber(cols[qtyIdx]);
+    const rowContext = `line ${i + 1} sku ${sku}`;
+    const sales = parseRequiredNumber(cols[salesIdx], `sales ${rowContext}`);
+    const units = parseRequiredNumber(cols[qtyIdx], `quantity ${rowContext}`);
     const record = bySku[sku] || { sku, totalSales: 0, totalUnits: 0 };
     record.totalSales = roundCurrency(record.totalSales + sales);
     record.totalUnits = roundCurrency(record.totalUnits + units);
     bySku[sku] = record;
   }
 
+  const skuCount = Object.keys(bySku).length;
   return {
     bySku,
-    skuCount: Object.keys(bySku).length,
-    parseWarning: null,
+    skuCount,
+    parseWarning: skuCount === 0 ? 'Order report has no qualifying SKU rows' : null,
   };
 }
 
@@ -87,10 +91,14 @@ function normalizeHeader(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-function toNumber(input) {
-  if (input === null || input === undefined || input === '') return 0;
-  const n = Number(String(input).replace(/[\s,$]/g, ''));
-  return Number.isFinite(n) ? n : 0;
+function parseRequiredNumber(input, context) {
+  if (input === null || input === undefined || String(input).trim() === '') return 0;
+  const normalized = String(input).replace(/[\s,$]/g, '');
+  const parsed = Number(normalized);
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`Invalid numeric value for ${context}`);
+  }
+  return parsed;
 }
 
 function roundCurrency(value) {
@@ -100,6 +108,7 @@ function roundCurrency(value) {
 module.exports = {
   parseOrdersReport,
   parseDelimitedLine,
-  toNumber,
+  normalizeHeader,
+  parseRequiredNumber,
   roundCurrency,
 };
