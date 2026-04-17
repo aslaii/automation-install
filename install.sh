@@ -9,6 +9,7 @@ TARGET_ARG=""
 TARGET_DIR=""
 STATE_DIR=""
 APP_PORT=""
+BREW_BIN=""
 SKIP_DOCKER="${AUTOMATION_INSTALLER_SKIP_DOCKER:-0}"
 SKIP_OPEN="${AUTOMATION_INSTALLER_SKIP_OPEN:-0}"
 ASSUME_YES="${AUTOMATION_INSTALLER_ASSUME_YES:-1}"
@@ -344,10 +345,9 @@ ensure_admin_access() {
 }
 
 ensure_homebrew_available() {
-	local brew_bin=""
-	if brew_bin="$(find_brew_binary 2>/dev/null)"; then
-		log "Homebrew detected at $brew_bin."
-		printf '%s\n' "$brew_bin"
+	BREW_BIN=""
+	if BREW_BIN="$(find_brew_binary 2>/dev/null)"; then
+		log "Homebrew detected at $BREW_BIN."
 		return 0
 	fi
 
@@ -360,12 +360,11 @@ ensure_homebrew_available() {
 	log "Homebrew may take a few minutes to install. You should see Homebrew output below."
 	run_cmd "Installing Homebrew..." /bin/bash -c "NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
 
-	if ! brew_bin="$(find_brew_binary 2>/dev/null)"; then
+	if ! BREW_BIN="$(find_brew_binary 2>/dev/null)"; then
 		fail "Homebrew installation completed but brew was not found on disk."
 	fi
 
-	log "Homebrew installed successfully at $brew_bin."
-	printf '%s\n' "$brew_bin"
+	log "Homebrew installed successfully at $BREW_BIN."
 }
 
 find_docker_desktop_app() {
@@ -391,10 +390,9 @@ ensure_docker_desktop_installed() {
 	fi
 
 	log "Docker Desktop is not installed. Installing it now..."
-	local brew_bin
-	brew_bin="$(ensure_homebrew_available)"
+	ensure_homebrew_available
 	log "Docker Desktop download/install may take a few minutes."
-	run_cmd "Installing Docker Desktop with Homebrew..." "$brew_bin" install --cask docker-desktop
+	run_cmd "Installing Docker Desktop with Homebrew..." "$BREW_BIN" install --cask docker-desktop
 	log "Docker Desktop installation command finished."
 }
 
