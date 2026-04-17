@@ -3,6 +3,7 @@ const { parseDateRange } = require('../lib/date');
 const { extractBsr } = require('../lib/extract/bsr');
 const { extractSpreadsheetId, loadConfig } = require('../lib/config');
 const { fetchBsrForProduct, normalizeBsrError, computeRetryDelayMs, parseRetryAfterMs } = require('../features/bsr');
+const { runSalesOrganicTests } = require('./sales-organic-tests');
 
 function testParseDateRange() {
   assert.deepStrictEqual(parseDateRange('2026-04-07'), {
@@ -191,7 +192,7 @@ function testRetryHelpers() {
   );
 }
 
-async function main() {
+async function runBsrTests() {
   testParseDateRange();
   testExtractBsr();
   testExtractSpreadsheetId();
@@ -199,10 +200,29 @@ async function main() {
   await testBsrRetryAfterThrottleThenSuccess();
   await testBsrTimeoutEventuallyFails();
   testRetryHelpers();
-  console.log('All tests passed.');
+  console.log('BSR tests passed.');
 }
 
-main().catch((error) => {
-  console.error(error.stack || error.message);
-  process.exitCode = 1;
-});
+async function main() {
+  const argv = process.argv.slice(2);
+  const runBsrOnly = argv.includes('--bsr-only');
+
+  await runBsrTests();
+
+  if (!runBsrOnly) {
+    await runSalesOrganicTests();
+  }
+
+  console.log(runBsrOnly ? 'BSR-only test run passed.' : 'All tests passed.');
+}
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.stack || error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  runBsrTests,
+};

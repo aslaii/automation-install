@@ -56,6 +56,10 @@ const tests = [
     fn: testReportLifecycleRejectsNonText,
   },
   {
+    name: 'runner auth failure records auth stage failure artifact',
+    fn: testRunnerAuthFailure,
+  },
+  {
     name: 'parser handles escaped newline payloads',
     fn: testParserEscapedNewlines,
   },
@@ -76,6 +80,10 @@ const tests = [
     fn: testParserRejectsMalformedNumeric,
   },
   {
+    name: 'parser aggregates duplicate sku rows',
+    fn: testParserAggregatesDuplicateSkuRows,
+  },
+  {
     name: 'file source loads april 15 input fixture',
     fn: testFileSourceLoadsFixture,
   },
@@ -94,6 +102,14 @@ const tests = [
   {
     name: 'compute merges report totals with ad sales and flags mismatches',
     fn: testComputeMismatchDetection,
+  },
+  {
+    name: 'compute clamps negative sales organic to zero',
+    fn: testComputeClampsNegativeOrganic,
+  },
+  {
+    name: 'compute returns empty summary for empty sku set',
+    fn: testComputeHandlesEmptySkuSet,
   },
   {
     name: 'compute keeps report-only and ad-sales-only skus inspectable in sheet mode',
@@ -332,6 +348,45 @@ async function testReportLifecycleRejectsNonText() {
   assert.strictEqual(result.error.code, 'NON_TEXT_REPORT');
 }
 
+async function testRunnerAuthFailure() {
+  let savedReport = null;
+  let printedReport = null;
+
+  await assert.rejects(
+    () => runGetSalesOrganic(
+      { metric: 'sales-organic', date: '2026-04-15', source: 'file', delayMs: 0 },
+      {
+        loadConfig: () => ({
+          amazon: {},
+          salesOrganic: {
+            polling: { createTimeoutMs: 12345 },
+          },
+        }),
+        mintSpAccessToken: async () => {
+          throw new Error('bad credentials');
+        },
+        writeReport: async ({ report }) => {
+          savedReport = report;
+          return '/tmp/sales-organic-auth-failure.json';
+        },
+        printSalesOrganicReport: (report, reportPath) => {
+          printedReport = { report, reportPath };
+        },
+      },
+    ),
+    /Sales Organic failed at auth: bad credentials/,
+  );
+
+  assert(savedReport);
+  assert.strictEqual(savedReport.status, 'failed');
+  assert.strictEqual(savedReport.stage, 'auth');
+  assert.strictEqual(savedReport.error.message, 'bad credentials');
+  assert.deepStrictEqual(savedReport.summary.lifecyclePhases, ['auth']);
+  assert.strictEqual(savedReport.summary.attempts.create, 0);
+  assert.strictEqual(savedReport.summary.attempts.poll, 0);
+  assert.strictEqual(printedReport.reportPath, '/tmp/sales-organic-auth-failure.json');
+}
+
 function testParserEscapedNewlines() {
   const text = 'sku\\titem-price\\tquantity\\torder-status\\nABC\\t10.00\\t1\\tShipped\\nABC\\t5.50\\t2\\tPending\\nXYZ\\t7.25\\t1\\tShipped';
   const parsed = parseOrdersReport(text);
@@ -378,6 +433,19 @@ function testParserRejectsMalformedNumeric() {
     () => parseOrdersReport('sku\titem-price\tquantity\torder-status\nABC\tnope\t1\tShipped'),
     /Invalid numeric value for sales line 2 sku ABC/,
   );
+}
+
+function testParserAggregatesDuplicateSkuRows() {
+  const parsed = parseOrdersReport([
+    'sku\titem-price\tquantity\torder-status',
+    'DUP\t10.00\t1\tShipped',
+    'DUP\t11.25\t2\tPending',
+    'DUP\t3.75\t1\tShipped',
+  ].join('\n'));
+
+  assert.strictEqual(parsed.skuCount, 1);
+  assert.strictEqual(parsed.bySku.DUP.totalSales, 25);
+  assert.strictEqual(parsed.bySku.DUP.totalUnits, 4);
 }
 
 async function testFileSourceLoadsFixture() {
@@ -460,6 +528,46 @@ function testComputeMismatchDetection() {
   assert.strictEqual(computation.summary.matched, 1);
   assert.strictEqual(computation.summary.mismatched, 1);
   assert.strictEqual(computation.items.find((item) => item.sku === 'SKU2').salesOrganic, 0);
+}
+
+function testComputeClampsNegativeOrganic() {
+  const computation = computeSalesOrganic({
+    parsedReport: {
+      bySku: {
+        SKU1: { sku: 'SKU1', totalSales: 12.34, totalUnits: 1 },
+      },
+    },
+    adSalesInput: {
+      source: 'file',
+      bySku: {
+        SKU1: { sku: 'SKU1', adSales: 20, expectedSalesOrganic: 0, expectedSalesPpc: 20, source: 'file' },
+      },
+    },
+    tolerance: 0.01,
+  });
+
+  const item = computation.items[0];
+  assert.strictEqual(item.salesOrganic, 0);
+  assert.strictEqual(item.organicDelta, 0);
+  assert.strictEqual(item.comparisonStatus, 'match');
+}
+
+function testComputeHandlesEmptySkuSet() {
+  const computation = computeSalesOrganic({
+    parsedReport: { bySku: {} },
+    adSalesInput: { source: 'sheet', bySku: {} },
+    tolerance: 0.01,
+  });
+
+  assert.deepStrictEqual(computation.items, []);
+  assert.deepStrictEqual(computation.mismatches, []);
+  assert.deepStrictEqual(computation.summary, {
+    skuCount: 0,
+    matched: 0,
+    mismatched: 0,
+    missingExpected: 0,
+    extraReportSkuCount: 0,
+  });
 }
 
 function testComputeSheetModeIncludesJoinBoundarySkus() {
@@ -567,16 +675,20 @@ function buildSheetsStub(values) {
   };
 }
 
-async function main() {
-  const grepValue = parseGrep(process.argv.slice(2));
+function getSelectedTests(grepValue = '') {
   const grepPattern = grepValue ? new RegExp(grepValue, 'i') : null;
   const selected = grepPattern ? tests.filter((test) => grepPattern.test(test.name)) : tests;
   if (!selected.length) throw new Error(`No tests matched --grep ${grepValue}`);
+  return selected;
+}
+
+async function runSalesOrganicTests(grepValue = '') {
+  const selected = getSelectedTests(grepValue);
   for (const test of selected) {
     await test.fn();
     console.log(`PASS ${test.name}`);
   }
-  console.log(`Completed ${selected.length} test(s).`);
+  console.log(`Completed ${selected.length} sales-organic test(s).`);
 }
 
 function parseGrep(argv) {
@@ -584,7 +696,17 @@ function parseGrep(argv) {
   return index === -1 ? '' : argv[index + 1] || '';
 }
 
-main().catch((error) => {
-  console.error(error.stack || error.message);
-  process.exitCode = 1;
-});
+async function main() {
+  await runSalesOrganicTests(parseGrep(process.argv.slice(2)));
+}
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.stack || error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  runSalesOrganicTests,
+};
