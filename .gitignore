@@ -34,3 +34,4 @@ tmp/
 .claude/
 .mcp.json
 skills-lock.json
+scripts/runs/
