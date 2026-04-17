@@ -16,45 +16,45 @@
         592
       ],
       "id": "1f347c51-dab2-401c-b0e8-e01d1324238c",
-      "name": "When clicking ‘Execute workflow’"
+      "name": "When clicking \u2018Execute workflow\u2019"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "name": "✅START_DATE",
-              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "name": "\u2705START_DATE",
+              "value": "={{ $json[\"\u2705START_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅END_DATE",
-              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "name": "\u2705END_DATE",
+              "value": "={{ $json[\"\u2705END_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SHEET_NAME",
-              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "name": "\u2705SHEET_NAME",
+              "value": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅RANGE",
-              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "name": "\u2705RANGE",
+              "value": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "name": "\u2705AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
               "type": "string"
             },
             {
@@ -82,7 +82,7 @@
     },
     {
       "parameters": {
-        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"✅RANGE\"])) }}",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"\u2705SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"\u2705SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"\u2705RANGE\"])) }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -110,7 +110,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"\u2705SPREADSHEET_ID\"] }}/values:batchUpdate",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -140,7 +140,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst totalsBySku = $('SP Parse Returns by SKU').first().json.bySku || {};\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst headerRow = values[0] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst adSalesCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'ADSALES');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SALESORGANIC');\n\nif (skuCol === -1 || adSalesCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU, AD_SALES_$, and SALES_ORGANIC_$ columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  const totalSales = toNumber(totalsBySku[sku]?.totalSales || 0);\n  const adSales = toNumber(row[adSalesCol] || 0);\n  const salesOrganic = Number(Math.max(0, totalSales - adSales).toFixed(2));\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[salesOrganic]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst totalsBySku = $('SP Parse Sales Organic by SKU').first().json.bySku || {};\nconst sheetName = $('Set Credentials').first().json['\u2705SHEET_NAME'];\n\nconst headerRow = values[0] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst adSalesCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'ADSALES');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SALESORGANIC');\n\nif (skuCol === -1 || adSalesCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU, AD_SALES_$, and SALES_ORGANIC_$ columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  const totalSales = toNumber(totalsBySku[sku]?.totalSales || 0);\n  const adSales = toNumber(row[adSalesCol] || 0);\n  const salesOrganic = Number(Math.max(0, totalSales - adSales).toFixed(2));\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[salesOrganic]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -186,11 +186,11 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"reportType\": \"GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL\",\n  \"marketplaceIds\": [\"{{ $('Set Credentials').item.json['✅AMAZON_MARKETPLACE_ID'] }}\"],\n  \"dataStartTime\": \"{{ $('Set Credentials').item.json['✅START_DATE'] }}T00:00:00Z\",\n  \"dataEndTime\": \"{{ $('Set Credentials').item.json['✅END_DATE'] }}T23:59:59Z\"\n}",
+        "jsonBody": "={\n  \"reportType\": \"GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL\",\n  \"marketplaceIds\": [\"{{ $('Set Credentials').item.json['\u2705AMAZON_MARKETPLACE_ID'] }}\"],\n  \"dataStartTime\": \"{{ $('Set Credentials').item.json['\u2705START_DATE'] }}T00:00:00Z\",\n  \"dataEndTime\": \"{{ $('Set Credentials').item.json['\u2705END_DATE'] }}T23:59:59Z\"\n}",
         "options": {}
       },
       "id": "38f5efd8-3748-4275-b501-b89f0da050af",
-      "name": "SP Create Returns Report",
+      "name": "SP Create Sales Organic Report",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
@@ -214,7 +214,7 @@
     },
     {
       "parameters": {
-        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create Returns Report').item.json.reportId }}",
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create Sales Organic Report').item.json.reportId }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -322,10 +322,10 @@
     },
     {
       "parameters": {
-        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\nfunction toNumber(input) {\n  if (input === null || input === undefined || input === '') return 0;\n  const n = Number(String(input).replace(/[\\s,$]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'Order report text empty' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'Order report has no data rows' } }];\n}\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => header.toLowerCase().replace(/[^a-z0-9]/g, ''));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\nconst skuIdx = pickIndex(['sku','sellersku','merchantsku']);\nconst salesIdx = pickIndex(['itemprice','productsales','itempriceperunit']);\nconst qtyIdx = pickIndex(['quantity','quantitypurchased','unitsordered']);\nconst statusIdx = pickIndex(['orderstatus','status']);\nif (skuIdx === -1 || salesIdx === -1 || qtyIdx === -1) {\n  throw new Error('Could not locate sku, sales, and quantity columns in orders report');\n}\nconst skipStatuses = new Set(['CANCELLED']);\nconst includeStatuses = new Set(['SHIPPED','PENDING']);\nconst bySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n  const status = statusIdx === -1 ? '' : String(cols[statusIdx] || '').trim().toUpperCase();\n  if (skipStatuses.has(status)) continue;\n  if (statusIdx !== -1 && status && !includeStatuses.has(status)) continue;\n  const sales = toNumber(cols[salesIdx]);\n  const units = toNumber(cols[qtyIdx]);\n  const record = bySku[sku] || { sku, totalSales: 0, totalUnits: 0 };\n  record.totalSales = Number((record.totalSales + sales).toFixed(2));\n  record.totalUnits = Number((record.totalUnits + units).toFixed(2));\n  bySku[sku] = record;\n}\nreturn [{ json: { bySku, skuCount: Object.keys(bySku).length, parseWarning: null } }];"
+        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');\n}\n\nfunction parseRequiredNumber(input, context) {\n  if (input === null || input === undefined || String(input).trim() === '') return 0;\n  const normalized = String(input).replace(/[\\s,$]/g, '');\n  const parsed = Number(normalized);\n  if (!Number.isFinite(parsed)) {\n    throw new Error(`Invalid numeric value for ${context}`);\n  }\n  return parsed;\n}\n\nfunction roundCurrency(value) {\n  return Number(Number(value || 0).toFixed(2));\n}\n\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'Order report text empty' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'Order report has no data rows' } }];\n}\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => normalizeHeader(header));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\nconst skuIdx = pickIndex(['sku', 'sellersku', 'merchantsku']);\nconst salesIdx = pickIndex(['itemprice', 'productsales', 'itempriceperunit']);\nconst qtyIdx = pickIndex(['quantity', 'quantitypurchased', 'unitsordered']);\nconst statusIdx = pickIndex(['orderstatus', 'status']);\nif (skuIdx === -1 || salesIdx === -1 || qtyIdx === -1) {\n  throw new Error('Could not locate sku, sales, and quantity columns in orders report');\n}\nconst skipStatuses = new Set(['CANCELLED']);\nconst includeStatuses = new Set(['SHIPPED', 'PENDING']);\nconst bySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n\n  const status = statusIdx === -1 ? '' : String(cols[statusIdx] || '').trim().toUpperCase();\n  if (skipStatuses.has(status)) continue;\n  if (statusIdx !== -1 && status && !includeStatuses.has(status)) continue;\n\n  const rowContext = `line ${i + 1} sku ${sku}`;\n  const sales = parseRequiredNumber(cols[salesIdx], `sales ${rowContext}`);\n  const units = parseRequiredNumber(cols[qtyIdx], `quantity ${rowContext}`);\n  const record = bySku[sku] || { sku, totalSales: 0, totalUnits: 0 };\n  record.totalSales = roundCurrency(record.totalSales + sales);\n  record.totalUnits = roundCurrency(record.totalUnits + units);\n  bySku[sku] = record;\n}\n\nconst skuCount = Object.keys(bySku).length;\nreturn [{ json: { bySku, skuCount, parseWarning: skuCount === 0 ? 'Order report has no qualifying SKU rows' : null } }];"
       },
       "id": "adf80aa0-62ea-4181-a16c-b299ca564134",
-      "name": "SP Parse Returns by SKU",
+      "name": "SP Parse Sales Organic by SKU",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -398,38 +398,38 @@
         "assignments": {
           "assignments": [
             {
-              "name": "✅START_DATE",
-              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "name": "\u2705START_DATE",
+              "value": "={{ $json[\"\u2705START_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅END_DATE",
-              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "name": "\u2705END_DATE",
+              "value": "={{ $json[\"\u2705END_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SHEET_NAME",
-              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "name": "\u2705SHEET_NAME",
+              "value": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅RANGE",
-              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "name": "\u2705RANGE",
+              "value": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "name": "\u2705AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
               "type": "string"
             },
             {
@@ -472,7 +472,7 @@
     }
   ],
   "connections": {
-    "SP Create Returns Report": {
+    "SP Create Sales Organic Report": {
       "main": [
         [
           {
@@ -560,7 +560,7 @@
       "main": [
         [
           {
-            "node": "SP Parse Returns by SKU",
+            "node": "SP Parse Sales Organic by SKU",
             "type": "main",
             "index": 0
           }
@@ -589,7 +589,7 @@
         ]
       ]
     },
-    "When clicking ‘Execute workflow’": {
+    "When clicking \u2018Execute workflow\u2019": {
       "main": [
         [
           {
@@ -626,14 +626,14 @@
       "main": [
         [
           {
-            "node": "SP Create Returns Report",
+            "node": "SP Create Sales Organic Report",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SP Parse Returns by SKU": {
+    "SP Parse Sales Organic by SKU": {
       "main": [
         [
           {

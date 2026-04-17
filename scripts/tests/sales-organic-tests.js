@@ -9,7 +9,8 @@ const { loadAdSalesFromFile } = require('../lib/sources/ad-sales-file');
 const { loadSalesOrganicFromGoogleSheet } = require('../lib/sources/google-sheet');
 const { runWithArgs } = require('../index');
 const { runGetSalesOrganic, computeSalesOrganic } = require('../features/sales-organic');
-const { verifySalesOrganicRun, findLatestSalesOrganicRun } = require('../verify-latest-sales-organic-run');
+const { main: verifyLatestSalesOrganicRunMain, verifySalesOrganicRun, findLatestSalesOrganicRun } = require('../verify-latest-sales-organic-run');
+const { runWorkflowLocally } = require('../run-sales-organic-workflow-local');
 
 const tests = [
   {
@@ -153,6 +154,10 @@ const tests = [
     fn: testRunTestsMainInvokesSalesOrganicCoverage,
   },
   {
+    name: 'latest-run verifier resolves the default runs directory from the scripts tree',
+    fn: testVerifyRunMainUsesScriptsRunsDir,
+  },
+  {
     name: 'latest-run verifier rejects missing sales-organic artifacts',
     fn: testVerifyRunRejectsMissingArtifacts,
   },
@@ -175,6 +180,18 @@ const tests = [
   {
     name: 'compute runner writes compute-stage failure artifact when file input is ambiguous',
     fn: testRunnerComputeFailureArtifactForAmbiguousFileInput,
+  },
+  {
+    name: 'workflow sales organic parser node keeps fail-closed contract and renamed references',
+    fn: testWorkflowParserNodeContract,
+  },
+  {
+    name: 'workflow local runner matches current April 15 sheet updates',
+    fn: testWorkflowLocalRunnerMatchesApril15Fixture,
+  },
+  {
+    name: 'workflow local runner rejects malformed numerics like the local parser',
+    fn: testWorkflowLocalRunnerRejectsMalformedNumericLikeLocalParser,
   },
 ];
 
@@ -818,6 +835,25 @@ async function testRunTestsMainInvokesSalesOrganicCoverage() {
   assert(logs.includes('All tests passed.'));
 }
 
+async function testVerifyRunMainUsesScriptsRunsDir() {
+  const tmpDir = await fs.promises.mkdtemp(path.join(__dirname, 'tmp-sales-organic-report-'));
+  const filePath = path.join(tmpDir, 'sales-organic-success.json');
+
+  try {
+    await fs.promises.writeFile(filePath, JSON.stringify(buildVerifierSuccessReport()), 'utf8');
+    const result = verifyLatestSalesOrganicRunMain({ filePath });
+    assert.deepStrictEqual(result, {
+      status: 'success',
+      stage: 'compute',
+      itemCount: 3,
+      warningCount: 2,
+      mismatchCount: 1,
+    });
+  } finally {
+    await fs.promises.rm(tmpDir, { recursive: true, force: true });
+  }
+}
+
 async function testVerifyRunRejectsMissingArtifacts() {
   const tmpDir = await fs.promises.mkdtemp(path.join(__dirname, 'tmp-sales-organic-runs-'));
   try {
@@ -1023,6 +1059,70 @@ async function testRunnerComputeFailureArtifactForAmbiguousFileInput() {
   assert.strictEqual(savedReport.lifecycle.at(-1).stage, 'compute');
   assert.strictEqual(savedReport.lifecycle.at(-1).status, 'error');
   assert.strictEqual(printedReport.reportPath, '/tmp/sales-organic-compute-failure.json');
+}
+
+async function testWorkflowLocalRunnerMatchesApril15Fixture() {
+  const summary = await runWorkflowLocally({
+    workflow: path.resolve(__dirname, '../../workflows/Get Sales Organic.json'),
+    report: path.resolve(__dirname, '../data/all-orders-2026-04-15.txt'),
+    adSales: path.resolve(__dirname, '../data/sales-organic-input.json'),
+    date: '2026-04-15',
+    sheetName: 'Sheet1',
+  });
+
+  assert.strictEqual(summary.parser.localStatus, 'ok');
+  assert.strictEqual(summary.parser.workflowStatus, 'ok');
+  assert.strictEqual(summary.compute.status, 'ok');
+  assert.strictEqual(summary.compute.mismatchCount, 0);
+  assert(summary.compute.updateCount > 0);
+}
+
+function testWorkflowParserNodeContract() {
+  const workflow = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../workflows/Get Sales Organic.json'), 'utf8'));
+  const nodeNames = new Set((workflow.nodes || []).map((node) => node.name));
+  const parserNode = (workflow.nodes || []).find((node) => node.name === 'SP Parse Sales Organic by SKU');
+  const parserCode = parserNode?.parameters?.jsCode || '';
+  const statusNode = (workflow.nodes || []).find((node) => node.name === 'SP Check Report Status');
+  const statusUrl = statusNode?.parameters?.url || '';
+
+  assert.strictEqual(nodeNames.has('SP Create Sales Organic Report'), true);
+  assert.strictEqual(nodeNames.has('SP Parse Sales Organic by SKU'), true);
+  assert.strictEqual(nodeNames.has('SP Create Returns Report'), false);
+  assert.strictEqual(nodeNames.has('SP Parse Returns by SKU'), false);
+  assert.match(parserCode, /Invalid numeric value for \$\{context\}/);
+  assert.match(parserCode, /parseWarning/);
+  assert.match(statusUrl, /SP Create Sales Organic Report/);
+  assert.deepStrictEqual((workflow.connections || {})['SP Parse Sales Organic by SKU']?.main?.[0]?.[0]?.node, 'Webhook Read Google Sheet');
+}
+
+async function testWorkflowLocalRunnerRejectsMalformedNumericLikeLocalParser() {
+  const tmpDir = await fs.promises.mkdtemp(path.join(__dirname, 'tmp-sales-organic-workflow-runner-'));
+  const reportPath = path.join(tmpDir, 'invalid-report.txt');
+
+  try {
+    await fs.promises.writeFile(
+      reportPath,
+      'sku\titem-price\tquantity\torder-status\nBAD-SKU\tnope\t1\tShipped\n',
+      'utf8',
+    );
+
+    const summary = await runWorkflowLocally({
+      workflow: path.resolve(__dirname, '../../workflows/Get Sales Organic.json'),
+      report: reportPath,
+      adSales: path.resolve(__dirname, '../data/sales-organic-input.json'),
+      date: '2026-04-15',
+      sheetName: 'Sheet1',
+    });
+
+    assert.strictEqual(summary.parser.localStatus, 'error');
+    assert.strictEqual(summary.parser.workflowStatus, 'error');
+    assert.match(summary.parser.localError, /Invalid numeric value for sales line 2 sku BAD-SKU/);
+    assert.match(summary.parser.workflowError, /Invalid numeric value for sales line 2 sku BAD-SKU/);
+    assert.strictEqual(summary.compute.status, 'ok');
+    assert.strictEqual(summary.compute.updateCount, 0);
+  } finally {
+    await fs.promises.rm(tmpDir, { recursive: true, force: true });
+  }
 }
 
 function buildVerifierSuccessReport(overrides = {}) {

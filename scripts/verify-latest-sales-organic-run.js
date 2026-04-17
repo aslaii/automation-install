@@ -5,7 +5,7 @@ const path = require('path');
 const assert = require('assert');
 
 function main(options = {}) {
-  const runsDir = options.runsDir || path.join(__dirname, '..', 'runs');
+  const runsDir = options.runsDir || path.join(__dirname, 'runs');
   assertDirectoryExists(runsDir);
 
   const latestPath = options.filePath || findLatestSalesOrganicRun(runsDir);

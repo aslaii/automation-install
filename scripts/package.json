@@ -8,6 +8,7 @@
     "test:bsr": "node tests/run-tests.js --bsr-only",
     "test:sales-organic": "node tests/sales-organic-tests.js",
     "verify:sales-organic-run": "node verify-latest-sales-organic-run.js",
+    "workflow:sales-organic": "node run-sales-organic-workflow-local.js",
     "bsr": "node index.js --bsr",
     "sales-organic": "node index.js --sales-organic"
   },
