@@ -1,7 +1,10 @@
 const axios = require('axios');
 
-async function mintSpAccessToken(config) {
-  const response = await axios.post(
+async function mintSpAccessToken(config, options = {}) {
+  const axiosInstance = options.axiosInstance || axios;
+  const timeout = Number.isFinite(options.timeout) ? options.timeout : 30000;
+
+  const response = await axiosInstance.post(
     'https://api.amazon.com/auth/o2/token',
     new URLSearchParams({
       grant_type: 'refresh_token',
@@ -13,7 +16,7 @@ async function mintSpAccessToken(config) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
       },
-      timeout: 30000,
+      timeout,
     },
   );
 

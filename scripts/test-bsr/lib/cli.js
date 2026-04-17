@@ -10,7 +10,10 @@ function parseCliArgs(argv) {
     const token = argv[i];
     switch (token) {
       case '--bsr':
-        args.metric = 'bsr';
+        setMetric(args, 'bsr', token);
+        break;
+      case '--sales-organic':
+        setMetric(args, 'sales-organic', token);
         break;
       case '--date':
         args.date = requireValue(argv, ++i, '--date');
@@ -34,6 +37,13 @@ function parseCliArgs(argv) {
   }
 
   return args;
+}
+
+function setMetric(args, metric, flag) {
+  if (args.metric && args.metric !== metric) {
+    throw new Error(`Multiple metrics selected. Received ${flag} after --${args.metric}`);
+  }
+  args.metric = metric;
 }
 
 function requireValue(argv, index, flag) {
