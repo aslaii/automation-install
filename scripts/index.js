@@ -3,11 +3,13 @@
 const { parseCliArgs } = require('./lib/cli');
 const { runGetBsr } = require('./features/bsr');
 const { runGetSalesOrganic } = require('./features/sales-organic');
+const { runGetUnitsOrganic } = require('./features/units-organic');
 
 async function runWithArgs(argv, deps = {}) {
   const parse = deps.parseCliArgs || parseCliArgs;
   const runBsr = deps.runGetBsr || runGetBsr;
   const runSalesOrganic = deps.runGetSalesOrganic || runGetSalesOrganic;
+  const runUnitsOrganic = deps.runGetUnitsOrganic || runGetUnitsOrganic;
   const helpPrinter = deps.printHelp || printHelp;
 
   const args = parse(argv);
@@ -18,7 +20,7 @@ async function runWithArgs(argv, deps = {}) {
   }
 
   if (!args.metric) {
-    throw new Error('No metric selected. Use --bsr or --sales-organic.');
+    throw new Error('No metric selected. Use --bsr, --sales-organic, or --units-organic.');
   }
 
   if (args.metric === 'bsr') {
@@ -29,11 +31,15 @@ async function runWithArgs(argv, deps = {}) {
     return runSalesOrganic(args);
   }
 
+  if (args.metric === 'units-organic') {
+    return runUnitsOrganic(args);
+  }
+
   throw new Error(`Unsupported metric: ${args.metric}`);
 }
 
 function printHelp() {
-  console.log(`Usage:\n  node index.js --bsr --date YYYY-MM-DD [--end-date YYYY-MM-DD] [--source file|sheet] [--delay-ms 0]\n  node index.js --sales-organic --date YYYY-MM-DD [--end-date YYYY-MM-DD] [--source file|sheet] [--delay-ms 0]\n\nExamples:\n  node index.js --bsr --date 2026-04-07\n  node index.js --bsr --date 2026-04-07 --source sheet\n  node index.js --bsr --date 2026-04-01 --end-date 2026-04-07 --delay-ms 250\n  node index.js --sales-organic --date 2026-04-07\n  node index.js --sales-organic --date 2026-04-07 --source file --delay-ms 0\n`);
+  console.log(`Usage:\n  node index.js --bsr --date YYYY-MM-DD [--end-date YYYY-MM-DD] [--source file|sheet] [--delay-ms 0]\n  node index.js --sales-organic --date YYYY-MM-DD [--end-date YYYY-MM-DD] [--source file|sheet] [--delay-ms 0]\n  node index.js --units-organic --date YYYY-MM-DD [--end-date YYYY-MM-DD] [--source file] [--delay-ms 0]\n\nExamples:\n  node index.js --bsr --date 2026-04-07\n  node index.js --bsr --date 2026-04-07 --source sheet\n  node index.js --bsr --date 2026-04-01 --end-date 2026-04-07 --delay-ms 250\n  node index.js --sales-organic --date 2026-04-07\n  node index.js --sales-organic --date 2026-04-07 --source file --delay-ms 0\n  node index.js --units-organic --date 2026-04-07 --source file --delay-ms 0\n`);
 }
 
 if (require.main === module) {

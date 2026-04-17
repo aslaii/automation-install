@@ -89,7 +89,73 @@ function printSalesOrganicReport(report, reportPath) {
   console.log(`[Sales Organic] Report saved: ${reportPath}`);
 }
 
+function printUnitsOrganicReport(report, reportPath) {
+  console.log('\n[Units Organic] Summary');
+  console.table([{
+    status: report.status,
+    stage: report.stage,
+    createAttempts: report.summary?.attempts?.create || 0,
+    pollAttempts: report.summary?.attempts?.poll || 0,
+    parsedSkus: report.summary?.parsedSkuCount || 0,
+    computedSkus: report.summary?.computedSkuCount || 0,
+    mismatches: report.summary?.mismatchedSkuCount || 0,
+    processingStatus: report.reportInfo?.processingStatus || '',
+    reportId: report.reportInfo?.reportId || '',
+    reportDocumentId: report.reportInfo?.reportDocumentId || '',
+  }]);
+
+  if (report.lifecycle?.length) {
+    console.log('[Units Organic] Lifecycle');
+    console.table(report.lifecycle.map((entry) => ({
+      stage: entry.stage,
+      attempt: entry.attempt,
+      status: entry.status,
+      httpStatus: entry.httpStatus || '',
+      bytes: entry.bytes || '',
+      message: entry.message || '',
+    })));
+  }
+
+  if (report.items?.length) {
+    console.log('[Units Organic] Items');
+    console.table(report.items.map((item) => ({
+      sku: item.sku,
+      totalUnits: item.totalUnits,
+      adUnits: item.adUnits,
+      salesOrganicQty: item.salesOrganicQty,
+      expected: item.expectedSalesOrganicQty ?? '',
+      delta: item.organicQtyDelta ?? '',
+      status: item.comparisonStatus,
+    })));
+  }
+
+  if (report.comparison?.mismatches?.length) {
+    console.log('[Units Organic] Mismatches');
+    console.table(report.comparison.mismatches.map((item) => ({
+      sku: item.sku,
+      totalUnits: item.totalUnits,
+      adUnits: item.adUnits,
+      actual: item.salesOrganicQty,
+      expected: item.expectedSalesOrganicQty,
+      delta: item.organicQtyDelta,
+    })));
+  }
+
+  if (report.warnings?.length) {
+    for (const warning of report.warnings) {
+      console.warn(`[Units Organic] Warning: ${warning}`);
+    }
+  }
+
+  if (report.error) {
+    console.error(`[Units Organic] Error: ${report.error.message}`);
+  }
+
+  console.log(`[Units Organic] Report saved: ${reportPath}`);
+}
+
 module.exports = {
   printBsrReport,
   printSalesOrganicReport,
+  printUnitsOrganicReport,
 };

@@ -41,6 +41,18 @@ function loadConfig({ source, env = process.env } = {}) {
         downloadTimeoutMs: parsePositiveInteger(env.SP_REPORT_DOWNLOAD_TIMEOUT_MS, 30000, 'SP_REPORT_DOWNLOAD_TIMEOUT_MS'),
       },
     },
+    unitsOrganic: {
+      fileInput: path.join(__dirname, '..', 'data', 'units-organic-input.json'),
+      comparisonTolerance: parsePositiveNumber(env.UNITS_ORGANIC_COMPARISON_TOLERANCE, 0.01, 'UNITS_ORGANIC_COMPARISON_TOLERANCE'),
+      polling: {
+        maxAttempts: parsePositiveInteger(env.SP_REPORT_POLL_MAX_ATTEMPTS, 10, 'SP_REPORT_POLL_MAX_ATTEMPTS'),
+        pollIntervalMs: parsePositiveInteger(env.SP_REPORT_POLL_INTERVAL_MS, 60000, 'SP_REPORT_POLL_INTERVAL_MS'),
+        createTimeoutMs: parsePositiveInteger(env.SP_REPORT_CREATE_TIMEOUT_MS, 30000, 'SP_REPORT_CREATE_TIMEOUT_MS'),
+        pollTimeoutMs: parsePositiveInteger(env.SP_REPORT_POLL_TIMEOUT_MS, 30000, 'SP_REPORT_POLL_TIMEOUT_MS'),
+        documentTimeoutMs: parsePositiveInteger(env.SP_REPORT_DOCUMENT_TIMEOUT_MS, 30000, 'SP_REPORT_DOCUMENT_TIMEOUT_MS'),
+        downloadTimeoutMs: parsePositiveInteger(env.SP_REPORT_DOWNLOAD_TIMEOUT_MS, 30000, 'SP_REPORT_DOWNLOAD_TIMEOUT_MS'),
+      },
+    },
   };
 
   if (source === 'sheet') {
