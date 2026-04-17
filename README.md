@@ -45,6 +45,16 @@ AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 curl -fsSL https://raw.githubuserconte
 
 - `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1` forces workflow import again on an existing install.
 
+## After Install
+
+The installer finishes by printing a short checklist:
+
+- open n8n
+- confirm imported workflows are present
+- fill in credentials and secrets
+- start with `Unified Amazon Metrics Orchestrator`
+- activate workflows after credentials are ready
+
 ## Notes
 
 - macOS only

@@ -560,6 +560,15 @@ import_workflows() {
 	log "Workflow import completed. Imported files are stored in $TARGET_DIR/workflows"
 }
 
+print_final_checklist() {
+	printf '\n[Automation] Next steps\n' >&2
+	printf '[Automation] 1. Open n8n at: http://localhost:%s\n' "$APP_PORT" >&2
+	printf '[Automation] 2. Confirm the imported workflows are present in the Workflows list.\n' >&2
+	printf '[Automation] 3. Fill in credentials and secrets inside n8n before running anything.\n' >&2
+	printf '[Automation] 4. Start with: Unified Amazon Metrics Orchestrator\n' >&2
+	printf '[Automation] 5. Imported workflows are inactive by default. Activate the ones you want after credentials are ready.\n' >&2
+}
+
 open_n8n() {
 	if [[ "$SKIP_OPEN" == "1" ]]; then
 		log "Skipping browser launch because AUTOMATION_INSTALLER_SKIP_OPEN=1."
@@ -599,6 +608,7 @@ main() {
 	step "6/6" "Open n8n"
 	open_n8n
 	log "Open n8n at: http://localhost:${APP_PORT}"
+	print_final_checklist
 	log "Automation is ready in $TARGET_DIR"
 }
 
