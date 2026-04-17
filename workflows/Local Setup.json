@@ -1,0 +1,224 @@
+{
+  "updatedAt": "2026-04-17T01:48:46.953Z",
+  "createdAt": "2026-04-15T07:41:31.125Z",
+  "id": "M5sagq2NMUmtoCBx",
+  "name": "Local Setup",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "manual_trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "set_config",
+      "name": "Set Local Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tools-root",
+              "name": "localToolsRoot",
+              "type": "string",
+              "value": "/home/node/.n8n/local-tools"
+            },
+            {
+              "id": "temp-root",
+              "name": "localTempRoot",
+              "type": "string",
+              "value": "/home/node/.n8n/local-tools/tmp"
+            },
+            {
+              "id": "readable-root",
+              "name": "localReadableFilesRoot",
+              "type": "string",
+              "value": "/home/node/.n8n-files"
+            },
+            {
+              "id": "output-root",
+              "name": "snapshotOutputRoot",
+              "type": "string",
+              "value": "/home/node/.n8n-files/snapshots"
+            },
+            {
+              "id": "renderer-binary",
+              "name": "pdfRendererBinary",
+              "type": "string",
+              "value": "pdftoppm"
+            },
+            {
+              "id": "package-spec",
+              "name": "pdfRendererPackageSpec",
+              "type": "string",
+              "value": "poppler-utils"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "bootstrap_tool_files",
+      "name": "Prepare Local Tooling",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "command": "node - <<'NODE'\nconst fs = require('fs');\nconst path = require('path');\nconst toolsRoot = '/home/node/.n8n/local-tools';\nconst tempRoot = path.join(toolsRoot, 'tmp');\nconst readableFilesRoot = '/home/node/.n8n-files';\nconst snapshotOutputRoot = path.join(readableFilesRoot, 'snapshots');\nconst toolDir = path.join(toolsRoot, 'pdf-to-png-converter');\nconst scriptPath = path.join(toolDir, 'convert-first-page.js');\nconst packagePath = path.join(toolDir, 'package.json');\nconst packageJson = {\n  name: 'local-pdf-to-png-converter',\n  private: true,\n  version: '1.0.0',\n  description: 'Local PDF to PNG converter for n8n Slack snapshots',\n  license: 'UNLICENSED'\n};\nconst script = [\n  '#!/usr/bin/env node',\n  \"const fs = require('fs');\",\n  \"const path = require('path');\",\n  \"const { pdfToPng } = require('pdf-to-png-converter');\",\n  \"const converterPackage = JSON.parse(\",\n  \"  fs.readFileSync(path.join(__dirname, 'node_modules', 'pdf-to-png-converter', 'package.json'), 'utf8')\",\n  \");\",\n  'function getArg(name) {',\n  '  const index = process.argv.indexOf(name);',\n  '  return index >= 0 ? process.argv[index + 1] : undefined;',\n  '}',\n  'async function main() {',\n  \"  if (process.argv.includes('--healthcheck')) {\",\n  \"    console.log(JSON.stringify({ ok: true, converterVersion: converterPackage.version, nodeVersion: process.version, scriptPath: __filename }));\",\n  '    return;',\n  '  }',\n  \"  const inputPath = getArg('--input');\",\n  \"  const outputPath = getArg('--output');\",\n  \"  const viewportScale = Number(getArg('--viewport-scale') || '1.5');\",\n  '  if (!inputPath || !outputPath) {',\n  \"    throw new Error('Usage: convert-first-page.js --input <pdf> --output <png> [--viewport-scale <number>]');\",\n  '  }',\n  '  if (!fs.existsSync(inputPath)) {',\n  \"    throw new Error('Input PDF not found: ' + inputPath);\",\n  '  }',\n  '  const outputDir = path.dirname(outputPath);',\n  '  fs.mkdirSync(outputDir, { recursive: true });',\n  '  if (fs.existsSync(outputPath)) {',\n  '    fs.unlinkSync(outputPath);',\n  '  }',\n  '  const pages = await pdfToPng(inputPath, {',\n  '    outputFolder: outputDir,',\n  '    pagesToProcess: [1],',\n  '    viewportScale,',\n  '    returnPageContent: false,',\n  '    disableFontFace: false,',\n  '    useSystemFonts: true,',\n  '  });',\n  '  const renderedPath = pages[0] && pages[0].path;',\n  '  if (!pages.length || !renderedPath || !fs.existsSync(renderedPath)) {',\n  \"    throw new Error('Converter did not create the expected PNG output');\",\n  '  }',\n  '  if (renderedPath !== outputPath) {',\n  '    fs.copyFileSync(renderedPath, outputPath);',\n  '  }',\n  '  const stats = fs.statSync(outputPath);',\n  \"  console.log(JSON.stringify({ ok: true, outputPath, bytes: stats.size, pageCount: pages.length, converterVersion: converterPackage.version }));\",\n  '}',\n  'main().catch((error) => {',\n  \"  console.error(error.stack || error.message || String(error));\",\n  '  process.exit(1);',\n  '});',\n].join('\\n') + '\\n';\nfs.mkdirSync(toolsRoot, { recursive: true });\nfs.mkdirSync(tempRoot, { recursive: true });\nfs.mkdirSync(readableFilesRoot, { recursive: true });\nfs.mkdirSync(snapshotOutputRoot, { recursive: true });\nfs.mkdirSync(toolDir, { recursive: true });\nfs.chmodSync(toolsRoot, 0o755);\nfs.chmodSync(toolDir, 0o755);\nfs.chmodSync(tempRoot, 0o777);\nfs.chmodSync(readableFilesRoot, 0o755);\nfs.chmodSync(snapshotOutputRoot, 0o777);\nif (!fs.existsSync(packagePath)) {\n  fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\\n');\n}\nif (!fs.existsSync(scriptPath)) {\n  fs.writeFileSync(scriptPath, script);\n}\nfs.chmodSync(scriptPath, 0o755);\nconst tempProbe = path.join(tempRoot, '.write-test');\nfs.writeFileSync(tempProbe, 'ok\\n');\nfs.unlinkSync(tempProbe);\nconst outputProbe = path.join(snapshotOutputRoot, '.write-test');\nfs.writeFileSync(outputProbe, 'ok\\n');\nfs.unlinkSync(outputProbe);\nconsole.log(JSON.stringify({ ok: true, toolsRoot, tempRoot, readableFilesRoot, snapshotOutputRoot, toolDir, scriptPath, packagePath, tempWritable: true, outputWritable: true }));\nNODE"
+      }
+    },
+    {
+      "id": "install_converter_package",
+      "name": "Verify PDF Renderer Package",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "command": "sh -lc 'if command -v pdftoppm >/dev/null 2>&1; then pdftoppm -v 2>&1 | head -n 1; else echo \"pdftoppm is missing. Rebuild the n8n image after updating Dockerfile.\" >&2; exit 1; fi'"
+      }
+    },
+    {
+      "id": "verify_converter",
+      "name": "Verify PDF Renderer",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "command": "sh -lc 'pdftoppm -v 2>&1 | head -n 1'"
+      }
+    },
+    {
+      "id": "build_summary",
+      "name": "Build Setup Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const config = $('Set Local Config').first().json;\nconst rendererCheck = String($('Verify PDF Renderer Package').first().json.stdout || '').trim();\nconst rendererVersion = String($input.first().json.stdout || rendererCheck).trim();\nreturn [{ json: {\n  status: rendererVersion ? 'ready' : 'error',\n  localToolsRoot: config.localToolsRoot,\n  localTempRoot: config.localTempRoot,\n  localReadableFilesRoot: config.localReadableFilesRoot,\n  snapshotOutputRoot: config.snapshotOutputRoot,\n  pdfRendererBinary: config.pdfRendererBinary,\n  pdfRendererPackageSpec: config.pdfRendererPackageSpec,\n  rendererVersion,\n  tempWritable: true,\n  outputWritable: true,\n} }];"
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Local Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Local Config": {
+      "main": [
+        [
+          {
+            "node": "Prepare Local Tooling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Local Tooling": {
+      "main": [
+        [
+          {
+            "node": "Verify PDF Renderer Package",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify PDF Renderer Package": {
+      "main": [
+        [
+          {
+            "node": "Verify PDF Renderer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify PDF Renderer": {
+      "main": [
+        [
+          {
+            "node": "Build Setup Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "376a1cee-f5d1-449e-97f0-7c12da0c3645",
+  "activeVersionId": null,
+  "versionCounter": 11,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-15T07:41:31.130Z",
+      "createdAt": "2026-04-15T07:41:31.130Z",
+      "role": "workflow:owner",
+      "workflowId": "M5sagq2NMUmtoCBx",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

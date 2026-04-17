@@ -1,0 +1,547 @@
+{
+  "updatedAt": "2026-04-17T01:10:40.575Z",
+  "createdAt": "2026-04-15T02:07:42.705Z",
+  "id": "GtrUp6wKVHsU5Nwu",
+  "name": "Unified Amazon Metrics Orchestrator",
+  "description": "Grouped top-level orchestrator that dispatches only Ads, SP, and Special self-contained workflows and returns group plus per-metric status rollups.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "05b7c9fa-1cf1-40af-8ad5-26ab3ede58ce",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        320
+      ]
+    },
+    {
+      "id": "b27fcdd5-6bb8-4478-8c4d-aec59b506105",
+      "name": "Set Credentials",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -640,
+        544
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76a6c500-c2c0-4339-8299-682826c4452b",
+              "name": "✅START_DATE",
+              "value": "2026-04-07",
+              "type": "string"
+            },
+            {
+              "id": "2a1915cd-7949-44ff-952b-9ab2aa6365f5",
+              "name": "✅END_DATE",
+              "value": "2026-04-07",
+              "type": "string"
+            },
+            {
+              "id": "6944e5f6-f22f-4bf8-9746-13b9e5ee8f91",
+              "name": "INCLUDE_LIST",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "d2a87c47-b55e-4641-90c9-4b7c204d8955",
+              "name": "✅AMAZON_ADS_CLIENT_ID",
+              "value": "YOUR_AMAZON_CLIENT_ID",
+              "type": "string"
+            },
+            {
+              "id": "f6bcc963-0897-455c-ac16-e86f3deca6ef",
+              "name": "✅AMAZON_ADS_CLIENT_SECRET",
+              "value": "amzn1.oa2-cs.v1.c8d866128f6e2dbe406785ea446654c10bc921de4d1ac4256fa96a63f5a47971",
+              "type": "string"
+            },
+            {
+              "id": "6e513cbb-157d-4f5b-a18f-6f2b212157f5",
+              "name": "✅AMAZON_ADS_REFRESH_TOKEN",
+              "value": "Atzr|IwEBID_-DsgS6HGOaBkUmeUGN3_4CG7Skx-lQJuchtu5WaP852TE32iP4z9PUNBlnkOJPJoyn4nbKFnAGXJDbedu5th0VlxqZFU125TiPIpGkYLBieEPgkiIMSLV6vJOjB6Xm7nnmNd4_KXtLnH4x69IkhJ0cYSQgWpy9nc1c71hEX8lht3kD7qHsAByw4Wd8sYuOlfzxCeepOAHsv2h76XSA629pZglhVNNXQLPFKpXBRwoVjaI1j_EueHE0iQ50IPNWjC38A7WT2ZEaRlj7pkjSvmh13v-zeLHvpkWD31g5mIj-SeCUalwlFDkdMgOLM2wI1zCW_GhpI3bipRYbjrT2Deog_suuskEK1l8hCBtnUAZZflZLo3e6s3SIeSPJDTmShRDuBDjGPX3Qz1rDa1LUk0UU0ON-Z-eLXbhSKOdYQKLhFNA0UMc9cHT1polWR_iuvd13z7u2OrB-Q5EF6sdhxyLFR9QiqwNqT9T5-XUfRgNUWexJyEYQVsrcClCdTjrwg-y0xo8EmkCLAgoRCaXPnVd",
+              "type": "string"
+            },
+            {
+              "id": "15f4bb08-6a83-4e2f-bf3f-706b362ee4af",
+              "name": "✅AMAZON_ADS_PROFILE_ID",
+              "value": "873689645456341",
+              "type": "string"
+            },
+            {
+              "id": "55f35d9b-4dd4-4594-af0c-08185938f2ac",
+              "name": "✅AMAZON_SP_CLIENT_ID",
+              "value": "YOUR_AMAZON_CLIENT_ID",
+              "type": "string"
+            },
+            {
+              "id": "2aa06f79-f2f4-4d4f-8a4a-bf328f2de798",
+              "name": "✅AMAZON_SP_CLIENT_SECRET: ",
+              "value": "amzn1.oa2-cs.v1.7952b2a0ac9fc179d52a158485b1755be99e2f56c256c5009bf5b23c373ac7f4",
+              "type": "string"
+            },
+            {
+              "id": "518c7b45-f2de-42ad-b944-6342308f9e41",
+              "name": "✅AMAZON_SP_REFRESH_TOKEN",
+              "value": "Atzr|IwEBIIvWPTsQK2VYjuqsRqPryHsxWgSLgEqW54kRaFox8SHBd9VIV60_VVt0p2XJMvBPT7-1YJ7amEx8kuoRL-wT6-lkg2yDOMnMo1SswpohWcq5Pune77FhhIg5NYacOZIFUUqwsPCnLijKtHqWFdhOmXFzc-1Q7tbhJYvmi3EC7NQDJupcQ8xMw6sbqQCOInwGReb0Be6uHxN_M1-IN_VLDdN-6iaYCkN8eDBcZWrOunKpSUnzjp72RraWSF2pekXs88zrMOhT78vMdevSDus18Nrp2V6GdNSmPci3QLlqam2FDHCDFgQQM6hHnz3Zwv4t9pM",
+              "type": "string"
+            },
+            {
+              "id": "d02eed0a-85e5-4723-97a0-2ef963c0cb91",
+              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL",
+              "value": "n8n-268@amazon-automation-493007.iam.gserviceaccount.com",
+              "type": "string"
+            },
+            {
+              "id": "fe461a50-becf-4868-9675-eba1f00317b1",
+              "name": "✅GOOGLE_PRIVATE_KEY",
+              "value": "REDACTED",
+              "type": "string"
+            },
+            {
+              "id": "51f84e29-8590-46e0-bb22-c92f5900bcd7",
+              "name": "✅GOOGLE_SCOPE",
+              "value": "https://www.googleapis.com/auth/spreadsheets",
+              "type": "string"
+            },
+            {
+              "id": "297bd6d8-b645-41fa-baf6-9ac1a3b4a682",
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "https://docs.google.com/spreadsheets/d/1RSbTS6Y1idmbG_LHUhCSPNx341eYxvUJty_Oxs9gK2o/",
+              "type": "string"
+            },
+            {
+              "id": "c0aec1b6-f8fc-49fd-82aa-03fbb686df99",
+              "name": "✅SHEET_NAME",
+              "value": "MOBILITY",
+              "type": "string"
+            },
+            {
+              "id": "163475ec-2602-4c9e-9200-3277ef26934d",
+              "name": "✅RANGE",
+              "value": "A:Z",
+              "type": "string"
+            },
+            {
+              "id": "7cc097e4-78a8-4ff3-8f04-a50764c10b41",
+              "name": "✅START_DATE",
+              "value": "2026-04-09",
+              "type": "string"
+            },
+            {
+              "id": "8d2c39d2-0cca-468a-bdb6-8a4ec6d9ad01",
+              "name": "✅END_DATE",
+              "value": "2026-04-09",
+              "type": "string"
+            },
+            {
+              "id": "05c6613c-5ce9-418b-9067-8ca2a91dec71",
+              "name": "✅COLUMNS",
+              "value": "[\"cost\", \"clicks\", \"impressions\", \"advertisedAsin\", \"advertisedSku\"]",
+              "type": "string"
+            },
+            {
+              "id": "e05654b1-70f3-45f6-ba57-3f3b7bb1a8bf",
+              "name": "✅SPREADSHEET_ID",
+              "value": "1RSbTS6Y1idmbG_LHUhCSPNx341eYxvUJty_Oxs9gK2o",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "40ab5b65-ab0d-48fc-aa52-b1921d6773d1",
+      "name": "Build Group Registry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        320
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const input = $input.first().json;\nconst groups = [\n  { groupKey: 'ads', workflowId: 'vmOB9dWgN8q6LJVk', metricKeys: ['ads_spend', 'ctr', 'sales_ppc', 'clicks', 'units_ppc'] },\n  { groupKey: 'sp', workflowId: 'lI6VdPxTKRYvgIUn', metricKeys: ['refunds', 'sales_organic', 'units_organic', 'reversal_reimbursement'] },\n  { groupKey: 'special', workflowId: 'JcjQO7vgmt1m0JRa', metricKeys: ['bsr', 'fba_fbm_stock', 'fba_per_unit_fulfillment_fee'] },\n];\nconst selectedMetrics = [...new Set(String(input.INCLUDE_LIST || '').split(',').map((value) => value.trim().toLowerCase()).filter(Boolean))];\nconst runAll = selectedMetrics.length === 0;\nreturn groups.map((group) => {\n  const requestedMetrics = runAll ? [...group.metricKeys] : selectedMetrics.filter((metricKey) => group.metricKeys.includes(metricKey));\n  return {\n    json: {\n      '✅START_DATE': input['✅START_DATE'],\n      '✅END_DATE': input['✅END_DATE'],\n      INCLUDE_LIST: requestedMetrics.join(','),\n      groupKey: group.groupKey,\n      workflowId: group.workflowId,\n      metricKeys: group.metricKeys,\n      selectedMetrics: requestedMetrics,\n      shouldRun: runAll || requestedMetrics.length > 0,\n      groupStartedAt: new Date().toISOString(),\n    },\n  };\n});"
+      }
+    },
+    {
+      "id": "7cecb546-e5f1-453e-a6de-6bb85fb71868",
+      "name": "Final Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        320
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const results = $('Record Group Result').all().map((item) => item.json);\nconst groups = results.map((item) => item.group).filter(Boolean);\nconst summary = results.flatMap((item) => Array.isArray(item.summary) ? item.summary : []);\nconst totals = summary.reduce((acc, item) => { acc.total += 1; acc[item.status] = (acc[item.status] || 0) + 1; return acc; }, { total: 0, success: 0, failed: 0, skipped: 0 });\nreturn [{ json: { groups, summary, totals } }];"
+      }
+    },
+    {
+      "id": "a2780ee3-eedb-41c1-a5c6-cc9293cb7b99",
+      "name": "If Should Run Group",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1376,
+        320
+      ],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.shouldRun }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "edd960ba-3379-48f4-a2cf-7dadf81aa34d",
+      "name": "Route Group Workflow",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1664,
+        224
+      ],
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 4,
+        "output": "={{ ({ ads: 0, sp: 1, special: 2 })[$json.groupKey] ?? 3 }}"
+      }
+    },
+    {
+      "id": "55b8a820-f36f-4b0f-b0c6-a50a5db88e5c",
+      "name": "Execute Ads Group Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        96
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vmOB9dWgN8q6LJVk",
+          "cachedResultName": "Unified Amazon Metrics Group - Ads"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "INCLUDE_LIST": "={{ ($json.selectedMetrics || []).join(\",\") }}",
+            "selectedMetrics": "={{ $json.selectedMetrics }}",
+            "groupKey": "={{ $json.groupKey }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "8a827e51-1c65-4e1a-bfb7-bb29c33e9669",
+      "name": "Record Group Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        320
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "const current = $('If Should Run Group').item.json || $json || {};\nconst payload = $json || {};\nconst finishedAt = new Date().toISOString();\nconst allMetrics = Array.isArray(current.metricKeys) ? current.metricKeys : [];\nconst selected = Array.isArray(current.selectedMetrics) ? current.selectedMetrics : [];\nfunction buildSkippedSummary() {\n  return allMetrics.map((metricKey) => ({ groupKey: current.groupKey, metricKey, status: 'skipped', errorMessage: null, startedAt: null, finishedAt }));\n}\nif (!current.shouldRun) {\n  return { json: { group: { groupKey: current.groupKey, status: 'skipped', selectedMetrics: [], errorMessage: null, startedAt: null, finishedAt }, summary: buildSkippedSummary() } };\n}\nconst executionError = payload.error || payload.execution?.error || null;\nconst rawSummary = Array.isArray(payload.summary) ? payload.summary : [];\nconst summary = rawSummary.length ? rawSummary.map((item) => ({ groupKey: current.groupKey, metricKey: item.metricKey, status: item.status || (executionError ? 'failed' : 'success'), errorMessage: item.errorMessage ?? (executionError ? String(executionError.message || payload.message || 'Group workflow failed') : null), startedAt: item.startedAt ?? current.groupStartedAt ?? null, finishedAt: item.finishedAt ?? finishedAt })) : allMetrics.map((metricKey) => ({ groupKey: current.groupKey, metricKey, status: selected.includes(metricKey) ? (executionError ? 'failed' : 'success') : 'skipped', errorMessage: selected.includes(metricKey) && executionError ? String(executionError.message || payload.message || 'Group workflow failed') : null, startedAt: selected.includes(metricKey) ? current.groupStartedAt ?? null : null, finishedAt }));\nconst groupStatus = executionError ? 'failed' : (payload.groups?.[0]?.status || (summary.some((item) => item.status === 'failed') ? 'failed' : summary.some((item) => item.status === 'success') ? 'success' : 'skipped'));\nconst groupErrorMessage = executionError ? String(executionError.message || payload.message || 'Group workflow failed') : (payload.groups?.[0]?.errorMessage ?? null);\nreturn { json: { group: { groupKey: current.groupKey, status: groupStatus, selectedMetrics: selected, errorMessage: groupErrorMessage, startedAt: payload.groups?.[0]?.startedAt || current.groupStartedAt || null, finishedAt: payload.groups?.[0]?.finishedAt || finishedAt }, summary } };"
+      }
+    },
+    {
+      "id": "fae13d4d-894b-4e2b-8e23-fad925e3ab6b",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1088,
+        320
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "22a6ef0a-9c3a-4172-b5a5-75db4532d8e9",
+      "name": "Execute SP Group Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        224
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "lI6VdPxTKRYvgIUn",
+          "cachedResultName": "Unified Amazon Metrics Group - SP"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "INCLUDE_LIST": "={{ ($json.selectedMetrics || []).join(\",\") }}",
+            "selectedMetrics": "={{ $json.selectedMetrics }}",
+            "groupKey": "={{ $json.groupKey }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "a35e3d42-0a63-40a1-b625-46ddd6440bff",
+      "name": "Execute Special Group Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        352
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "JcjQO7vgmt1m0JRa",
+          "cachedResultName": "Unified Amazon Metrics Group - Special"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "INCLUDE_LIST": "={{ ($json.selectedMetrics || []).join(\",\") }}",
+            "selectedMetrics": "={{ $json.selectedMetrics }}",
+            "groupKey": "={{ $json.groupKey }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "Build Group Registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Group Registry": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Should Run Group": {
+      "main": [
+        [
+          {
+            "node": "Route Group Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Group Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Group Workflow": {
+      "main": [
+        [
+          {
+            "node": "Execute Ads Group Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute SP Group Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Special Group Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Ads Group Workflow": {
+      "main": [
+        [
+          {
+            "node": "Record Group Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Group Result": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Should Run Group",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute SP Group Workflow": {
+      "main": [
+        [
+          {
+            "node": "Record Group Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Special Group Workflow": {
+      "main": [
+        [
+          {
+            "node": "Record Group Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "74b2b04d-1686-4712-88a4-f0c2f25f82ca",
+  "activeVersionId": null,
+  "versionCounter": 474,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-15T02:07:42.715Z",
+      "createdAt": "2026-04-15T02:07:42.715Z",
+      "role": "workflow:owner",
+      "workflowId": "GtrUp6wKVHsU5Nwu",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

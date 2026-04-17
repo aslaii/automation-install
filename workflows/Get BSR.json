@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-04-17T05:47:03.820Z",
+  "createdAt": "2026-04-14T05:48:30.198Z",
+  "id": "zC5vJ22Tb7i4dli8",
   "name": "Get BSR",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -135,7 +141,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function extractBsr(payload) {\n  const ranks = [];\n  const seen = new Set();\n  function walk(value) {\n    if (!value || typeof value !== 'object') return;\n    if (Array.isArray(value)) {\n      for (const item of value) walk(item);\n      return;\n    }\n    for (const [key, child] of Object.entries(value)) {\n      if (key.toLowerCase() === 'rank') {\n        const n = Number(child);\n        if (Number.isFinite(n) && n > 0 && !seen.has(n)) {\n          seen.add(n);\n          ranks.push(n);\n        }\n      }\n      walk(child);\n    }\n  }\n  walk(payload);\n  if (!ranks.length) return '';\n  return Math.min(...ranks);\n}\nconst originalItems = $('Build BSR Requests').all();\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\nconst data = [];\nfor (const item of $input.all()) {\n  const source = item.json || {};\n  const originalIndex = item.pairedItem && typeof item.pairedItem.item === 'number' ? item.pairedItem.item : -1;\n  const original = originalIndex >= 0 ? (originalItems[originalIndex]?.json || {}) : {};\n  const rowNumber = original.rowNumber;\n  const rank = extractBsr(source);\n  if (!rowNumber) continue;\n  data.push({ range: `${sheetName}!F${rowNumber}`, values: [[rank]] });\n}\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
+        "jsCode": "function colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nfunction extractBsr(payload) {\n  const ranks = [];\n  const seen = new Set();\n\n  function walk(value) {\n    if (!value || typeof value !== 'object') return;\n    if (Array.isArray(value)) {\n      for (const item of value) walk(item);\n      return;\n    }\n    for (const [key, child] of Object.entries(value)) {\n      if (key.toLowerCase() === 'rank') {\n        const n = Number(child);\n        if (Number.isFinite(n) && n > 0 && !seen.has(n)) {\n          seen.add(n);\n          ranks.push(n);\n        }\n      }\n      walk(child);\n    }\n  }\n\n  walk(payload);\n  return ranks.length ? Math.min(...ranks) : '';\n}\n\nconst originalItems = $('Build BSR Requests').all();\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst headerRow = values[0] || [];\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'BSR');\n\nif (targetCol === -1) {\n  throw new Error('Could not find BSR column');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (const item of $input.all()) {\n  const source = item.json || {};\n  const originalIndex = item.pairedItem && typeof item.pairedItem.item === 'number' ? item.pairedItem.item : -1;\n  const original = originalIndex >= 0 ? (originalItems[originalIndex]?.json || {}) : {};\n  const rowNumber = original.rowNumber;\n  if (!rowNumber) continue;\n  data.push({\n    range: `${sheetName}!${targetColA1}${rowNumber}`,\n    values: [[extractBsr(source)]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -337,7 +343,6 @@
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Code in JavaScript": {
       "main": [
@@ -457,7 +462,6 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -465,10 +469,35 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "versionId": "e0d9ba2f-3c5f-44c4-80d2-2154b19590a6",
-  "meta": {
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
-  },
-  "id": "zC5vJ22Tb7i4dli8",
-  "tags": []
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "51643995-907e-4510-b009-7c59c60f8967",
+  "activeVersionId": "e0d9ba2f-3c5f-44c4-80d2-2154b19590a6",
+  "versionCounter": 110,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-14T05:48:30.208Z",
+      "createdAt": "2026-04-14T05:48:30.208Z",
+      "role": "workflow:owner",
+      "workflowId": "zC5vJ22Tb7i4dli8",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
 }

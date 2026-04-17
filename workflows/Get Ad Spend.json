@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-04-17T05:44:40.678Z",
+  "createdAt": "2026-04-12T23:21:21.568Z",
+  "id": "nWQo0Pz3qHzQO0My",
   "name": "Get Ad Spend",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -366,7 +372,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\n  function toNumber(v) {\n    if (v === null || v === undefined) return 0;\n    const s = String(v).replace(/[$,%\\s,]/g, '');\n    const n = Number(s);\n    return Number.isFinite(n) ? n : 0;\n  }\n\n  function colToA1(colIndex1Based) {\n    let n = colIndex1Based;\n    let out = '';\n    while (n > 0) {\n      const m = (n - 1) % 26;\n      out = String.fromCharCode(65 + m) + out;\n      n = Math.floor((n - 1) / 26);\n    }\n    return out;\n  }\n\n  const sheet = $json; // from Webhook Read Google Sheet\n  const values = sheet.values || [];\n  const reportData = $('Extract from File').first().json.data || [];\n  const sheetName = $('Set Credentials').first().json[\"✅SHEET_NAME\"];\n\n  // 1) Aggregate Amazon cost by SKU\n  const adsBySku = new Map();\n  for (const r of reportData) {\n    const sku = (r.advertisedSku || '').trim();\n    if (!sku) continue;\n    const cost = toNumber(r.cost);\n    adsBySku.set(sku, (adsBySku.get(sku) || 0) + cost);\n  }\n\n  // 2) Detect header row (last row that has SKU + ADS-like column)\n  const adsHeaderNames = new Set(['ADS', 'ADS_SPEND', 'Ads spend', 'Ads Spend', 'ads',\n  'ads_spend']);\n  let headerRowIdx = -1;\n  let skuCol = -1;\n  let adsCol = -1;\n\n  for (let i = 0; i < Math.min(values.length, 12); i++) {\n    const row = values[i] || [];\n    const skuIdx = row.findIndex(c => String(c).trim().toUpperCase() === 'SKU');\n    if (skuIdx === -1) continue;\n\n    let adsIdx = -1;\n    for (let j = 0; j < row.length; j++) {\n      const name = String(row[j] || '').trim();\n      if (adsHeaderNames.has(name)) {\n        adsIdx = j;\n        break;\n      }\n    }\n    if (adsIdx !== -1) {\n      headerRowIdx = i;\n      skuCol = skuIdx;\n      adsCol = adsIdx;\n    }\n  }\n\n  if (headerRowIdx === -1 || skuCol === -1 || adsCol === -1) {\n    throw new Error('Could not find header row with SKU and ADS column');\n  }\n\n  // 3) Build Google batch updates\n  const data = [];\n  const missingSkus = [];\n\n  for (let i = headerRowIdx + 1; i < values.length; i++) {\n    const row = values[i] || [];\n    const sku = String(row[skuCol] || '').trim();\n    if (!sku) continue;\n\n    if (!adsBySku.has(sku)) continue;\n\n    const newAds = Number(adsBySku.get(sku).toFixed(2));\n    const rowNumber = i + 1; // sheet is 1-based\n    const adsColA1 = colToA1(adsCol + 1);\n\n    data.push({\n      range: `${sheetName}!${adsColA1}${rowNumber}`,\n      values: [[newAds]]\n    });\n  }\n\n  // Optional: SKUs from report not found in sheet\n  for (const sku of adsBySku.keys()) {\n    const found = values.slice(headerRowIdx + 1).some(r => String((r || [])[skuCol] ||\n  '').trim() === sku);\n    if (!found) missingSkus.push(sku);\n  }\n\n  return [{\n    json: {\n      valueInputOption: 'USER_ENTERED',\n      data,\n    }\n  }];"
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $json;\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst adsBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n  const cost = toNumber(row.cost);\n  adsBySku.set(sku, Number(((adsBySku.get(sku) || 0) + cost).toFixed(2)));\n}\n\nconst headerRowIdx = 0;\nconst headerRow = values[headerRowIdx] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'ADSPEND');\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and AD_SPEND columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\n\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /_TOTALS$/i.test(sku)) continue;\n  if (!adsBySku.has(sku)) continue;\n\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[Number((adsBySku.get(sku) || 0).toFixed(2))]],\n  });\n}\n\nreturn [{\n  json: {\n    valueInputOption: 'USER_ENTERED',\n    data,\n  },\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -529,7 +535,6 @@
       "notes": "write-health-check"
     }
   ],
-  "pinData": {},
   "connections": {
     "Wait": {
       "main": [
@@ -722,7 +727,6 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -730,11 +734,37 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "versionId": "80a9a12e-98f1-488c-8334-94231b118683",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+    "templateCredsSetupCompleted": true
   },
-  "id": "nWQo0Pz3qHzQO0My",
-  "tags": []
+  "pinData": {},
+  "versionId": "09edb40c-e4e9-4b3c-bdb9-2cd65079002b",
+  "activeVersionId": "80a9a12e-98f1-488c-8334-94231b118683",
+  "versionCounter": 301,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-12T23:21:21.576Z",
+      "createdAt": "2026-04-12T23:21:21.576Z",
+      "role": "workflow:owner",
+      "workflowId": "nWQo0Pz3qHzQO0My",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
 }

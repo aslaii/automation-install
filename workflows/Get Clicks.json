@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-04-17T05:45:05.593Z",
+  "createdAt": "2026-04-14T00:49:02.724Z",
+  "id": "iVZAWiAvfBrQVOpi",
   "name": "Get Clicks",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -366,7 +372,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined || v === '') return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nconst sheet = $json;\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst clicksBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n  const clicks = toNumber(row.clicks);\n  clicksBySku.set(sku, Number(((clicksBySku.get(sku) || 0) + clicks).toFixed(2)));\n}\n\nlet headerRowIdx = -1;\nlet skuCol = -1;\nfor (let i = 0; i < Math.min(values.length, 12); i++) {\n  const row = values[i] || [];\n  const skuIdx = row.findIndex((cell) => String(cell).trim().toUpperCase() === 'SKU');\n  if (skuIdx !== -1) {\n    headerRowIdx = i;\n    skuCol = skuIdx;\n  }\n}\n\nif (headerRowIdx === -1 || skuCol === -1) {\n  throw new Error('Could not find header row with SKU column');\n}\n\nconst data = [];\nconst clicksColA1 = 'AQ';\n\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /_TOTALS$/i.test(sku)) continue;\n\n  const rowNumber = i + 1;\n  const clicks = Number((clicksBySku.get(sku) || 0).toFixed(2));\n  data.push({\n    range: `${sheetName}!${clicksColA1}${rowNumber}`,\n    values: [[clicks]],\n  });\n}\n\nreturn [{\n  json: {\n    valueInputOption: 'USER_ENTERED',\n    data,\n  },\n}];"
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined || v === '') return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $json;\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst clicksBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n  const clicks = toNumber(row.clicks);\n  clicksBySku.set(sku, Number(((clicksBySku.get(sku) || 0) + clicks).toFixed(2)));\n}\n\nconst headerRow = values[0] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'ADCLICKS');\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and AD_CLICKS columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /_TOTALS$/i.test(sku)) continue;\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[Number((clicksBySku.get(sku) || 0).toFixed(2))]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -528,7 +534,6 @@
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Wait": {
       "main": [
@@ -721,7 +726,6 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -729,11 +733,37 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "versionId": "8077547f-bac3-4c2c-ae18-12ae41ac9722",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+    "templateCredsSetupCompleted": true
   },
-  "id": "iVZAWiAvfBrQVOpi",
-  "tags": []
+  "pinData": {},
+  "versionId": "f03a2352-1ef4-41b0-911b-93fedef42e0e",
+  "activeVersionId": "8077547f-bac3-4c2c-ae18-12ae41ac9722",
+  "versionCounter": 65,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-14T00:49:02.727Z",
+      "createdAt": "2026-04-14T00:49:02.727Z",
+      "role": "workflow:owner",
+      "workflowId": "iVZAWiAvfBrQVOpi",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
 }

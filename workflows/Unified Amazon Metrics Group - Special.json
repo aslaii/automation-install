@@ -1,0 +1,1880 @@
+{
+  "updatedAt": "2026-04-16T23:44:37.398Z",
+  "createdAt": "2026-04-16T22:33:25.444Z",
+  "id": "JcjQO7vgmt1m0JRa",
+  "name": "Unified Amazon Metrics Group - Special",
+  "description": "Self-contained special grouped workflow with inlined special metric logic and parent-callable entry.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3744,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const registry = [\n  {\n    \"metricKey\": \"bsr\",\n    \"displayName\": \"Get BSR\",\n    \"dateMode\": \"snapshot-metadata\"\n  },\n  {\n    \"metricKey\": \"fba_fbm_stock\",\n    \"displayName\": \"Get FBA/FBM Stock\",\n    \"dateMode\": \"snapshot-metadata\"\n  },\n  {\n    \"metricKey\": \"fba_per_unit_fulfillment_fee\",\n    \"displayName\": \"Get FBAPerUnitFulfillmentFee\",\n    \"dateMode\": \"snapshot-metadata\"\n  }\n];\nconst raw = String($json.INCLUDE_LIST || '').trim().toLowerCase();\nconst selectedMetrics = raw ? [...new Set(raw.split(',').map((value) => value.trim()).filter(Boolean).filter((metricKey) => registry.some((entry) => entry.metricKey === metricKey)))] : [];\nreturn [{\n  json: {\n    ...$json,\n    INCLUDE_LIST: selectedMetrics.join(','),\n    selectedMetrics,\n    runAll: selectedMetrics.length === 0,\n    groupKey: 'special',\n    groupMetrics: registry.map((entry) => entry.metricKey),\n    summary: [],\n    registry,\n    remainingRegistry: registry,\n  },\n}];"
+      },
+      "id": "9ab7ff96-a858-4f5d-89dd-6eae4df70259",
+      "name": "Build Workflow Registry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1728,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst summary = (input.summary || []).map((item) => ({\n  groupKey: 'special',\n  metricKey: item.metricKey,\n  displayName: item.displayName,\n  selected: item.selected,\n  status: item.status,\n  errorMessage: item.errorMessage ?? null,\n  startedAt: item.startedAt ?? null,\n  finishedAt: item.finishedAt ?? null,\n}));\nconst totals = summary.reduce((acc, item) => {\n  acc.total += 1;\n  acc[item.status] = (acc[item.status] || 0) + 1;\n  return acc;\n}, { total: 0, success: 0, failed: 0, skipped: 0 });\nconst firstFailure = summary.find((item) => item.status === 'failed');\nconst selectedMetrics = input.runAll ? (input.groupMetrics || []) : (input.selectedMetrics || []);\nconst groupStatus = totals.failed > 0 ? 'failed' : totals.success > 0 ? 'success' : 'skipped';\nconst startedAt = summary.find((item) => item.startedAt)?.startedAt || null;\nconst finishedAt = new Date().toISOString();\nreturn [{\n  json: {\n    groupKey: 'special',\n    groups: [{\n      groupKey: 'special',\n      status: groupStatus,\n      selectedMetrics,\n      errorMessage: firstFailure ? firstFailure.errorMessage : null,\n      startedAt,\n      finishedAt,\n    }],\n    summary,\n    totals,\n  },\n}];"
+      },
+      "id": "cb2054c8-299b-414e-86a3-b578d73d746f",
+      "name": "Final Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.amazon.com/auth/o2/token",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "=refresh_token"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $json[\"✅AMAZON_ADS_REFRESH_TOKEN\"] }}"
+            },
+            {
+              "name": "client_id",
+              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_ID\"] }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_SECRET\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "131724be-1194-4fa4-ad8e-87fd0c534d33",
+      "name": "Mint Amazon Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -3296,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all();"
+      },
+      "id": "04c59770-30d9-42ea-9d31-b768024eef39",
+      "name": "Refresh Amazon Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3072,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth2.googleapis.com/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "urn:ietf:params:oauth:grant-type:jwt-bearer"
+            },
+            {
+              "name": "assertion",
+              "value": "={{ $json.assertion }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2a201658-f325-423c-b8dc-7da5cad61342",
+      "name": "Mint Google Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2624,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all();"
+      },
+      "id": "13be27ef-0fcb-4dfa-83f2-ba8e40ec6978",
+      "name": "Refresh Google Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2400,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const seed = $('Set Credentials').first().json;\nconst input = $input.first().json;\nconst issuedAt = new Date().toISOString();\n\nconst refreshBufferSeconds = Number(seed.AUTH_REFRESH_BUFFER_SECONDS || input.AUTH_REFRESH_BUFFER_SECONDS || 300);\n\nconst amazonAdsNode = $('Mint Amazon Access Token').first().json;\nconst googleNode = $('Mint Google Access Token').first().json;\nconst spNode = $('Mint SP Access Token').first().json;\n\nconst amazonExpiresIn = Number(amazonAdsNode.expires_in || 3600);\nconst googleExpiresIn = Number(googleNode.expires_in || 3600);\nconst spExpiresIn = Number(spNode.expires_in || 3600);\n\nreturn [{\n  json: {\n    ...seed,\n    ...input,\n    auth: {\n      amazon: {\n        accessToken: amazonAdsNode.access_token,\n        clientId: seed['✅AMAZON_ADS_CLIENT_ID'],\n        profileId: seed['✅AMAZON_ADS_PROFILE_ID'],\n        issuedAt,\n        expiresAt: new Date(Date.now() + amazonExpiresIn * 1000).toISOString(),\n        spAccessToken: spNode.access_token,\n        spIssuedAt: issuedAt,\n        spExpiresAt: new Date(Date.now() + spExpiresIn * 1000).toISOString(),\n      },\n      google: {\n        accessToken: googleNode.access_token,\n        scope: seed['✅GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets',\n        issuedAt: seed.googleIssuedAt || input.googleIssuedAt || issuedAt,\n        expiresAt: seed.googleExpiresAt || input.googleExpiresAt || new Date(Date.now() + googleExpiresIn * 1000).toISOString(),\n      },\n      meta: {\n        refreshBufferSeconds,\n      },\n    },\n  },\n}];"
+      },
+      "id": "196cd93e-f36a-4b77-bb65-3a1677c07974",
+      "name": "Attach Shared Auth Bundle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1952,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76a6c500-c2c0-4339-8299-682826c4452b",
+              "name": "✅START_DATE",
+              "value": "={{ $json['✅START_DATE'] || '2026-04-07' }}",
+              "type": "string"
+            },
+            {
+              "id": "2a1915cd-7949-44ff-952b-9ab2aa6365f5",
+              "name": "✅END_DATE",
+              "value": "={{ $json['✅END_DATE'] || $json['✅START_DATE'] || '2026-04-07' }}",
+              "type": "string"
+            },
+            {
+              "id": "6944e5f6-f22f-4bf8-9746-13b9e5ee8f91",
+              "name": "INCLUDE_LIST",
+              "value": "={{ Array.isArray($json.selectedMetrics) && $json.selectedMetrics.length ? $json.selectedMetrics.join(',') : ($json.INCLUDE_LIST || '') }}",
+              "type": "string"
+            },
+            {
+              "id": "d2a87c47-b55e-4641-90c9-4b7c204d8955",
+              "name": "✅AMAZON_ADS_CLIENT_ID",
+              "value": "YOUR_AMAZON_CLIENT_ID",
+              "type": "string"
+            },
+            {
+              "id": "f6bcc963-0897-455c-ac16-e86f3deca6ef",
+              "name": "✅AMAZON_ADS_CLIENT_SECRET",
+              "value": "amzn1.oa2-cs.v1.c8d866128f6e2dbe406785ea446654c10bc921de4d1ac4256fa96a63f5a47971",
+              "type": "string"
+            },
+            {
+              "id": "6e513cbb-157d-4f5b-a18f-6f2b212157f5",
+              "name": "✅AMAZON_ADS_REFRESH_TOKEN",
+              "value": "Atzr|IwEBID_-DsgS6HGOaBkUmeUGN3_4CG7Skx-lQJuchtu5WaP852TE32iP4z9PUNBlnkOJPJoyn4nbKFnAGXJDbedu5th0VlxqZFU125TiPIpGkYLBieEPgkiIMSLV6vJOjB6Xm7nnmNd4_KXtLnH4x69IkhJ0cYSQgWpy9nc1c71hEX8lht3kD7qHsAByw4Wd8sYuOlfzxCeepOAHsv2h76XSA629pZglhVNNXQLPFKpXBRwoVjaI1j_EueHE0iQ50IPNWjC38A7WT2ZEaRlj7pkjSvmh13v-zeLHvpkWD31g5mIj-SeCUalwlFDkdMgOLM2wI1zCW_GhpI3bipRYbjrT2Deog_suuskEK1l8hCBtnUAZZflZLo3e6s3SIeSPJDTmShRDuBDjGPX3Qz1rDa1LUk0UU0ON-Z-eLXbhSKOdYQKLhFNA0UMc9cHT1polWR_iuvd13z7u2OrB-Q5EF6sdhxyLFR9QiqwNqT9T5-XUfRgNUWexJyEYQVsrcClCdTjrwg-y0xo8EmkCLAgoRCaXPnVd",
+              "type": "string"
+            },
+            {
+              "id": "15f4bb08-6a83-4e2f-bf3f-706b362ee4af",
+              "name": "✅AMAZON_ADS_PROFILE_ID",
+              "value": "873689645456341",
+              "type": "string"
+            },
+            {
+              "id": "55f35d9b-4dd4-4594-af0c-08185938f2ac",
+              "name": "✅AMAZON_SP_CLIENT_ID",
+              "value": "YOUR_AMAZON_CLIENT_ID",
+              "type": "string"
+            },
+            {
+              "id": "2aa06f79-f2f4-4d4f-8a4a-bf328f2de798",
+              "name": "✅AMAZON_SP_CLIENT_SECRET: ",
+              "value": "amzn1.oa2-cs.v1.7952b2a0ac9fc179d52a158485b1755be99e2f56c256c5009bf5b23c373ac7f4",
+              "type": "string"
+            },
+            {
+              "id": "518c7b45-f2de-42ad-b944-6342308f9e41",
+              "name": "✅AMAZON_SP_REFRESH_TOKEN",
+              "value": "Atzr|IwEBIIvWPTsQK2VYjuqsRqPryHsxWgSLgEqW54kRaFox8SHBd9VIV60_VVt0p2XJMvBPT7-1YJ7amEx8kuoRL-wT6-lkg2yDOMnMo1SswpohWcq5Pune77FhhIg5NYacOZIFUUqwsPCnLijKtHqWFdhOmXFzc-1Q7tbhJYvmi3EC7NQDJupcQ8xMw6sbqQCOInwGReb0Be6uHxN_M1-IN_VLDdN-6iaYCkN8eDBcZWrOunKpSUnzjp72RraWSF2pekXs88zrMOhT78vMdevSDus18Nrp2V6GdNSmPci3QLlqam2FDHCDFgQQM6hHnz3Zwv4t9pM",
+              "type": "string"
+            },
+            {
+              "id": "d02eed0a-85e5-4723-97a0-2ef963c0cb91",
+              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL",
+              "value": "n8n-268@amazon-automation-493007.iam.gserviceaccount.com",
+              "type": "string"
+            },
+            {
+              "id": "fe461a50-becf-4868-9675-eba1f00317b1",
+              "name": "✅GOOGLE_PRIVATE_KEY",
+              "value": "-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC8c0JZmC0qtMMW\\nH588LkS3fVUWusX30OQASwFyJY5jjndDvGva5kHxvORBTn+/YB7Ei9YyAIXqcZYU\\nFVAP1nCNJtNI9TiamZGP/c3P2XRdPlK0TLCqWMpYqg7iXp8Rrv4YOtpzEpnxeMsx\\n3saKrqccA969jAaSC9aCaa1O5wHmNQlk2pPD9TEywuBIMJeSllsZbxiTYQC7olWy\\nG1HhOFgU7xFVe7YVrQMI/O43uWXCB7BdpHUoCKGaxnOvWINOMbIIRLvi1GUTC30L\\nUPq14S0bDqnzu4En4Cd0WcpBqpsWutnqu9YEtDjV1eeFyg2F3DPYU2JmxeBX89eY\\nJUuL9S1lAgMBAAECggEAJPXvMr7Vxv0+kQmBM+64NAvNI0DdIJp0CXmsjix/BZg0\\n3JBpT/zevLCpTQS+KfUKe86YY2S2XzHJd2Vptz1+BDUz9eiAolPR2J21Htm9yKb3\\nVhz/fl2dTDAIbM4VoUSC2hI685xXnKRuJ/kTVDJmnKhGqML8q+rN9vSOlP3aYcG5\\nD84TH3xY2pjl0vV3L4Qm7gmzkBepbbz6IDPNZJKz1C5H7k9mitkQMwIlRsaj0BQ4\\n7Kdh1Hg/670vUu6AHFsebDtXmIQVpKln9D11wBszpH/D7NclwFnIiP102xBMgH5L\\n/7UUcavrUvOvoljICT41O0R41Ad295b+mT9K8fum0QKBgQD0cPhITWP9kUYFHDb5\\ntkga3p8pPajVWnuKGafuNvzt1/GzaDrg3/lwejua2Ht6KdSi/IkL8Ucx8SNaJk1/\\nROH4mfaS2lGG+7VPRD019iEkA7eqUoTvpQWyLFS4Rw/oTzaWdlWAgqzqyNlvaEON\\nD0Y+QAOgKoCWqMuhlRbUoXLeNQKBgQDFXIB97hX+BaRhuYFE5P9Wne7ymaojULt9\\nFitUezFVk8xJKDvkPJhrqh5N9hmdr/LxAD9nuR3ZrX0jTU6w1CKX4TesVGny8ZRG\\nlyzS0tdHJsv5TyV1Wrsr+opS4YgPcH254d5VA9TJf/pmsqQTMQxDWVT62kgBqRpv\\nYE/kE7+4cQKBgA5ZP0nHOTJeP7T3FgcMeykQnlkmZG25tPzDSsdB9RDlFywH10Ty\\nAMtocW1CfeUK5Y93sXfA/wPgesnE69GnsngMWZv/Mr/wsJDpmYo8W2+oxDQ8Sc9j\\naXUvAv4aNcXWOIcWhShZA1t41MKkZSq3ldD7ovrY49l0KRfgD4oFvB9tAoGAcdFV\\n3MoIbtWMJjuYHEZAJxCvs8MAxpsRdSLq3C6rleHFh08nswlrEXQrQ+SwgyrsXSY6\\narPsThPqPgigYAQG6zYcKEsKSuwdCdS3KeIj+smaCm4leRdZKBS13vRnxhemuiNT\\nWA38kjQ3ETDmxJadrt1+z6hArIx8TUzq5eqpv1ECgYAsNgy7dzdxPPaA6hH9LKMD\\nSNK2XNNTYFboktV6UEHIx1ZQ6sEim/W83KZZx4azV1leJ7olCsRkibzyQUHikVlC\\nvZuWbd/0oClYd+IPODafrgD310zcrYP43YbDPjZyK/C+ZztpwUjSkSQY9QLtqKQp\\njmyybrA+ZAHcBtdhnqKx+A==\\n-----END PRIVATE KEY-----\\n",
+              "type": "string"
+            },
+            {
+              "id": "51f84e29-8590-46e0-bb22-c92f5900bcd7",
+              "name": "✅GOOGLE_SCOPE",
+              "value": "https://www.googleapis.com/auth/spreadsheets",
+              "type": "string"
+            },
+            {
+              "id": "297bd6d8-b645-41fa-baf6-9ac1a3b4a682",
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "https://docs.google.com/spreadsheets/d/1RSbTS6Y1idmbG_LHUhCSPNx341eYxvUJty_Oxs9gK2o/",
+              "type": "string"
+            },
+            {
+              "id": "c0aec1b6-f8fc-49fd-82aa-03fbb686df99",
+              "name": "✅SHEET_NAME",
+              "value": "MOBILITY",
+              "type": "string"
+            },
+            {
+              "id": "163475ec-2602-4c9e-9200-3277ef26934d",
+              "name": "✅RANGE",
+              "value": "A:Z",
+              "type": "string"
+            },
+            {
+              "id": "7cc097e4-78a8-4ff3-8f04-a50764c10b41",
+              "name": "✅START_DATE",
+              "value": "2026-04-09",
+              "type": "string"
+            },
+            {
+              "id": "8d2c39d2-0cca-468a-bdb6-8a4ec6d9ad01",
+              "name": "✅END_DATE",
+              "value": "2026-04-09",
+              "type": "string"
+            },
+            {
+              "id": "05c6613c-5ce9-418b-9067-8ca2a91dec71",
+              "name": "✅COLUMNS",
+              "value": "[\"cost\", \"clicks\", \"impressions\", \"advertisedAsin\", \"advertisedSku\"]",
+              "type": "string"
+            },
+            {
+              "id": "e05654b1-70f3-45f6-ba57-3f3b7bb1a8bf",
+              "name": "✅SPREADSHEET_ID",
+              "value": "1RSbTS6Y1idmbG_LHUhCSPNx341eYxvUJty_Oxs9gK2o",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3520,
+        832
+      ],
+      "id": "cf0346ef-113a-4bf8-9537-56adc7df7f82",
+      "name": "Set Credentials"
+    },
+    {
+      "parameters": {
+        "jsCode": "function b64urlFromString(str) {\n  return Buffer.from(str, 'utf8')\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction b64urlFromBytes(bytes) {\n  return Buffer.from(bytes)\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction hexToBytes(hex) {\n  const out = new Uint8Array(hex.length / 2);\n  for (let i = 0; i < out.length; i++) {\n    out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);\n  }\n  return out;\n}\n\nfunction bytesToBigInt(bytes) {\n  let n = 0n;\n  for (let i = 0; i < bytes.length; i++) {\n    n = (n << 8n) | BigInt(bytes[i]);\n  }\n  return n;\n}\n\nfunction bigIntToBytes(num, length) {\n  const out = new Uint8Array(length);\n  let x = num;\n  for (let i = length - 1; i >= 0; i--) {\n    out[i] = Number(x & 0xffn);\n    x >>= 8n;\n  }\n  return out;\n}\n\nfunction modPow(base, exp, mod) {\n  let result = 1n;\n  let b = base % mod;\n  let e = exp;\n  while (e > 0n) {\n    if (e & 1n) result = (result * b) % mod;\n    b = (b * b) % mod;\n    e >>= 1n;\n  }\n  return result;\n}\n\nfunction readAsn1Element(bytes, offset) {\n  const tag = bytes[offset++];\n  const lenByte = bytes[offset++];\n  let length = 0;\n  if ((lenByte & 0x80) === 0) {\n    length = lenByte;\n  } else {\n    const numBytes = lenByte & 0x7f;\n    for (let i = 0; i < numBytes; i++) {\n      length = (length << 8) | bytes[offset++];\n    }\n  }\n  const valueStart = offset;\n  const valueEnd = valueStart + length;\n  return { tag, valueStart, valueEnd, nextOffset: valueEnd };\n}\n\nfunction readAsn1Integer(bytes, offset) {\n  const el = readAsn1Element(bytes, offset);\n  if (el.tag !== 0x02) throw new Error('Invalid ASN.1 INTEGER');\n  let start = el.valueStart;\n  while (start < el.valueEnd - 1 && bytes[start] === 0x00) start++;\n  return { value: bytesToBigInt(bytes.slice(start, el.valueEnd)), nextOffset: el.nextOffset };\n}\n\nfunction parsePkcs8RsaPrivateKey(pem) {\n  const der = Buffer.from(\n    pem\n      .replace(/-----BEGIN PRIVATE KEY-----/g, '')\n      .replace(/-----END PRIVATE KEY-----/g, '')\n      .replace(/\\s+/g, ''),\n    'base64'\n  );\n  const bytes = new Uint8Array(der);\n\n  const top = readAsn1Element(bytes, 0);\n  if (top.tag !== 0x30) throw new Error('Invalid PKCS#8');\n\n  let o = top.valueStart;\n  const version = readAsn1Element(bytes, o);\n  if (version.tag !== 0x02) throw new Error('Invalid PKCS#8 version');\n  o = version.nextOffset;\n\n  const alg = readAsn1Element(bytes, o);\n  if (alg.tag !== 0x30) throw new Error('Invalid PKCS#8 algorithm identifier');\n  o = alg.nextOffset;\n\n  const pk = readAsn1Element(bytes, o);\n  if (pk.tag !== 0x04) throw new Error('Invalid PKCS#8 privateKey');\n\n  const rsaBytes = bytes.slice(pk.valueStart, pk.valueEnd);\n  const rsaSeq = readAsn1Element(rsaBytes, 0);\n  if (rsaSeq.tag !== 0x30) throw new Error('Invalid RSAPrivateKey');\n\n  let r = rsaSeq.valueStart;\n  r = readAsn1Element(rsaBytes, r).nextOffset; // version\n  const nEl = readAsn1Integer(rsaBytes, r); r = nEl.nextOffset;\n  const eEl = readAsn1Integer(rsaBytes, r); r = eEl.nextOffset;\n  const dEl = readAsn1Integer(rsaBytes, r);\n\n  return {\n    n: nEl.value,\n    e: eEl.value,\n    d: dEl.value,\n  };\n}\n\nfunction rotr(x, n) {\n  return ((x >>> n) | (x << (32 - n))) >>> 0;\n}\n\nfunction sha256(msgBytes) {\n  const K = [\n    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,\n    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,\n    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,\n    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,\n    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,\n    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,\n    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,\n    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,\n  ];\n\n  const H = [\n    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,\n    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,\n  ];\n\n  const bitLen = msgBytes.length * 8;\n  const withOne = msgBytes.length + 1;\n  const padLen = (64 - ((withOne + 8) % 64)) % 64;\n  const totalLen = withOne + padLen + 8;\n  const data = new Uint8Array(totalLen);\n  data.set(msgBytes, 0);\n  data[msgBytes.length] = 0x80;\n  const hi = Math.floor(bitLen / 0x100000000);\n  const lo = bitLen >>> 0;\n  data[totalLen - 8] = (hi >>> 24) & 0xff;\n  data[totalLen - 7] = (hi >>> 16) & 0xff;\n  data[totalLen - 6] = (hi >>> 8) & 0xff;\n  data[totalLen - 5] = hi & 0xff;\n  data[totalLen - 4] = (lo >>> 24) & 0xff;\n  data[totalLen - 3] = (lo >>> 16) & 0xff;\n  data[totalLen - 2] = (lo >>> 8) & 0xff;\n  data[totalLen - 1] = lo & 0xff;\n\n  const W = new Uint32Array(64);\n\n  for (let i = 0; i < data.length; i += 64) {\n    for (let t = 0; t < 16; t++) {\n      const j = i + t * 4;\n      W[t] = ((data[j] << 24) | (data[j + 1] << 16) | (data[j + 2] << 8) | data[j + 3]) >>> 0;\n    }\n    for (let t = 16; t < 64; t++) {\n      const s0 = (rotr(W[t - 15], 7) ^ rotr(W[t - 15], 18) ^ (W[t - 15] >>> 3)) >>> 0;\n      const s1 = (rotr(W[t - 2], 17) ^ rotr(W[t - 2], 19) ^ (W[t - 2] >>> 10)) >>> 0;\n      W[t] = (((W[t - 16] + s0) >>> 0) + ((W[t - 7] + s1) >>> 0)) >>> 0;\n    }\n\n    let a = H[0], b = H[1], c = H[2], d = H[3];\n    let e = H[4], f = H[5], g = H[6], h = H[7];\n\n    for (let t = 0; t < 64; t++) {\n      const S1 = (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) >>> 0;\n      const ch = ((e & f) ^ (~e & g)) >>> 0;\n      const temp1 = (((((h + S1) >>> 0) + ch) >>> 0) + ((K[t] + W[t]) >>> 0)) >>> 0;\n      const S0 = (rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) >>> 0;\n      const maj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;\n      const temp2 = (S0 + maj) >>> 0;\n\n      h = g;\n      g = f;\n      f = e;\n      e = (d + temp1) >>> 0;\n      d = c;\n      c = b;\n      b = a;\n      a = (temp1 + temp2) >>> 0;\n    }\n\n    H[0] = (H[0] + a) >>> 0;\n    H[1] = (H[1] + b) >>> 0;\n    H[2] = (H[2] + c) >>> 0;\n    H[3] = (H[3] + d) >>> 0;\n    H[4] = (H[4] + e) >>> 0;\n    H[5] = (H[5] + f) >>> 0;\n    H[6] = (H[6] + g) >>> 0;\n    H[7] = (H[7] + h) >>> 0;\n  }\n\n  const out = new Uint8Array(32);\n  for (let i = 0; i < 8; i++) {\n    out[i * 4] = (H[i] >>> 24) & 0xff;\n    out[i * 4 + 1] = (H[i] >>> 16) & 0xff;\n    out[i * 4 + 2] = (H[i] >>> 8) & 0xff;\n    out[i * 4 + 3] = H[i] & 0xff;\n  }\n  return out;\n}\n\nfunction rsassaPkcs1V15Sha256Sign(messageUtf8, privateKeyPem) {\n  const key = parsePkcs8RsaPrivateKey(privateKeyPem);\n  const k = Math.ceil(key.n.toString(2).length / 8);\n\n  const hash = sha256(new TextEncoder().encode(messageUtf8));\n  const digestInfoPrefix = hexToBytes('3031300d060960864801650304020105000420');\n  const tLen = digestInfoPrefix.length + hash.length;\n  const psLen = k - tLen - 3;\n  if (psLen < 8) throw new Error('RSA key too short for PKCS#1 v1.5 SHA-256');\n\n  const em = new Uint8Array(k);\n  em[0] = 0x00;\n  em[1] = 0x01;\n  for (let i = 0; i < psLen; i++) em[2 + i] = 0xff;\n  em[2 + psLen] = 0x00;\n  em.set(digestInfoPrefix, 3 + psLen);\n  em.set(hash, 3 + psLen + digestInfoPrefix.length);\n\n  const m = bytesToBigInt(em);\n  const s = modPow(m, key.d, key.n);\n  return bigIntToBytes(s, k);\n}\n\nconst input = $input.first().json;\nconst serviceAccountEmail = $('Set Credentials').first().json[\"✅GOOGLE_SERVICE_ACCOUNT_EMAIL\"];\nconst privateKeyPem = String($('Set Credentials').first().json[\"✅GOOGLE_PRIVATE_KEY\"] || '').replace(/\\\\n/g, '\\n');\nconst scope = $('Set Credentials').first().json[\"✅GOOGLE_SCOPE\"] || 'https://www.googleapis.com/auth/spreadsheets.readonly';\n\nif (!serviceAccountEmail || !privateKeyPem) {\n  throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY');\n}\n\nconst now = Math.floor(Date.now() / 1000);\nconst header = { alg: 'RS256', typ: 'JWT' };\nconst payload = {\n  iss: serviceAccountEmail,\n  scope,\n  aud: 'https://oauth2.googleapis.com/token',\n  iat: now,\n  exp: now + 3600,\n};\n\nconst encodedHeader = b64urlFromString(JSON.stringify(header));\nconst encodedPayload = b64urlFromString(JSON.stringify(payload));\nconst signingInput = `${encodedHeader}.${encodedPayload}`;\n\nconst signatureBytes = rsassaPkcs1V15Sha256Sign(signingInput, privateKeyPem);\nconst signature = b64urlFromBytes(signatureBytes);\nconst assertion = `${signingInput}.${signature}`;\n\nreturn [\n  {\n    json: {\n      ...input,\n      assertion,\n    },\n  },\n];\n"
+      },
+      "id": "ccccc996-2d47-48fe-a659-6c8e16dc18de",
+      "name": "Build JWT Assertion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2848,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.amazon.com/auth/o2/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "=refresh_token"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_REFRESH_TOKEN\"] }}"
+            },
+            {
+              "name": "client_id",
+              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_CLIENT_ID\"] }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_CLIENT_SECRET: \"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "afc9b8b5-cf21-4e96-9860-7880ca67dd81",
+      "name": "Mint SP Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2176,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent($('Set Credentials').item.json[\"✅SHEET_NAME\"] || 'MOBILITY') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Refresh Google Token').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2b6d24fb-ba21-4e4b-a472-90af99569432",
+      "name": "Webhook Read Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3200,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Refresh Google Token').item.json.access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "650d76f2-51f9-497f-a8c3-830c0668c8d8",
+      "name": "Webhook Update Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4096,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractBsr(payload) {\n  const ranks = [];\n  const seen = new Set();\n  function walk(value) {\n    if (!value || typeof value !== 'object') return;\n    if (Array.isArray(value)) {\n      for (const item of value) walk(item);\n      return;\n    }\n    for (const [key, child] of Object.entries(value)) {\n      if (key.toLowerCase() === 'rank') {\n        const n = Number(child);\n        if (Number.isFinite(n) && n > 0 && !seen.has(n)) {\n          seen.add(n);\n          ranks.push(n);\n        }\n      }\n      walk(child);\n    }\n  }\n  walk(payload);\n  if (!ranks.length) return '';\n  return Math.min(...ranks);\n}\nconst originalItems = $('Build BSR Requests').all();\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'] || 'MOBILITY';\nconst data = [];\nfor (const item of $input.all()) {\n  const source = item.json || {};\n  const originalIndex = item.pairedItem && typeof item.pairedItem.item === 'number' ? item.pairedItem.item : -1;\n  const original = originalIndex >= 0 ? (originalItems[originalIndex]?.json || {}) : {};\n  const rowNumber = original.rowNumber;\n  const columnLetter = original.bsrColumnLetter;\n  const rank = extractBsr(source);\n  if (!rowNumber) continue;\n  if (!columnLetter) {\n    throw new Error('Missing detected BSR column letter from row 2');\n  }\n  data.push({ range: `${sheetName}!${columnLetter}${rowNumber}`, values: [[rank]] });\n}\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3872,
+        -224
+      ],
+      "id": "a05541f0-b920-43b4-9d74-67e1703e245f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalize(value) {\n  return String(value || '').trim().replace(/\\s+/g, ' ').toUpperCase();\n}\n\nfunction toColumnLetter(index) {\n  let value = index + 1;\n  let output = '';\n  while (value > 0) {\n    const remainder = (value - 1) % 26;\n    output = String.fromCharCode(65 + remainder) + output;\n    value = Math.floor((value - 1) / 26);\n  }\n  return output;\n}\n\nconst sheet = $input.first().json || {};\nconst values = sheet.values || [];\nconst row2 = values[1] || [];\n\nconst skuCol = row2.findIndex((cell) => normalize(cell) === 'SKU');\nconst bsrCol = row2.findIndex((cell) => normalize(cell) === 'BSR');\nlet asinCol = row2.findIndex((cell) => normalize(cell) === 'ASIN');\n\nif (asinCol === -1) {\n  for (let i = 0; i < Math.min(values.length, 6); i++) {\n    const row = values[i] || [];\n    const found = row.findIndex((cell) => normalize(cell) === 'ASIN');\n    if (found !== -1) {\n      asinCol = found;\n      break;\n    }\n  }\n}\n\nif (skuCol === -1 || bsrCol === -1 || asinCol === -1) {\n  throw new Error('Could not find SKU, ASIN, and BSR columns from the Google Sheet headers');\n}\n\nconst bsrColumnLetter = toColumnLetter(bsrCol);\nconst items = [];\nfor (let i = 4; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  const asin = String(row[asinCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  if (!asin || !/^[A-Z0-9]{10}$/i.test(asin)) continue;\n  items.push({ json: { rowNumber: i + 1, sku, asin: asin.toUpperCase(), bsrColumnLetter } });\n}\nreturn items;"
+      },
+      "id": "6e70dd72-590d-43bf-bef9-29b172697ccd",
+      "name": "Build BSR Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3424,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/catalog/2022-04-01/items/{{ $json.asin }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "marketplaceIds",
+              "value": "ATVPDKIKX0DER"
+            },
+            {
+              "name": "includedData",
+              "value": "salesRanks"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Mint SP Access Token').first().json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "16ddf64d-e263-4bdf-b553-90fb377ed8af",
+      "name": "SP Get BSR by ASIN",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3872,
+        -32
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 1500,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "11348922-3f5b-4ad7-a494-ac4e8de226fb",
+      "name": "BSR Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3648,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1.5
+      },
+      "id": "be715f49-5fb1-4b74-a3ac-f73cc18e724f",
+      "name": "BSR Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4096,
+        16
+      ],
+      "webhookId": "1e4020f7-c0d0-4330-a3fe-5e60016158b8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Attach Shared Auth Bundle').first().json.auth.amazon.spAccessToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportType\": \"GET_MERCHANT_LISTINGS_ALL_DATA\",\n  \"marketplaceIds\": [\"ATVPDKIKX0DER\"]\n}",
+        "options": {}
+      },
+      "id": "e6106b6e-d87c-482e-bca8-898799d2c6d1",
+      "name": "SP Create FBM Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1632,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.max(60, Number($json.nextWaitSeconds || 60)) }}"
+      },
+      "id": "a682d91b-335c-4fc8-a8fa-134eea99e344",
+      "name": "SP Wait FBM",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1856,
+        496
+      ],
+      "webhookId": "f2ad2760-db2a-4c06-a0df-a5c9ba23420d"
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create FBM Report').item.json.reportId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Attach Shared Auth Bundle').first().json.auth.amazon.spAccessToken }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "92e5409e-794d-4f89-ad52-aa4d0123bb18",
+      "name": "SP Check FBM Report Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2080,
+        448
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseRetryAfterSeconds(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;\n}\nfunction nextBackoffSeconds(previousAttempt, retryAfterSeconds) {\n  const capped = Math.min(300, 60 * (2 ** Math.max(1, previousAttempt + 1)));\n  const jitter = Math.floor(Math.random() * 31);\n  return Math.max(capped + jitter, retryAfterSeconds || 0, 60);\n}\nconst input = $input.first().json || {};\nconst previousAttempt = Number(input.pollAttempt || 0);\nconst error = input.error || null;\nconst rawStatus = String(input.processingStatus || '').toUpperCase();\nif (error) {\n  const message = String(error.message || input.message || 'Unknown polling error');\n  const httpCode = Number(error.httpCode || input.httpCode || 0);\n  const retryAfterSeconds = parseRetryAfterSeconds(error.retryAfter || error.headers?.['retry-after'] || error.response?.headers?.['retry-after']);\n  if (httpCode === 429 || message.toLowerCase().includes('too many requests') || message.toLowerCase().includes('thrott')) {\n    return [{ json: { ...input, processingStatus: 'THROTTLED', pollAttempt: previousAttempt + 1, nextWaitSeconds: nextBackoffSeconds(previousAttempt, retryAfterSeconds) } }];\n  }\n  throw new Error(message);\n}\nif (rawStatus === 'FATAL' || rawStatus === 'CANCELLED') {\n  throw new Error(`SP report ${rawStatus}: ${input.processingEndTime || input.reportId || 'No report details provided'}`);\n}\nif (rawStatus === 'DONE') {\n  return [{ json: { ...input, processingStatus: 'DONE', pollAttempt: previousAttempt } }];\n}\nreturn [{ json: { ...input, processingStatus: rawStatus || 'IN_PROGRESS', pollAttempt: previousAttempt + 1, nextWaitSeconds: nextBackoffSeconds(previousAttempt, 0) } }];"
+      },
+      "id": "0703f413-c3cc-46cd-9655-7ead55220479",
+      "name": "SP Normalize FBM Poll Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2304,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.processingStatus }}",
+              "rightValue": "DONE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1776134540687-uz3scx2co"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f9cdf3dd-6b5d-4be3-a828-09ecd9155c80",
+      "name": "SP If FBM",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2528,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/documents/{{ $('SP Check FBM Report Status').item.json.reportDocumentId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Attach Shared Auth Bundle').first().json.auth.amazon.spAccessToken }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4632f2e0-873a-417b-a606-699450d43e26",
+      "name": "SP Get FBM Report Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2752,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "506b19b4-60af-466f-a3d2-5378d2005ef6",
+      "name": "SP Download FBM Report File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2976,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "reportText",
+        "options": {
+          "encoding": "utf8",
+          "stripBOM": true
+        }
+      },
+      "id": "be155284-9dd2-4ced-a57d-cbbf93ba974b",
+      "name": "SP Extract FBM Report Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        3200,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\nfunction toNumber(input) {\n  if (input === null || input === undefined || input === '') return 0;\n  const n = Number(String(input).replace(/[\\s,$]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\nfunction isMerchantChannel(value) {\n  const normalized = String(value || '').trim().toUpperCase();\n  if (!normalized) return true;\n  if (normalized === 'DEFAULT' || normalized === 'MERCHANT' || normalized === 'MFN') return true;\n  return !normalized.includes('AMAZON');\n}\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'FBM report text empty' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'FBM report has no data rows' } }];\n}\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => header.toLowerCase().replace(/[^a-z0-9]/g, ''));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\nconst skuIdx = pickIndex(['sellersku', 'sku', 'merchantsku']);\nconst quantityIdx = pickIndex(['quantity']);\nconst fulfillmentChannelIdx = pickIndex(['fulfillmentchannel']);\nif (skuIdx === -1 || quantityIdx === -1) {\n  throw new Error('Could not locate seller-sku and quantity columns in FBM stock report');\n}\nconst bySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n  const channel = fulfillmentChannelIdx === -1 ? '' : String(cols[fulfillmentChannelIdx] || '').trim();\n  const fbmQuantity = isMerchantChannel(channel) ? toNumber(cols[quantityIdx]) : 0;\n  const record = bySku[sku] || { sku, fbaTotalQuantity: 0, fbaFulfillableQuantity: 0, fbaUnsellableQuantity: 0, fbaReservedQuantity: 0, fbmQuantity: 0 };\n  record.fbmQuantity = Number((record.fbmQuantity + fbmQuantity).toFixed(2));\n  bySku[sku] = record;\n}\nreturn [{ json: { bySku, skuCount: Object.keys(bySku).length, parseWarning: null } }];"
+      },
+      "id": "4818547f-b829-41d7-8ec8-9d4045f9ff29",
+      "name": "SP Parse FBM Stock by SKU",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3424,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ !!$json.retryCreate }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "condition-1776136949714-14najxzz4"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5439cfc9-dd09-45c3-97a7-02a5dcfa94d2",
+      "name": "SP If Retry FBA Create",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        288,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"] || 'MOBILITY') + '!' + ($('Set Credentials').item.json[\"✅RANGE\"] || 'A:Z')) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Attach Shared Auth Bundle').first().json.auth.google.accessToken }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "de92f16b-753c-4e39-a540-b214c89cf757",
+      "name": "Webhook Read Google Sheet7",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3648,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Attach Shared Auth Bundle').first().json.auth.google.accessToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "c2da35bc-b7f3-4f4d-87ec-8ddd5b1eb8e4",
+      "name": "Webhook Update Google Sheet7",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4096,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nconst sheet = $('Webhook Read Google Sheet7').first().json || {};\nconst values = sheet.values || [];\nconst fbaBySku = $('SP Parse Returns by SKU1').first().json.bySku || {};\nconst fbmBySku = $('SP Parse FBM Stock by SKU').first().json.bySku || {};\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'] || 'MOBILITY';\n\nlet headerRowIdx = -1;\nlet skuCol = -1;\nfor (let i = 0; i < Math.min(values.length, 12); i++) {\n  const row = values[i] || [];\n  const foundSkuCol = row.findIndex((c) => String(c).trim().toUpperCase() === 'SKU');\n  if (foundSkuCol !== -1) {\n    headerRowIdx = i;\n    skuCol = foundSkuCol;\n    break;\n  }\n}\nif (headerRowIdx === -1 || skuCol === -1) {\n  throw new Error('Could not find SKU header column');\n}\n\nconst stockColA1 = 'AP';\nconst data = [];\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  if (!/[A-Za-z0-9]/.test(sku) || sku.length < 3) continue;\n\n  const fba = fbaBySku[sku] || {};\n  const fbm = fbmBySku[sku] || {};\n  const stock = Number((toNumber(fba.fbaFulfillableQuantity) + toNumber(fbm.fbmQuantity)).toFixed(2));\n  data.push({ range: `${sheetName}!${stockColA1}${i + 1}`, values: [[stock]] });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3872,
+        496
+      ],
+      "id": "4e116f3c-e647-4adf-9ffa-05446477a10e",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Attach Shared Auth Bundle').first().json.auth.amazon.spAccessToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportType\": \"{{ $json.fbaReportType || 'GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA' }}\",\n  \"marketplaceIds\": [\"ATVPDKIKX0DER\"]\n}",
+        "options": {}
+      },
+      "id": "f3a9c433-5e2a-4a9d-848a-126b7a97dc77",
+      "name": "SP Create Returns Report1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -608,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.max(60, Number($json.nextWaitSeconds || 60)) }}"
+      },
+      "id": "7089d83a-ee2f-4cf9-b4d1-c7f36c6e325e",
+      "name": "SP Wait1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -384,
+        496
+      ],
+      "webhookId": "f775dac8-a224-49d7-a771-9ea5ebb658df"
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create Returns Report1').item.json.reportId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Attach Shared Auth Bundle').first().json.auth.amazon.spAccessToken }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0a42a77a-e0b0-4677-b826-fb76f5e68e27",
+      "name": "SP Check Report Status1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -160,
+        448
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "11fa5373-bef8-477a-a2ee-f1f61005f843",
+              "leftValue": "={{ $json.processingStatus }}",
+              "rightValue": "DONE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "65ce4906-93d8-445b-b9af-ce62ac7ac44a",
+      "name": "SP If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        512,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/documents/{{ $('SP Check Report Status1').item.json.reportDocumentId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-amz-access-token",
+              "value": "={{ $('Attach Shared Auth Bundle').first().json.auth.amazon.spAccessToken }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e140e483-0fe9-426a-b0a2-93334120a175",
+      "name": "SP Get Report Document1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        736,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "8f0d4b0f-9e42-4032-926f-3e2948887f43",
+      "name": "SP Download Report File1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        960,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\n\nfunction toNumber(input) {\n  if (input === null || input === undefined || input === '') return 0;\n  const n = Number(String(input).replace(/[\\s,$]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'FBA report text empty' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\n\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'FBA report has no data rows' } }];\n}\n\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => header.toLowerCase().replace(/[^a-z0-9]/g, ''));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\n\nconst skuIdx = pickIndex(['sku', 'sellersku', 'merchantsku']);\nconst fbaTotalIdx = pickIndex(['afntotalquantity']);\nconst fbaFulfillableIdx = pickIndex(['afnfulfillablequantity']);\nconst fbaUnsellableIdx = pickIndex(['afnunsellablequantity']);\nconst fbaReservedIdx = pickIndex(['afnreservedquantity']);\n\nif (skuIdx === -1) {\n  throw new Error('Could not locate SKU column in FBA stock report');\n}\n\nconst bySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n\n  const record = bySku[sku] || {\n    sku,\n    fbaTotalQuantity: 0,\n    fbaFulfillableQuantity: 0,\n    fbaUnsellableQuantity: 0,\n    fbaReservedQuantity: 0,\n    fbmQuantity: 0,\n  };\n\n  record.fbaFulfillableQuantity = Number((record.fbaFulfillableQuantity + (fbaFulfillableIdx === -1 ? 0 : toNumber(cols[fbaFulfillableIdx]))).toFixed(2));\n  record.fbaUnsellableQuantity = Number((record.fbaUnsellableQuantity + (fbaUnsellableIdx === -1 ? 0 : toNumber(cols[fbaUnsellableIdx]))).toFixed(2));\n  record.fbaReservedQuantity = Number((record.fbaReservedQuantity + (fbaReservedIdx === -1 ? 0 : toNumber(cols[fbaReservedIdx]))).toFixed(2));\n  if (fbaTotalIdx !== -1) {\n    record.fbaTotalQuantity = Number((record.fbaTotalQuantity + toNumber(cols[fbaTotalIdx])).toFixed(2));\n  } else {\n    record.fbaTotalQuantity = Number((record.fbaFulfillableQuantity + record.fbaUnsellableQuantity + record.fbaReservedQuantity).toFixed(2));\n  }\n\n  bySku[sku] = record;\n}\n\nreturn [{ json: { bySku, skuCount: Object.keys(bySku).length, parseWarning: null } }];"
+      },
+      "id": "324a68d8-d635-429b-96ec-bb14ea27ff6d",
+      "name": "SP Parse Returns by SKU1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "reportText",
+        "options": {
+          "encoding": "utf8",
+          "stripBOM": true
+        }
+      },
+      "id": "2424ffac-6859-439c-a251-0c1fe83c2dd0",
+      "name": "SP Extract Report Text1",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseRetryAfterSeconds(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;\n}\nfunction nextBackoffSeconds(previousAttempt, retryAfterSeconds) {\n  const capped = Math.min(300, 60 * (2 ** Math.max(1, previousAttempt + 1)));\n  const jitter = Math.floor(Math.random() * 31);\n  return Math.max(capped + jitter, retryAfterSeconds || 0, 60);\n}\nconst input = $input.first().json || {};\nconst previousAttempt = Number(input.pollAttempt || 0);\nconst error = input.error || null;\nconst rawStatus = String(input.processingStatus || '').toUpperCase();\nconst currentReportType = String(input.reportType || '').toUpperCase();\nif (error) {\n  const message = String(error.message || input.message || 'Unknown polling error');\n  const httpCode = Number(error.httpCode || input.httpCode || 0);\n  const retryAfterSeconds = parseRetryAfterSeconds(error.retryAfter || error.headers?.['retry-after'] || error.response?.headers?.['retry-after']);\n  if (httpCode === 429 || message.toLowerCase().includes('too many requests') || message.toLowerCase().includes('thrott')) {\n    return [{ json: { ...input, processingStatus: 'THROTTLED', pollAttempt: previousAttempt + 1, nextWaitSeconds: nextBackoffSeconds(previousAttempt, retryAfterSeconds), retryCreate: false } }];\n  }\n  throw new Error(message);\n}\nif (rawStatus === 'FATAL' || rawStatus === 'CANCELLED') {\n  if (currentReportType === 'GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA') {\n    return [{ json: { fbaReportType: 'GET_FBA_MYI_ALL_INVENTORY_DATA', retryCreate: true, previousFailedReportType: currentReportType, previousFailedStatus: rawStatus, pollAttempt: 0 } }];\n  }\n  throw new Error(`SP report ${rawStatus}: ${currentReportType || input.reportId || 'No report details provided'}`);\n}\nif (rawStatus === 'DONE') {\n  return [{ json: { ...input, processingStatus: 'DONE', pollAttempt: previousAttempt, retryCreate: false } }];\n}\nreturn [{ json: { ...input, processingStatus: rawStatus || 'IN_PROGRESS', pollAttempt: previousAttempt + 1, nextWaitSeconds: nextBackoffSeconds(previousAttempt, 0), retryCreate: false } }];"
+      },
+      "id": "401e6596-4dd4-4831-8f82-5cf816b3ebdc",
+      "name": "SP Normalize Poll Status1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function toNumber(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const n = Number(String(value).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\nconst sheet = $input.first().json || {};\nconst values = sheet.values || [];\nlet headerRowIdx = -1;\nlet skuCol = -1;\nfor (let i = 0; i < Math.min(values.length, 12); i++) {\n  const row = values[i] || [];\n  const foundSkuCol = row.findIndex((c) => String(c).trim().toUpperCase() === 'SKU');\n  if (foundSkuCol !== -1) {\n    headerRowIdx = i;\n    skuCol = foundSkuCol;\n    break;\n  }\n}\nif (headerRowIdx === -1 || skuCol === -1) throw new Error('Could not find SKU header column');\nconst items = [];\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  const listingPrice = toNumber(row[2] || 0) || 1;\n  const unitsSold = toNumber(row[8] || 0);\n  items.push({ json: { rowNumber: i + 1, sku, listingPrice, unitsSold } });\n}\nreturn items;"
+      },
+      "id": "57882794-4120-4009-bbdf-d650ec1b235f",
+      "name": "Build Fee Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3424,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function sleep(ms) {\n  return new Promise((resolve) => setTimeout(resolve, ms));\n}\n\nfunction normalizePayload(payload) {\n  let current = payload;\n  if (typeof current === 'string') {\n    try { current = JSON.parse(current); } catch { return {}; }\n  }\n  if (current && typeof current === 'object' && typeof current.body === 'string') {\n    try { current = JSON.parse(current.body); } catch {}\n  } else if (current && typeof current === 'object' && current.body && typeof current.body === 'object') {\n    current = current.body;\n  }\n  return current && typeof current === 'object' ? current : {};\n}\n\nfunction amountOf(value) {\n  if (!value || typeof value !== 'object') return 0;\n  const amount = Number(value.Amount ?? value.amount ?? 0);\n  return Number.isFinite(amount) ? amount : 0;\n}\n\nfunction collectFeeDetails(container, acc) {\n  if (!container || typeof container !== 'object') return;\n  if (Array.isArray(container)) {\n    for (const item of container) collectFeeDetails(item, acc);\n    return;\n  }\n  if (container.FeeType || container.feeType) acc.push(container);\n  for (const child of Object.values(container)) collectFeeDetails(child, acc);\n}\n\nfunction getPerUnitFulfillmentFee(rawPayload) {\n  const payload = normalizePayload(rawPayload);\n  const feeRoot = payload.payload?.FeesEstimateResult?.FeesEstimate || payload.FeesEstimateResult?.FeesEstimate || payload.payload?.feesEstimateResult?.feesEstimate || payload.feesEstimateResult?.feesEstimate || payload;\n  const directList = feeRoot.FeeDetailList || feeRoot.feeDetailList || [];\n  const details = [];\n  collectFeeDetails(directList, details);\n  if (!details.length) collectFeeDetails(feeRoot, details);\n  let total = 0;\n  for (const detail of details) {\n    const type = String(detail.FeeType || detail.feeType || '').toLowerCase();\n    if (!type) continue;\n    if (type === 'fbafees') {\n      const top = amountOf(detail.FinalFee || detail.finalFee || detail.FeeAmount || detail.feeAmount);\n      if (top > 0) return Number(top.toFixed(2));\n    }\n    const isFulfillment = type.includes('fulfillment') || type.includes('pickandpack') || type.includes('weight') || type.includes('handling') || type.includes('fba');\n    const exclude = type.includes('referral') || type.includes('closing') || type.includes('commission') || type.includes('storage');\n    if (!isFulfillment || exclude) continue;\n    total += amountOf(detail.FinalFee || detail.finalFee || detail.FeeAmount || detail.feeAmount);\n  }\n  return Number(total.toFixed(2));\n}\n\nconst token = $('Attach Shared Auth Bundle').first().json.auth.amazon.spAccessToken;\nconst items = $input.all();\nconst output = [];\nfor (let index = 0; index < items.length; index++) {\n  const current = items[index].json || {};\n  const sku = String(current.sku || '').trim();\n  if (!sku) continue;\n  const body = {\n    FeesEstimateRequest: {\n      MarketplaceId: 'ATVPDKIKX0DER',\n      IsAmazonFulfilled: true,\n      Identifier: `${current.rowNumber}-${sku}`,\n      PriceToEstimateFees: {\n        ListingPrice: { CurrencyCode: 'USD', Amount: Number(current.listingPrice || 1) },\n        Shipping: { CurrencyCode: 'USD', Amount: 0 },\n      },\n    },\n  };\n  let rawPayload = {};\n  for (let attempt = 0; attempt < 5; attempt++) {\n    try {\n      rawPayload = await this.helpers.httpRequest({\n        method: 'POST',\n        url: `https://sellingpartnerapi-na.amazon.com/products/fees/v0/listings/${encodeURIComponent(sku)}/feesEstimate`,\n        headers: {\n          'x-amz-access-token': token,\n          Accept: 'application/json',\n          'Content-Type': 'application/json',\n        },\n        body,\n        json: true,\n      });\n      break;\n    } catch (error) {\n      const statusCode = Number(error.statusCode || error.httpCode || error.response?.statusCode || 0);\n      const isRetryable = statusCode === 429 || statusCode === 503 || String(error.message || '').toLowerCase().includes('too many requests');\n      if (!isRetryable || attempt === 4) {\n        rawPayload = { error: { message: error.message || 'Request failed', statusCode } };\n        break;\n      }\n      await sleep(1500 * (attempt + 1));\n    }\n  }\n  const perUnitFee = getPerUnitFulfillmentFee(rawPayload);\n  const totalFee = Number((perUnitFee * Number(current.unitsSold || 0) * -1).toFixed(2));\n  output.push({\n    json: {\n      rowNumber: current.rowNumber,\n      sku,\n      perUnitFee,\n      unitsSold: current.unitsSold || 0,\n      totalFee,\n      debugRawPayload: index < 2 ? rawPayload : undefined,\n      debugNormalizedPayload: index < 2 ? normalizePayload(rawPayload) : undefined,\n      debugRequestBody: index < 2 ? body : undefined,\n    },\n  });\n  if (index < items.length - 1) await sleep(1300);\n}\nreturn output;"
+      },
+      "id": "ef799954-74be-40fc-875d-100f64cb9244",
+      "name": "Fetch FBA Fees Sequentially",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3648,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"] || 'MOBILITY') + '!' + ($('Set Credentials').item.json[\"✅RANGE\"] || 'A:Z')) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Attach Shared Auth Bundle').first().json.auth.google.accessToken }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "880c543b-da82-48e3-8d12-ebf5a08846ed",
+      "name": "Webhook Read Google Sheet11",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3200,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Attach Shared Auth Bundle').first().json.auth.google.accessToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "bcb812a1-6683-4d37-b5d5-844dc4136d4e",
+      "name": "Webhook Update Google Sheet11",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4096,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const sheetName = $('Set Credentials').first().json[\"✅SHEET_NAME\"] || 'MOBILITY';\nconst data = [];\nfor (const item of $input.all()) {\n  const source = item.json || {};\n  if (!source.rowNumber) continue;\n  data.push({ range: `${sheetName}!AU${source.rowNumber}`, values: [[source.totalFee ?? 0]] });\n}\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3872,
+        280
+      ],
+      "id": "768cb74e-e623-4fe1-aded-57e57861bdf2",
+      "name": "Code in JavaScript11"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst remainingRegistry = Array.isArray(input.remainingRegistry) ? input.remainingRegistry : [];\nif (remainingRegistry.length === 0) {\n  return [{ json: { ...input, currentMetric: null, currentSelected: 'false', currentStartedAt: null, done: true } }];\n}\nconst [currentMetric, ...rest] = remainingRegistry;\nconst selected = input.runAll || (input.selectedMetrics || []).includes(currentMetric.metricKey);\nreturn [{\n  json: {\n    ...input,\n    remainingRegistry: rest,\n    currentMetric,\n    currentSelected: selected ? 'true' : 'false',\n    currentStartedAt: selected ? new Date().toISOString() : null,\n    done: false,\n  },\n}];"
+      },
+      "id": "7fb6cf8a-0fdc-4d5c-9001-a99bbc33828d",
+      "name": "Prepare Next Metric",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.done }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              },
+              "id": "condition-has-current-metric"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "519c6c61-acfb-4105-8edc-6f2f23ef0e01",
+      "name": "If Has Current Metric",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1280,
+        488
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.currentSelected }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-run-current-metric"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bc59c1d5-858a-4ffc-8669-2e0fc7610e9e",
+      "name": "If Run Current Metric",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1056,
+        392
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ ({ bsr: 0, fba_fbm_stock: 1, fba_per_unit_fulfillment_fee: 2 })[$json.currentMetric.metricKey] ?? 3 }}"
+      },
+      "id": "823e7be9-a464-45d5-81a2-d579ee636437",
+      "name": "Route Metric",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -832,
+        232
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{\n  json: {\n    ...input,\n    summary: [\n      ...(input.summary || []),\n      {\n        metricKey: current.metricKey,\n        displayName: current.displayName,\n        selected: false,\n        status: 'skipped',\n        errorMessage: null,\n        startedAt: null,\n        finishedAt: new Date().toISOString(),\n      },\n    ],\n  },\n}];"
+      },
+      "id": "616063dc-3e7f-4d0b-a805-34dbe8399ed2",
+      "name": "Record Metric Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -832,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previous = $('If Run Current Metric').item.json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{\n  json: {\n    ...previous,\n    summary: [\n      ...(previous.summary || []),\n      {\n        metricKey: current.metricKey,\n        displayName: current.displayName,\n        selected: true,\n        status: error ? 'failed' : 'success',\n        errorMessage: error ? String(error.message || payload.message || 'Metric execution failed') : null,\n        startedAt: previous.currentStartedAt || null,\n        finishedAt: new Date().toISOString(),\n      },\n    ],\n  },\n}];"
+      },
+      "id": "28bc8d38-4aab-4acc-a2d6-90c80a823fef",
+      "name": "Record Metric Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4320,
+        216
+      ]
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "special-execute-subworkflow-trigger",
+      "name": "Execute Sub-workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3744,
+        880
+      ]
+    }
+  ],
+  "connections": {
+    "Mint Amazon Access Token": {
+      "main": [
+        [
+          {
+            "node": "Refresh Amazon Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refresh Amazon Token": {
+      "main": [
+        [
+          {
+            "node": "Build JWT Assertion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mint Google Access Token": {
+      "main": [
+        [
+          {
+            "node": "Refresh Google Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Shared Auth Bundle": {
+      "main": [
+        [
+          {
+            "node": "Build Workflow Registry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "Mint Amazon Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build JWT Assertion": {
+      "main": [
+        [
+          {
+            "node": "Mint Google Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refresh Google Token": {
+      "main": [
+        [
+          {
+            "node": "Mint SP Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mint SP Access Token": {
+      "main": [
+        [
+          {
+            "node": "Attach Shared Auth Bundle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Read Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Build BSR Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Webhook Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build BSR Requests": {
+      "main": [
+        [
+          {
+            "node": "BSR Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Get BSR by ASIN": {
+      "main": [
+        [
+          {
+            "node": "BSR Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BSR Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP Get BSR by ASIN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BSR Wait": {
+      "main": [
+        [
+          {
+            "node": "BSR Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Create FBM Report": {
+      "main": [
+        [
+          {
+            "node": "SP Wait FBM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Wait FBM": {
+      "main": [
+        [
+          {
+            "node": "SP Check FBM Report Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Check FBM Report Status": {
+      "main": [
+        [
+          {
+            "node": "SP Normalize FBM Poll Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Normalize FBM Poll Status": {
+      "main": [
+        [
+          {
+            "node": "SP If FBM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP If FBM": {
+      "main": [
+        [
+          {
+            "node": "SP Get FBM Report Document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP Wait FBM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Get FBM Report Document": {
+      "main": [
+        [
+          {
+            "node": "SP Download FBM Report File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Download FBM Report File": {
+      "main": [
+        [
+          {
+            "node": "SP Extract FBM Report Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Extract FBM Report Text": {
+      "main": [
+        [
+          {
+            "node": "SP Parse FBM Stock by SKU",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Parse FBM Stock by SKU": {
+      "main": [
+        [
+          {
+            "node": "Webhook Read Google Sheet7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP If Retry FBA Create": {
+      "main": [
+        [
+          {
+            "node": "SP Create Returns Report1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Read Google Sheet7": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "Webhook Update Google Sheet7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Create Returns Report1": {
+      "main": [
+        [
+          {
+            "node": "SP Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Wait1": {
+      "main": [
+        [
+          {
+            "node": "SP Check Report Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Check Report Status1": {
+      "main": [
+        [
+          {
+            "node": "SP Normalize Poll Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP If1": {
+      "main": [
+        [
+          {
+            "node": "SP Get Report Document1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Get Report Document1": {
+      "main": [
+        [
+          {
+            "node": "SP Download Report File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Download Report File1": {
+      "main": [
+        [
+          {
+            "node": "SP Extract Report Text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Parse Returns by SKU1": {
+      "main": [
+        [
+          {
+            "node": "SP Create FBM Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Extract Report Text1": {
+      "main": [
+        [
+          {
+            "node": "SP Parse Returns by SKU1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SP Normalize Poll Status1": {
+      "main": [
+        [
+          {
+            "node": "SP If Retry FBA Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Fee Requests": {
+      "main": [
+        [
+          {
+            "node": "Fetch FBA Fees Sequentially",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch FBA Fees Sequentially": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Read Google Sheet11": {
+      "main": [
+        [
+          {
+            "node": "Build Fee Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript11": {
+      "main": [
+        [
+          {
+            "node": "Webhook Update Google Sheet11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Workflow Registry": {
+      "main": [
+        [
+          {
+            "node": "Prepare Next Metric",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Next Metric": {
+      "main": [
+        [
+          {
+            "node": "If Has Current Metric",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Has Current Metric": {
+      "main": [
+        [
+          {
+            "node": "If Run Current Metric",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Current Metric": {
+      "main": [
+        [
+          {
+            "node": "Route Metric",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Metric Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Metric": {
+      "main": [
+        [
+          {
+            "node": "Webhook Read Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SP Create Returns Report1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Webhook Read Google Sheet11",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Record Metric Skipped": {
+      "main": [
+        [
+          {
+            "node": "Prepare Next Metric",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Metric Result": {
+      "main": [
+        [
+          {
+            "node": "Prepare Next Metric",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Update Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Record Metric Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Update Google Sheet7": {
+      "main": [
+        [
+          {
+            "node": "Record Metric Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Update Google Sheet11": {
+      "main": [
+        [
+          {
+            "node": "Record Metric Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Sub-workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "8ad27101-dbe0-442f-89a0-5d98ad0dc8dc",
+  "activeVersionId": null,
+  "versionCounter": 3,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-16T22:33:25.449Z",
+      "createdAt": "2026-04-16T22:33:25.449Z",
+      "role": "workflow:owner",
+      "workflowId": "JcjQO7vgmt1m0JRa",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

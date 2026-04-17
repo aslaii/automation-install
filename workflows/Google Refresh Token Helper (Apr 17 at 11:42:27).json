@@ -1,0 +1,298 @@
+{
+  "updatedAt": "2026-04-17T04:04:42.937Z",
+  "createdAt": "2026-04-17T04:04:42.937Z",
+  "id": "3ya68vqpbOK4hBYl",
+  "name": "Google Refresh Token Helper (Apr 17 at 11:42:27)",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "google-refresh-token-helper",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "google_oauth_webhook",
+      "name": "Google OAuth Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "fe3f58c2-4978-4b28-adfe-e1e0bb1ea547"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "client-id",
+              "name": "✅GOOGLE_OAUTH_CLIENT_ID",
+              "type": "string",
+              "value": "YOUR_GOOGLE_CLIENT_ID"
+            },
+            {
+              "id": "client-secret",
+              "name": "✅GOOGLE_OAUTH_CLIENT_SECRET",
+              "type": "string",
+              "value": "YOUR_GOOGLE_CLIENT_SECRET"
+            },
+            {
+              "id": "scopes",
+              "name": "✅GOOGLE_OAUTH_SCOPES",
+              "type": "string",
+              "value": "https://www.googleapis.com/auth/drive"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "set_oauth_config",
+      "name": "Set OAuth Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst clientId = String(input['✅GOOGLE_OAUTH_CLIENT_ID'] || '').trim();\nconst clientSecret = String(input['✅GOOGLE_OAUTH_CLIENT_SECRET'] || '').trim();\nconst scopes = String(input['✅GOOGLE_OAUTH_SCOPES'] || 'https://www.googleapis.com/auth/drive').trim();\nconst redirectUri = String(input.webhookUrl || '').trim();\nif (!clientId || !clientSecret) {\n  throw new Error('Fill ✅GOOGLE_OAUTH_CLIENT_ID and ✅GOOGLE_OAUTH_CLIENT_SECRET first');\n}\nif (!redirectUri) {\n  throw new Error('Missing webhookUrl from trigger output');\n}\nconst code = typeof query.code === 'string' ? query.code : Array.isArray(query.code) ? query.code[0] : '';\nconst oauthParams = new URLSearchParams({\n  client_id: clientId,\n  redirect_uri: redirectUri,\n  response_type: 'code',\n  scope: scopes,\n  access_type: 'offline',\n  prompt: 'consent',\n  include_granted_scopes: 'true',\n});\nreturn [{ json: {\n  oauthStep: code ? 'callback' : 'start',\n  authUrl: 'https://accounts.google.com/o/oauth2/v2/auth?' + oauthParams.toString(),\n  authCode: code,\n  clientId,\n  clientSecret,\n  redirectUri,\n  scopes,\n} }];"
+      },
+      "id": "build_oauth_flow",
+      "name": "Build OAuth Flow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.oauthStep }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "callback"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "has_auth_code",
+      "name": "Has Auth Code?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "redirect",
+        "redirectURL": "={{ $json.authUrl }}",
+        "options": {
+          "responseCode": 302
+        }
+      },
+      "id": "redirect_to_google",
+      "name": "Redirect To Google Consent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1136,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth2.googleapis.com/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $json.clientId }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json.clientSecret }}"
+            },
+            {
+              "name": "code",
+              "value": "={{ $json.authCode }}"
+            },
+            {
+              "name": "grant_type",
+              "value": "authorization_code"
+            },
+            {
+              "name": "redirect_uri",
+              "value": "={{ $json.redirectUri }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "exchange_code_for_tokens",
+      "name": "Exchange Code For Tokens",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1136,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const token = $input.first().json;\nif (!token.refresh_token) {\n  throw new Error('Google did not return a refresh_token. Revoke the app or use prompt=consent with a fresh authorization attempt.');\n}\nreturn [{ json: {\n  ok: true,\n  message: 'Copy ✅GOOGLE_REFRESH_TOKEN into your other workflow.',\n  refresh_token: token.refresh_token,\n  access_token: token.access_token,\n  scope: token.scope,\n  token_type: token.token_type,\n  expires_in: token.expires_in,\n} }];"
+      },
+      "id": "format_token_response",
+      "name": "Format Token Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond_with_tokens",
+      "name": "Respond With Tokens",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1584,
+        432
+      ]
+    }
+  ],
+  "connections": {
+    "Google OAuth Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set OAuth Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set OAuth Config": {
+      "main": [
+        [
+          {
+            "node": "Build OAuth Flow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build OAuth Flow": {
+      "main": [
+        [
+          {
+            "node": "Has Auth Code?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Auth Code?": {
+      "main": [
+        [
+          {
+            "node": "Exchange Code For Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redirect To Google Consent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exchange Code For Tokens": {
+      "main": [
+        [
+          {
+            "node": "Format Token Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Token Response": {
+      "main": [
+        [
+          {
+            "node": "Respond With Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "8131bc44-fbed-450e-8a5a-2718ed15c7dd",
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-17T04:04:42.942Z",
+      "createdAt": "2026-04-17T04:04:42.942Z",
+      "role": "workflow:owner",
+      "workflowId": "3ya68vqpbOK4hBYl",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

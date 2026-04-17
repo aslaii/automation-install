@@ -1,0 +1,283 @@
+{
+  "updatedAt": "2026-04-14T02:01:10.893Z",
+  "createdAt": "2026-04-14T01:37:53.765Z",
+  "id": "2OZFeVjGdJaV9JRv",
+  "name": "Get Refresh Token",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "manual-trigger",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        240
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "set-inputs",
+      "name": "Set OAuth Inputs",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        240
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "clientId",
+              "value": "YOUR_AMAZON_CLIENT_ID",
+              "type": "string"
+            },
+            {
+              "name": "clientSecret",
+              "value": "amzn1.oa2-cs.v1.c8d866128f6e2dbe406785ea446654c10bc921de4d1ac4256fa96a63f5a47971",
+              "type": "string"
+            },
+            {
+              "name": "redirectUri",
+              "value": "https://example.com/callback",
+              "type": "string"
+            },
+            {
+              "name": "authorizationCode",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "name": "scope",
+              "value": "advertising::campaign_management",
+              "type": "string"
+            },
+            {
+              "name": "state",
+              "value": "amazon-ads-refresh-token",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "build-auth-url",
+      "name": "Build Auth URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        240
+      ],
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst encode = (v) => encodeURIComponent(String(v || ''));\nconst query = [\n  ['application_id', input.clientId || ''],\n  ['state', input.state || 'amazon-ads-refresh-token'],\n  ['redirect_uri', input.redirectUri || ''],\n  ['scope', input.scope || 'advertising::campaign_management'],\n  ['response_type', 'code'],\n].map(([k, v]) => `${encode(k)}=${encode(v)}`).join('&');\n\nreturn [{\n  json: {\n    ...input,\n    authorizationUrl: `https://www.amazon.com/ap/oa?${query}`,\n    instructions: 'Open authorizationUrl, approve app, copy returned code into authorizationCode, run workflow again.',\n  },\n}];"
+      }
+    },
+    {
+      "id": "has-code",
+      "name": "Has Code",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        240
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ String($json.authorizationCode || '').trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "id": "condition-1776131112903-kxvjgjb3l"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "no-code-yet",
+      "name": "No Code Yet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        120
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: { status: 'needs_authorization_code', authorizationUrl: $json.authorizationUrl, redirectUri: $json.redirectUri, scope: $json.scope, instructions: ['1. Open authorizationUrl in browser.','2. Sign in and approve Amazon Ads app.','3. Copy ?code=... from redirect URL.','4. Paste code into Set OAuth Inputs.authorizationCode.','5. Execute workflow again.'] } }];"
+      }
+    },
+    {
+      "id": "exchange-code",
+      "name": "Exchange Auth Code for Tokens",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        720,
+        360
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.amazon.com/auth/o2/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "authorization_code"
+            },
+            {
+              "name": "code",
+              "value": "={{ $json.authorizationCode }}"
+            },
+            {
+              "name": "redirect_uri",
+              "value": "={{ $json.redirectUri }}"
+            },
+            {
+              "name": "client_id",
+              "value": "={{ $json.clientId }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json.clientSecret }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "format-result",
+      "name": "Format Token Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        360
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: { accessToken: $json.access_token || null, refreshToken: $json.refresh_token || null, tokenType: $json.token_type || null, expiresIn: $json.expires_in || null, scope: $json.scope || null, note: 'Store refreshToken securely. Do not commit it.' } }];"
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set OAuth Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set OAuth Inputs": {
+      "main": [
+        [
+          {
+            "node": "Build Auth URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Auth URL": {
+      "main": [
+        [
+          {
+            "node": "Has Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Code": {
+      "main": [
+        [
+          {
+            "node": "Exchange Auth Code for Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Code Yet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exchange Auth Code for Tokens": {
+      "main": [
+        [
+          {
+            "node": "Format Token Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "358f5e6e-cbec-4d6e-ac44-6f4a68c0871f",
+  "activeVersionId": null,
+  "versionCounter": 6,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-14T01:37:53.770Z",
+      "createdAt": "2026-04-14T01:37:53.770Z",
+      "role": "workflow:owner",
+      "workflowId": "2OZFeVjGdJaV9JRv",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

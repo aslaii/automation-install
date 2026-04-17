@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-04-17T05:47:24.348Z",
+  "createdAt": "2026-04-13T22:37:10.693Z",
+  "id": "wJaKKBJzcgUUoahu",
   "name": "Get CTR",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -366,7 +372,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nconst sheet = $json; // from Webhook Read Google Sheet\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\n// Aggregate clicks and impressions by SKU, then derive CTR.\nconst metricsBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n\n  const clicks = toNumber(row.clicks);\n  const impressions = toNumber(row.impressions);\n\n  if (!metricsBySku.has(sku)) {\n    metricsBySku.set(sku, {\n      clicks: 0,\n      impressions: 0,\n    });\n  }\n\n  const bucket = metricsBySku.get(sku);\n  bucket.clicks = Number((bucket.clicks + clicks).toFixed(4));\n  bucket.impressions = Number((bucket.impressions + impressions).toFixed(4));\n}\n\nconst ctrBySku = new Map();\nfor (const [sku, metrics] of metricsBySku.entries()) {\n  const ctr = metrics.impressions > 0\n    ? Number(((metrics.clicks / metrics.impressions) * 100).toFixed(4))\n    : 0;\n  ctrBySku.set(sku, ctr);\n}\n\n// Detect the header row by finding the SKU column in the top section.\nlet headerRowIdx = -1;\nlet skuCol = -1;\nfor (let i = 0; i < Math.min(values.length, 12); i++) {\n  const row = values[i] || [];\n  const skuIdx = row.findIndex((cell) => String(cell).trim().toUpperCase() === 'SKU');\n  if (skuIdx !== -1) {\n    headerRowIdx = i;\n    skuCol = skuIdx;\n  }\n}\n\nif (headerRowIdx === -1 || skuCol === -1) {\n  throw new Error('Could not find header row with SKU column');\n}\n\nconst data = [];\nconst ctrColA1 = colToA1(12); // Column L\n\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || !ctrBySku.has(sku)) continue;\n\n  const rowNumber = i + 1;\n  data.push({\n    range: `${sheetName}!${ctrColA1}${rowNumber}`,\n    values: [[ctrBySku.get(sku)]],\n  });\n}\n\nreturn [{\n  json: {\n    valueInputOption: 'USER_ENTERED',\n    data,\n  },\n}];"
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $json;\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst metricsBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n  const clicks = toNumber(row.clicks);\n  const impressions = toNumber(row.impressions);\n  const bucket = metricsBySku.get(sku) || { clicks: 0, impressions: 0 };\n  bucket.clicks = Number((bucket.clicks + clicks).toFixed(4));\n  bucket.impressions = Number((bucket.impressions + impressions).toFixed(4));\n  metricsBySku.set(sku, bucket);\n}\n\nconst ctrBySku = new Map();\nfor (const [sku, metrics] of metricsBySku.entries()) {\n  const ctr = metrics.impressions > 0\n    ? Number(((metrics.clicks / metrics.impressions) * 100).toFixed(4))\n    : 0;\n  ctrBySku.set(sku, ctr);\n}\n\nconst headerRow = values[0] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'CTR');\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and CTR columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || !ctrBySku.has(sku)) continue;\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[ctrBySku.get(sku)]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -528,7 +534,6 @@
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Wait": {
       "main": [
@@ -721,7 +726,6 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -729,11 +733,37 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "versionId": "6d421519-720d-45fe-af10-da040129aadb",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+    "templateCredsSetupCompleted": true
   },
-  "id": "wJaKKBJzcgUUoahu",
-  "tags": []
+  "pinData": {},
+  "versionId": "e1be4998-7256-4c6e-ac74-9b417daac080",
+  "activeVersionId": "6d421519-720d-45fe-af10-da040129aadb",
+  "versionCounter": 85,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-13T22:37:10.715Z",
+      "createdAt": "2026-04-13T22:37:10.715Z",
+      "role": "workflow:owner",
+      "workflowId": "wJaKKBJzcgUUoahu",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
 }
