@@ -60,6 +60,7 @@ cd scripts && node index.js --bsr --date 2026-04-15 --source file
 cd scripts && node index.js --sales-organic --date 2026-04-15 --source file --delay-ms 0
 cd scripts && node index.js --sales-organic --date 2026-04-15 --source sheet --delay-ms 0
 cd scripts && node index.js --units-organic --date 2026-04-07 --source file
+cd scripts && node index.js --units-organic --date 2026-04-07 --source sheet --delay-ms 0
 ```
 
 Verify the latest Sales Organic run artifact without re-reading older runs:
@@ -110,7 +111,14 @@ cd scripts && npm run units-organic -- --date 2026-04-07 --source file
 cd scripts && npm run verify:units-organic-run
 ```
 
-The newest `runs/units-organic-*.json` artifact is the durable proof surface. Success runs retain lifecycle/report metadata plus per-SKU `totalUnits`, `adUnits`, and `salesOrganicQty`; auth, report, parse, and compute failures remain stage-specific in the saved artifact and surface through the verifier.
+Optional sheet parity proof uses the same runner and verifier surfaces:
+
+```bash
+cd scripts && node index.js --units-organic --date 2026-04-07 --source sheet --delay-ms 0
+cd scripts && node verify-latest-units-organic-run.js
+```
+
+The newest `runs/units-organic-*.json` artifact is the durable proof surface. Success runs retain lifecycle/report metadata plus per-SKU `totalUnits`, `adUnits`, and `salesOrganicQty`; auth, report, parse, and compute failures remain stage-specific in the saved artifact and surface through the verifier. Sheet-source load failures remain compute-stage failures with `source=sheet` context so verifier/debug surfaces expose credential, timeout, or row-shape drift instead of masking it.
 
 ## Sources
 
