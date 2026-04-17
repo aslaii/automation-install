@@ -92,6 +92,26 @@ const tests = [
     fn: testFileSourceRejectsMalformedNumeric,
   },
   {
+    name: 'file source rejects duplicate date sku rows with file row context',
+    fn: testFileSourceRejectsDuplicateDateSku,
+  },
+  {
+    name: 'file source rejects requested dates with zero matching rows',
+    fn: testFileSourceRejectsEmptyRequestedDate,
+  },
+  {
+    name: 'file source ignores other dates when checking requested-date uniqueness',
+    fn: testFileSourceScopesDuplicateChecksToRequestedDate,
+  },
+  {
+    name: 'file source rejects invalid json payloads with file context',
+    fn: testFileSourceRejectsInvalidJson,
+  },
+  {
+    name: 'file source rejects rows missing sku with file row context',
+    fn: testFileSourceRejectsMissingSku,
+  },
+  {
     name: 'sheet source rejects missing required columns',
     fn: testSheetSourceRejectsMissingColumns,
   },
@@ -118,6 +138,10 @@ const tests = [
   {
     name: 'compute runner builds sales organic artifact rows from file source',
     fn: testRunnerComputeFromFileSource,
+  },
+  {
+    name: 'compute runner writes compute-stage failure artifact when file input is ambiguous',
+    fn: testRunnerComputeFailureArtifactForAmbiguousFileInput,
   },
 ];
 
@@ -471,6 +495,82 @@ async function testFileSourceRejectsMalformedNumeric() {
   }
 }
 
+async function testFileSourceRejectsDuplicateDateSku() {
+  const tmpPath = path.join(__dirname, 'tmp-sales-organic-duplicate.json');
+  await fs.promises.writeFile(tmpPath, JSON.stringify([
+    { date: '2026-04-15', sku: 'SKU1', adSales: 10 },
+    { date: '2026-04-15', sku: 'SKU1', adSales: 20 },
+  ]), 'utf8');
+  try {
+    await assert.rejects(
+      () => loadAdSalesFromFile(tmpPath, '2026-04-15'),
+      /Ad sales file duplicate row for date 2026-04-15 sku SKU1 .*tmp-sales-organic-duplicate\.json rows 0 and 1/,
+    );
+  } finally {
+    await fs.promises.rm(tmpPath, { force: true });
+  }
+}
+
+async function testFileSourceRejectsEmptyRequestedDate() {
+  const tmpPath = path.join(__dirname, 'tmp-sales-organic-empty-date.json');
+  await fs.promises.writeFile(tmpPath, JSON.stringify([
+    { date: '2026-04-14', sku: 'SKU1', adSales: 10 },
+  ]), 'utf8');
+  try {
+    await assert.rejects(
+      () => loadAdSalesFromFile(tmpPath, '2026-04-15'),
+      /Ad sales file has no rows for requested date 2026-04-15 .*tmp-sales-organic-empty-date\.json/,
+    );
+  } finally {
+    await fs.promises.rm(tmpPath, { force: true });
+  }
+}
+
+async function testFileSourceScopesDuplicateChecksToRequestedDate() {
+  const tmpPath = path.join(__dirname, 'tmp-sales-organic-mixed-dates.json');
+  await fs.promises.writeFile(tmpPath, JSON.stringify([
+    { date: '2026-04-14', sku: 'SKU1', adSales: 10 },
+    { date: '2026-04-14', sku: 'SKU1', adSales: 20 },
+    { date: '2026-04-15', sku: 'SKU1', adSales: 30, expectedSalesOrganic: 40 },
+  ]), 'utf8');
+  try {
+    const result = await loadAdSalesFromFile(tmpPath, '2026-04-15');
+    assert.strictEqual(result.skuCount, 1);
+    assert.strictEqual(result.bySku.SKU1.adSales, 30);
+    assert.strictEqual(result.bySku.SKU1.expectedSalesOrganic, 40);
+  } finally {
+    await fs.promises.rm(tmpPath, { force: true });
+  }
+}
+
+async function testFileSourceRejectsInvalidJson() {
+  const tmpPath = path.join(__dirname, 'tmp-sales-organic-invalid-json.json');
+  await fs.promises.writeFile(tmpPath, '[{"date":"2026-04-15"', 'utf8');
+  try {
+    await assert.rejects(
+      () => loadAdSalesFromFile(tmpPath, '2026-04-15'),
+      /Ad sales file JSON parse failed .*tmp-sales-organic-invalid-json\.json/,
+    );
+  } finally {
+    await fs.promises.rm(tmpPath, { force: true });
+  }
+}
+
+async function testFileSourceRejectsMissingSku() {
+  const tmpPath = path.join(__dirname, 'tmp-sales-organic-missing-sku.json');
+  await fs.promises.writeFile(tmpPath, JSON.stringify([
+    { date: '2026-04-15', sku: '  ', adSales: 10 },
+  ]), 'utf8');
+  try {
+    await assert.rejects(
+      () => loadAdSalesFromFile(tmpPath, '2026-04-15'),
+      /Ad sales file row 0 is missing sku .*tmp-sales-organic-missing-sku\.json/,
+    );
+  } finally {
+    await fs.promises.rm(tmpPath, { force: true });
+  }
+}
+
 async function testSheetSourceRejectsMissingColumns() {
   const config = buildSheetConfig();
   await assert.rejects(
@@ -624,6 +724,51 @@ async function testRunnerComputeFromFileSource() {
   assert.strictEqual(first.adSales, 126.19);
   assert.strictEqual(first.salesOrganic, 169.32);
   assert.strictEqual(first.comparisonStatus, 'match');
+}
+
+async function testRunnerComputeFailureArtifactForAmbiguousFileInput() {
+  let savedReport = null;
+  let printedReport = null;
+
+  await assert.rejects(
+    () => runGetSalesOrganic(
+      { metric: 'sales-organic', date: '2026-04-15', source: 'file', delayMs: 0 },
+      {
+        mintSpAccessToken: async () => 'token',
+        fetchOrdersReport: async () => ({
+          ok: true,
+          stage: 'download-report',
+          attempts: { create: 1, poll: 1 },
+          lifecycle: [{ stage: 'download-report', attempt: 1, status: 'success' }],
+          reportId: 'r1',
+          reportDocumentId: 'd1',
+          processingStatus: 'DONE',
+          contentType: 'text/plain',
+          reportText: 'sku\titem-price\tquantity\torder-status\nSKU1\t10.00\t1\tShipped\n',
+        }),
+        loadAdSalesFromFile: async () => {
+          throw new Error('Ad sales file duplicate row for date 2026-04-15 sku SKU1 (data/sales-organic-input.json rows 0 and 1)');
+        },
+        writeReport: async ({ report }) => {
+          savedReport = report;
+          return '/tmp/sales-organic-compute-failure.json';
+        },
+        printSalesOrganicReport: (report, reportPath) => {
+          printedReport = { report, reportPath };
+        },
+      },
+    ),
+    /Sales Organic failed at compute: Ad sales file duplicate row for date 2026-04-15 sku SKU1/,
+  );
+
+  assert(savedReport);
+  assert.strictEqual(savedReport.status, 'failed');
+  assert.strictEqual(savedReport.stage, 'compute');
+  assert.strictEqual(savedReport.error.message, 'Ad sales file duplicate row for date 2026-04-15 sku SKU1 (data/sales-organic-input.json rows 0 and 1)');
+  assert.deepStrictEqual(savedReport.items, []);
+  assert.strictEqual(savedReport.lifecycle.at(-1).stage, 'compute');
+  assert.strictEqual(savedReport.lifecycle.at(-1).status, 'error');
+  assert.strictEqual(printedReport.reportPath, '/tmp/sales-organic-compute-failure.json');
 }
 
 function buildAxiosStub(steps, requestLog = []) {

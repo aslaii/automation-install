@@ -20,14 +20,25 @@ async function loadAdSalesFromFile(filePath, date) {
   }
 
   const bySku = {};
+  const seenKeys = new Map();
+  let matchedRowCount = 0;
+
   for (let index = 0; index < parsed.length; index += 1) {
     const item = parsed[index] || {};
     if (item.date !== date) continue;
+    matchedRowCount += 1;
 
     const sku = String(item.sku || '').trim();
     if (!sku) {
       throw new Error(`Ad sales file row ${index} is missing sku (${filePath})`);
     }
+
+    const duplicateKey = `${date}::${sku}`;
+    if (seenKeys.has(duplicateKey)) {
+      const firstRow = seenKeys.get(duplicateKey);
+      throw new Error(`Ad sales file duplicate row for date ${date} sku ${sku} (${filePath} rows ${firstRow} and ${index})`);
+    }
+    seenKeys.set(duplicateKey, index);
 
     const context = `file ${filePath} row ${index} sku ${sku}`;
     const adSales = parseRequiredNumber(item.adSales, `adSales ${context}`);
@@ -47,6 +58,10 @@ async function loadAdSalesFromFile(filePath, date) {
       source: 'file',
       notes: item.notes || '',
     };
+  }
+
+  if (matchedRowCount === 0) {
+    throw new Error(`Ad sales file has no rows for requested date ${date} (${filePath})`);
   }
 
   return {
