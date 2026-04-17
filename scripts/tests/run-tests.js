@@ -1,10 +1,11 @@
 const assert = require('assert');
+const path = require('path');
+const fs = require('fs');
+const zlib = require('zlib');
 const { parseDateRange } = require('../lib/date');
 const { extractBsr } = require('../lib/extract/bsr');
 const { extractSpreadsheetId, loadConfig } = require('../lib/config');
 const { fetchBsrForProduct, normalizeBsrError, computeRetryDelayMs, parseRetryAfterMs } = require('../features/bsr');
-const { runSalesOrganicTests } = require('./sales-organic-tests');
-const { runUnitsOrganicTests } = require('./units-organic-tests');
 
 function testParseDateRange() {
   assert.deepStrictEqual(parseDateRange('2026-04-07'), {
@@ -204,11 +205,23 @@ async function runBsrTests() {
   console.log('BSR tests passed.');
 }
 
+function loadTestRunner(modulePath, exportName, { optional = false } = {}) {
+  try {
+    return require(modulePath)[exportName];
+  } catch (error) {
+    if (optional && error.code === 'MODULE_NOT_FOUND') {
+      return async () => {};
+    }
+    throw error;
+  }
+}
+
 async function main(deps = {}) {
   const argv = deps.argv || process.argv.slice(2);
   const runBsrTestsFn = deps.runBsrTests || runBsrTests;
-  const runSalesOrganicTestsFn = deps.runSalesOrganicTests || runSalesOrganicTests;
-  const runUnitsOrganicTestsFn = deps.runUnitsOrganicTests || runUnitsOrganicTests;
+  const runSalesOrganicTestsFn = deps.runSalesOrganicTests || loadTestRunner('./sales-organic-tests', 'runSalesOrganicTests', { optional: true });
+  const runSalesPpcTestsFn = deps.runSalesPpcTests || loadTestRunner('./sales-ppc-tests', 'runSalesPpcTests');
+  const runUnitsOrganicTestsFn = deps.runUnitsOrganicTests || loadTestRunner('./units-organic-tests', 'runUnitsOrganicTests', { optional: true });
   const log = deps.log || console.log;
   const runBsrOnly = argv.includes('--bsr-only');
 
@@ -216,6 +229,7 @@ async function main(deps = {}) {
 
   if (!runBsrOnly) {
     await runSalesOrganicTestsFn();
+    await runSalesPpcTestsFn();
     await runUnitsOrganicTestsFn();
   }
 

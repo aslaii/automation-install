@@ -18,6 +18,9 @@ function parseCliArgs(argv) {
       case '--units-organic':
         setMetric(args, 'units-organic', token);
         break;
+      case '--sales-ppc':
+        setMetric(args, 'sales-ppc', token);
+        break;
       case '--date':
         args.date = requireValue(argv, ++i, '--date');
         break;

@@ -7,6 +7,7 @@
     "test": "node tests/run-tests.js",
     "test:bsr": "node tests/run-tests.js --bsr-only",
     "test:sales-organic": "node tests/sales-organic-tests.js",
+    "test:sales-ppc": "node tests/sales-ppc-tests.js",
     "test:units-organic": "node tests/units-organic-tests.js",
     "verify:sales-organic-run": "node verify-latest-sales-organic-run.js",
     "verify:units-organic-run": "node verify-latest-units-organic-run.js",
@@ -14,6 +15,7 @@
     "workflow:units-organic": "node run-units-organic-workflow-local.js",
     "bsr": "node index.js --bsr",
     "sales-organic": "node index.js --sales-organic",
+    "sales-ppc": "node index.js --sales-ppc",
     "units-organic": "node index.js --units-organic"
   },
   "keywords": [],

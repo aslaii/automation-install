@@ -4,14 +4,21 @@ const dotenv = require('dotenv');
 const ENV_PATH = path.join(__dirname, '..', '.env');
 dotenv.config({ path: ENV_PATH, quiet: true });
 
-function loadConfig({ source, env = process.env } = {}) {
+function loadConfig({ source, metric = null, env = process.env } = {}) {
   const config = {
     productsFile: path.join(__dirname, '..', 'data', 'products.json'),
     amazon: {
-      clientId: requiredEnv(env, 'AMAZON_SP_CLIENT_ID'),
-      clientSecret: requiredEnv(env, 'AMAZON_SP_CLIENT_SECRET'),
-      refreshToken: requiredEnv(env, 'AMAZON_SP_REFRESH_TOKEN'),
-      marketplaceId: requiredEnv(env, 'AMAZON_MARKETPLACE_ID'),
+      clientId: optionalEnv(env, 'AMAZON_SP_CLIENT_ID'),
+      clientSecret: optionalEnv(env, 'AMAZON_SP_CLIENT_SECRET'),
+      refreshToken: optionalEnv(env, 'AMAZON_SP_REFRESH_TOKEN'),
+      marketplaceId: optionalEnv(env, 'AMAZON_MARKETPLACE_ID'),
+    },
+    amazonAds: {
+      clientId: optionalEnv(env, 'AMAZON_ADS_CLIENT_ID'),
+      clientSecret: optionalEnv(env, 'AMAZON_ADS_CLIENT_SECRET'),
+      refreshToken: optionalEnv(env, 'AMAZON_ADS_REFRESH_TOKEN'),
+      profileId: optionalEnv(env, 'AMAZON_ADS_PROFILE_ID'),
+      authTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_AUTH_TIMEOUT_MS, 30000, 'AMAZON_ADS_AUTH_TIMEOUT_MS'),
     },
     google: {
       serviceAccountEmail: env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '',
@@ -53,7 +60,31 @@ function loadConfig({ source, env = process.env } = {}) {
         downloadTimeoutMs: parsePositiveInteger(env.SP_REPORT_DOWNLOAD_TIMEOUT_MS, 30000, 'SP_REPORT_DOWNLOAD_TIMEOUT_MS'),
       },
     },
+    salesPpc: {
+      fileInput: path.join(__dirname, '..', 'data', 'sales-ppc-input.json'),
+      report: {
+        namePrefix: env.SALES_PPC_REPORT_NAME_PREFIX || 'SKU_Sales_PPC',
+        adProduct: env.SALES_PPC_AD_PRODUCT || 'SPONSORED_PRODUCTS',
+        reportTypeId: env.SALES_PPC_REPORT_TYPE_ID || 'spAdvertisedProduct',
+        format: env.SALES_PPC_REPORT_FORMAT || 'GZIP_JSON',
+        timeUnit: env.SALES_PPC_TIME_UNIT || 'DAILY',
+        groupBy: parseJsonStringArray(env.SALES_PPC_GROUP_BY, ['advertiser'], 'SALES_PPC_GROUP_BY'),
+        columns: parseJsonStringArray(env.SALES_PPC_COLUMNS, ['advertisedSku', 'sales7d', 'attributedSales7d'], 'SALES_PPC_COLUMNS'),
+      },
+      polling: {
+        maxAttempts: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS, 10, 'AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS'),
+        pollIntervalMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_INTERVAL_MS, 60000, 'AMAZON_ADS_REPORT_POLL_INTERVAL_MS'),
+        createTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_CREATE_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_CREATE_TIMEOUT_MS'),
+        pollTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_POLL_TIMEOUT_MS'),
+        downloadTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_DOWNLOAD_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_DOWNLOAD_TIMEOUT_MS'),
+        baseRetryDelayMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_BASE_RETRY_DELAY_MS, 60000, 'AMAZON_ADS_REPORT_BASE_RETRY_DELAY_MS'),
+        maxRetryDelayMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_MAX_RETRY_DELAY_MS, 300000, 'AMAZON_ADS_REPORT_MAX_RETRY_DELAY_MS'),
+        jitterMaxMs: parsePositiveIntegerOrZero(env.AMAZON_ADS_REPORT_JITTER_MAX_MS, 30000, 'AMAZON_ADS_REPORT_JITTER_MAX_MS'),
+      },
+    },
   };
+
+  validateMetricEnv(metric, config, env);
 
   if (source === 'sheet') {
     if (!config.google.serviceAccountEmail || !config.google.privateKey || !config.google.spreadsheetId) {
@@ -64,12 +95,40 @@ function loadConfig({ source, env = process.env } = {}) {
   return config;
 }
 
+function validateMetricEnv(metric, config, env) {
+  if (metric !== 'sales-ppc') {
+    requiredEnv(env, 'AMAZON_SP_CLIENT_ID');
+    requiredEnv(env, 'AMAZON_SP_CLIENT_SECRET');
+    requiredEnv(env, 'AMAZON_SP_REFRESH_TOKEN');
+    requiredEnv(env, 'AMAZON_MARKETPLACE_ID');
+    config.amazon.clientId = env.AMAZON_SP_CLIENT_ID;
+    config.amazon.clientSecret = env.AMAZON_SP_CLIENT_SECRET;
+    config.amazon.refreshToken = env.AMAZON_SP_REFRESH_TOKEN;
+    config.amazon.marketplaceId = env.AMAZON_MARKETPLACE_ID;
+  }
+
+  if (metric === 'sales-ppc') {
+    requiredEnv(env, 'AMAZON_ADS_CLIENT_ID');
+    requiredEnv(env, 'AMAZON_ADS_CLIENT_SECRET');
+    requiredEnv(env, 'AMAZON_ADS_REFRESH_TOKEN');
+    requiredEnv(env, 'AMAZON_ADS_PROFILE_ID');
+    config.amazonAds.clientId = env.AMAZON_ADS_CLIENT_ID;
+    config.amazonAds.clientSecret = env.AMAZON_ADS_CLIENT_SECRET;
+    config.amazonAds.refreshToken = env.AMAZON_ADS_REFRESH_TOKEN;
+    config.amazonAds.profileId = env.AMAZON_ADS_PROFILE_ID;
+  }
+}
+
 function requiredEnv(env, name) {
   const value = env[name];
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
+}
+
+function optionalEnv(env, name) {
+  return env[name] || '';
 }
 
 function normalizePem(value) {
@@ -95,6 +154,19 @@ function parsePositiveInteger(rawValue, fallback, envName) {
   return value;
 }
 
+function parsePositiveIntegerOrZero(rawValue, fallback, envName) {
+  if (rawValue === undefined || rawValue === null || rawValue === '') {
+    return fallback;
+  }
+
+  const value = Number(rawValue);
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(`${envName} must be a non-negative integer`);
+  }
+
+  return value;
+}
+
 function parsePositiveNumber(rawValue, fallback, envName) {
   if (rawValue === undefined || rawValue === null || rawValue === '') {
     return fallback;
@@ -106,6 +178,25 @@ function parsePositiveNumber(rawValue, fallback, envName) {
   }
 
   return value;
+}
+
+function parseJsonStringArray(rawValue, fallback, envName) {
+  if (rawValue === undefined || rawValue === null || rawValue === '') {
+    return fallback;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(rawValue);
+  } catch (error) {
+    throw new Error(`${envName} must be a JSON array of strings`);
+  }
+
+  if (!Array.isArray(parsed) || parsed.some((value) => typeof value !== 'string' || !value.trim())) {
+    throw new Error(`${envName} must be a JSON array of strings`);
+  }
+
+  return parsed;
 }
 
 module.exports = {
