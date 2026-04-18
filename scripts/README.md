@@ -153,7 +153,7 @@ The newest `runs/units-organic-*.json` artifact is the durable proof surface. Su
 
 ## Sales PPC workflow-local parity flow
 
-Sales PPC now has a workflow-local parity harness for the checked-in `Get Sales PPC` workflow compute path. Use the focused grep block first when you need invariant-specific failures, then inspect the harness JSON summary for row-level drift:
+Sales PPC now has a workflow-local parity harness for the checked-in `Get Sales PPC` workflow compute path. Use the focused grep block first when you need invariant-specific failures, then inspect the harness JSON summary to confirm aligned zero-mismatch behavior and bounded target-set diagnostics:
 
 ```bash
 cd scripts && node tests/sales-ppc-tests.js --grep "workflow json parity|workflow local runner|workflow compute node"
@@ -171,11 +171,11 @@ The `--json` output is the primary machine-readable parity surface. It exposes:
 - `compute.sheetOnlySkuCount` / `compute.sheetOnlySkus` — SKUs present in the sheet target set but absent from the report fixture
 - `compute.updateCount`, `compute.localUpdateCount`, `compute.workflowUpdateCount` — expected versus workflow-emitted batch update coverage
 
-Interpretation for the current S03 diagnostic-first contract:
+Interpretation for the current S04 aligned contract:
 
-- `localStatus === "ok"` and `workflowStatus === "ok"` with non-zero `mismatchCount` means the harness is working and is surfacing real workflow/local drift. Do not suppress that mismatch; inspect the preview and workflow JSON before changing logic.
-- `reportOnly` or `sheetOnly` buckets are intended parity diagnostics, not automatic failures by themselves. They tell you whether the compared fixture/report target sets differ.
-- Missing workflow markers, malformed code, malformed sheet/report fixtures, or malformed summary fields should fail the grep block loudly with `[workflow json parity]` or exact summary field-path assertions. Treat those as contract regressions.
+- `localStatus === "ok"` and `workflowStatus === "ok"` with `mismatchCount === 0` means the checked-in workflow and local Sales PPC compute contract are aligned for the shared fixture set, so the workflow JSON can be trusted as the repo baseline.
+- Non-zero `reportOnly` or `sheetOnly` buckets with `mismatchCount === 0` remain bounded target-set diagnostics, not writeback regressions by themselves. They show fixture/report coverage outside the compared sheet rows.
+- Any non-empty `mismatchPreview`, non-zero `mismatchCount`, missing workflow markers, malformed code, malformed sheet/report fixtures, or malformed summary fields should fail the grep block loudly with `[workflow json parity]` or exact summary field-path assertions. Treat those as regressions.
 
 The shared regression path remains:
 
@@ -222,3 +222,4 @@ Evidence pointers:
 ## Local env
 
 Uses `scripts/.env` for local live proof commands, including Units Organic.
+cluding Units Organic.
