@@ -151,6 +151,38 @@ cd scripts && node tests/units-organic-tests.js --grep "workflow json parity|wor
 
 The newest `runs/units-organic-*.json` artifact is the durable proof surface. Success runs retain lifecycle/report metadata plus per-SKU `totalUnits`, `adUnits`, and `salesOrganicQty`; auth, report, parse, and compute failures remain stage-specific in the saved artifact and surface through the verifier. Sheet-source load failures remain compute-stage failures with `source=sheet` context so verifier/debug surfaces expose credential, timeout, or row-shape drift instead of masking it.
 
+## Sales PPC workflow-local parity flow
+
+Sales PPC now has a workflow-local parity harness for the checked-in `Get Sales PPC` workflow compute path. Use the focused grep block first when you need invariant-specific failures, then inspect the harness JSON summary for row-level drift:
+
+```bash
+cd scripts && node tests/sales-ppc-tests.js --grep "workflow json parity|workflow local runner|workflow compute node"
+cd scripts && node run-sales-ppc-workflow-local.js --json
+# or
+cd scripts && npm run workflow:sales-ppc -- --json
+```
+
+The `--json` output is the primary machine-readable parity surface. It exposes:
+
+- `compute.localStatus` / `compute.workflowStatus` — whether the local compute path and checked-in workflow compute node both executed cleanly
+- `compute.mismatchCount` — how many sheet writeback ranges differ between local truth and workflow-emitted updates
+- `compute.mismatchPreview` — capped mismatch details (`range`, `sku`, `localValue`, `workflowValue`, `delta`) for fast diagnosis
+- `compute.reportOnlySkuCount` / `compute.reportOnlySkus` — SKUs present in the Amazon report fixture but absent from the sheet target set
+- `compute.sheetOnlySkuCount` / `compute.sheetOnlySkus` — SKUs present in the sheet target set but absent from the report fixture
+- `compute.updateCount`, `compute.localUpdateCount`, `compute.workflowUpdateCount` — expected versus workflow-emitted batch update coverage
+
+Interpretation for the current S03 diagnostic-first contract:
+
+- `localStatus === "ok"` and `workflowStatus === "ok"` with non-zero `mismatchCount` means the harness is working and is surfacing real workflow/local drift. Do not suppress that mismatch; inspect the preview and workflow JSON before changing logic.
+- `reportOnly` or `sheetOnly` buckets are intended parity diagnostics, not automatic failures by themselves. They tell you whether the compared fixture/report target sets differ.
+- Missing workflow markers, malformed code, malformed sheet/report fixtures, or malformed summary fields should fail the grep block loudly with `[workflow json parity]` or exact summary field-path assertions. Treat those as contract regressions.
+
+The shared regression path remains:
+
+```bash
+cd scripts && npm test
+```
+
 ## Sources
 
 - `file` (default): `data/sales-organic-input.json` for Sales Organic, `data/units-organic-input.json` for Units Organic
