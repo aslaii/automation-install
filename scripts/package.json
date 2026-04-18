@@ -13,6 +13,7 @@
     "verify:sales-ppc-run": "node verify-latest-sales-ppc-run.js",
     "verify:units-organic-run": "node verify-latest-units-organic-run.js",
     "workflow:sales-organic": "node run-sales-organic-workflow-local.js",
+    "workflow:sales-ppc": "node run-sales-ppc-workflow-local.js",
     "workflow:units-organic": "node run-units-organic-workflow-local.js",
     "bsr": "node index.js --bsr",
     "sales-organic": "node index.js --sales-organic",
