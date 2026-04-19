@@ -20,6 +20,7 @@
     "bsr": "node index.js --bsr",
     "sales-organic": "node index.js --sales-organic",
     "sales-ppc": "node index.js --sales-ppc",
+    "ctr": "node index.js --ctr",
     "units-organic": "node index.js --units-organic"
   },
   "keywords": [],

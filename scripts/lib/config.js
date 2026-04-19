@@ -72,16 +72,21 @@ function loadConfig({ source, metric = null, env = process.env } = {}) {
         groupBy: parseJsonStringArray(env.SALES_PPC_GROUP_BY, ['advertiser'], 'SALES_PPC_GROUP_BY'),
         columns: parseJsonStringArray(env.SALES_PPC_COLUMNS, ['advertisedSku', 'sales7d', 'attributedSalesSameSku7d'], 'SALES_PPC_COLUMNS'),
       },
-      polling: {
-        maxAttempts: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS, 10, 'AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS'),
-        pollIntervalMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_INTERVAL_MS, 60000, 'AMAZON_ADS_REPORT_POLL_INTERVAL_MS'),
-        createTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_CREATE_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_CREATE_TIMEOUT_MS'),
-        pollTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_POLL_TIMEOUT_MS'),
-        downloadTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_DOWNLOAD_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_DOWNLOAD_TIMEOUT_MS'),
-        baseRetryDelayMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_BASE_RETRY_DELAY_MS, 60000, 'AMAZON_ADS_REPORT_BASE_RETRY_DELAY_MS'),
-        maxRetryDelayMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_MAX_RETRY_DELAY_MS, 300000, 'AMAZON_ADS_REPORT_MAX_RETRY_DELAY_MS'),
-        jitterMaxMs: parsePositiveIntegerOrZero(env.AMAZON_ADS_REPORT_JITTER_MAX_MS, 30000, 'AMAZON_ADS_REPORT_JITTER_MAX_MS'),
+      polling: sharedAmazonAdsPolling(env),
+    },
+    ctr: {
+      fileInput: path.join(__dirname, '..', 'data', 'ctr-input.json'),
+      comparisonTolerance: parsePositiveNumber(env.CTR_COMPARISON_TOLERANCE, 0.0001, 'CTR_COMPARISON_TOLERANCE'),
+      report: {
+        namePrefix: env.CTR_REPORT_NAME_PREFIX || 'SKU_CTR',
+        adProduct: env.CTR_AD_PRODUCT || 'SPONSORED_PRODUCTS',
+        reportTypeId: env.CTR_REPORT_TYPE_ID || 'spAdvertisedProduct',
+        format: env.CTR_REPORT_FORMAT || 'GZIP_JSON',
+        timeUnit: env.CTR_TIME_UNIT || 'DAILY',
+        groupBy: parseJsonStringArray(env.CTR_GROUP_BY, ['advertiser'], 'CTR_GROUP_BY'),
+        columns: parseJsonStringArray(env.CTR_COLUMNS, ['advertisedSku', 'clicks', 'impressions'], 'CTR_COLUMNS'),
       },
+      polling: sharedAmazonAdsPolling(env),
     },
   };
 
@@ -96,8 +101,21 @@ function loadConfig({ source, metric = null, env = process.env } = {}) {
   return config;
 }
 
+function sharedAmazonAdsPolling(env) {
+  return {
+    maxAttempts: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS, 10, 'AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS'),
+    pollIntervalMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_INTERVAL_MS, 60000, 'AMAZON_ADS_REPORT_POLL_INTERVAL_MS'),
+    createTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_CREATE_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_CREATE_TIMEOUT_MS'),
+    pollTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_POLL_TIMEOUT_MS'),
+    downloadTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_DOWNLOAD_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_DOWNLOAD_TIMEOUT_MS'),
+    baseRetryDelayMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_BASE_RETRY_DELAY_MS, 60000, 'AMAZON_ADS_REPORT_BASE_RETRY_DELAY_MS'),
+    maxRetryDelayMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_MAX_RETRY_DELAY_MS, 300000, 'AMAZON_ADS_REPORT_MAX_RETRY_DELAY_MS'),
+    jitterMaxMs: parsePositiveIntegerOrZero(env.AMAZON_ADS_REPORT_JITTER_MAX_MS, 30000, 'AMAZON_ADS_REPORT_JITTER_MAX_MS'),
+  };
+}
+
 function validateMetricEnv(metric, config, env) {
-  if (metric !== 'sales-ppc') {
+  if (metric !== 'sales-ppc' && metric !== 'ctr') {
     requiredEnv(env, 'AMAZON_SP_CLIENT_ID');
     requiredEnv(env, 'AMAZON_SP_CLIENT_SECRET');
     requiredEnv(env, 'AMAZON_SP_REFRESH_TOKEN');
@@ -108,7 +126,7 @@ function validateMetricEnv(metric, config, env) {
     config.amazon.marketplaceId = env.AMAZON_MARKETPLACE_ID;
   }
 
-  if (metric === 'sales-ppc') {
+  if (metric === 'sales-ppc' || metric === 'ctr') {
     requiredEnv(env, 'AMAZON_ADS_CLIENT_ID');
     requiredEnv(env, 'AMAZON_ADS_CLIENT_SECRET');
     requiredEnv(env, 'AMAZON_ADS_REFRESH_TOKEN');

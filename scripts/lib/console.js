@@ -156,6 +156,72 @@ function printSalesPpcReport(report, reportPath) {
   console.log(`[Sales PPC] Report saved: ${reportPath}`);
 }
 
+function printCtrReport(report, reportPath) {
+  console.log('\n[CTR] Summary');
+  console.table([{
+    status: report.status,
+    stage: report.stage,
+    createAttempts: report.summary?.attempts?.create || 0,
+    pollAttempts: report.summary?.attempts?.poll || 0,
+    parsedRows: report.summary?.parsedRowCount || 0,
+    parsedSkus: report.summary?.parsedSkuCount || 0,
+    computedSkus: report.summary?.computedSkuCount || 0,
+    mismatches: report.summary?.mismatchedSkuCount || 0,
+    processingStatus: report.reportInfo?.processingStatus || '',
+    reportId: report.reportInfo?.reportId || '',
+    reportDocumentId: report.reportInfo?.reportDocumentId || '',
+  }]);
+
+  if (report.lifecycle?.length) {
+    console.log('[CTR] Lifecycle');
+    console.table(report.lifecycle.map((entry) => ({
+      stage: entry.stage,
+      attempt: entry.attempt,
+      status: entry.status,
+      httpStatus: entry.httpStatus || '',
+      bytes: entry.bytes || '',
+      message: entry.message || '',
+    })));
+  }
+
+  if (report.items?.length) {
+    console.log('[CTR] Items');
+    console.table(report.items.map((item) => ({
+      sku: item.sku,
+      clicks: item.clicks,
+      impressions: item.impressions,
+      ctr: item.ctr,
+      expected: item.expectedCtr ?? '',
+      delta: item.ctrDelta ?? '',
+      status: item.comparisonStatus,
+    })));
+  }
+
+  if (report.comparison?.mismatches?.length) {
+    console.log('[CTR] Mismatches');
+    console.table(report.comparison.mismatches.map((item) => ({
+      sku: item.sku,
+      clicks: item.clicks,
+      impressions: item.impressions,
+      actual: item.ctr,
+      expected: item.expectedCtr,
+      delta: item.ctrDelta,
+    })));
+  }
+
+  if (report.warnings?.length) {
+    for (const warning of report.warnings) {
+      console.warn(`[CTR] Warning: ${warning}`);
+    }
+  }
+
+  if (report.error) {
+    console.error(`[CTR] Error: ${report.error.message}`);
+  }
+
+  console.log(`[CTR] Report saved: ${reportPath}`);
+}
+
 function printUnitsOrganicReport(report, reportPath) {
   console.log('\n[Units Organic] Summary');
   console.table([{
@@ -225,5 +291,6 @@ module.exports = {
   printBsrReport,
   printSalesOrganicReport,
   printSalesPpcReport,
+  printCtrReport,
   printUnitsOrganicReport,
 };

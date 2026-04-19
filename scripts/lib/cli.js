@@ -21,6 +21,9 @@ function parseCliArgs(argv) {
       case '--sales-ppc':
         setMetric(args, 'sales-ppc', token);
         break;
+      case '--ctr':
+        setMetric(args, 'ctr', token);
+        break;
       case '--date':
         args.date = requireValue(argv, ++i, '--date');
         break;
