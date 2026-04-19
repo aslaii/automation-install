@@ -68,12 +68,16 @@ cd scripts && node tests/ctr-tests.js
 cd scripts && node tests/ctr-tests.js --grep "compute-stage failure artifacts|canonical ads csv|malformed"
 cd scripts && node index.js --ctr --date 2026-04-15 --source file --delay-ms 0
 cd scripts && node verify-latest-ctr-run.js
+cd scripts && node run-ctr-workflow-local.js --json
+cd scripts && npm run workflow:ctr -- --json
 # or
 cd scripts && npm run ctr -- --date 2026-04-15 --source file --delay-ms 0
 cd scripts && npm run verify:ctr-run
 ```
 
 The file-first CTR proof path reads the canonical Ads CSV at `data/ads-products-2026-04-15.csv` and persists a canonical `runs/ctr-*.json` artifact. The requested date must match the single `YYYY-MM-DD` embedded in the filename, and the loader fails closed on malformed canonical rows (missing required headers, bad numerics, unsplittable `Products`, duplicate extracted SKUs, or row column drift).
+
+The workflow-local CTR parity harness compares the shared local CTR runner against the checked-in `workflows/Get CTR.json` compute node using fixture-backed inputs only. Its default sheet fixture is `tests/fixtures/ctr-workflow-local-sheet-workflow.json`, which includes top-matter rows above the real `SKU`/`CTR` header plus `fileRows[]` used to materialize deterministic local expected-input CSV content without mutating the existing file-first fixture.
 
 Success artifacts include per-SKU `clicks`, `impressions`, `ctr`, `expectedCtr`, `ctrDelta`, and mismatch traceability. Failure artifacts preserve compute-stage `status`, `error`, attempts, report identifiers, lifecycle metadata, and the loader-originated contract message with file path, row context, and violated key.
 
