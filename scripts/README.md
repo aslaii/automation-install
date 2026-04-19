@@ -11,7 +11,7 @@ scripts/
   .env.example
   package.json
   data/
-    ctr-input.json
+    ads-products-2026-04-15.csv
     sales-organic-input.json
     sales-ppc-input.json
   features/
@@ -65,6 +65,7 @@ CTR is now a first-class shared CLI metric and uses the same runner path as the 
 
 ```bash
 cd scripts && node tests/ctr-tests.js
+cd scripts && node tests/ctr-tests.js --grep "compute-stage failure artifacts|canonical ads csv|malformed"
 cd scripts && node index.js --ctr --date 2026-04-15 --source file --delay-ms 0
 cd scripts && node verify-latest-ctr-run.js
 # or
@@ -72,7 +73,9 @@ cd scripts && npm run ctr -- --date 2026-04-15 --source file --delay-ms 0
 cd scripts && npm run verify:ctr-run
 ```
 
-The file-first proof path reads `data/ctr-input.json` and persists a canonical `runs/ctr-*.json` artifact. Success artifacts include per-SKU `clicks`, `impressions`, `ctr`, `expectedCtr`, `ctrDelta`, and mismatch traceability. Failure artifacts preserve stage-specific `status`, `error`, attempts, report identifiers, and lifecycle metadata.
+The file-first CTR proof path reads the canonical Ads CSV at `data/ads-products-2026-04-15.csv` and persists a canonical `runs/ctr-*.json` artifact. The requested date must match the single `YYYY-MM-DD` embedded in the filename, and the loader fails closed on malformed canonical rows (missing required headers, bad numerics, unsplittable `Products`, duplicate extracted SKUs, or row column drift).
+
+Success artifacts include per-SKU `clicks`, `impressions`, `ctr`, `expectedCtr`, `ctrDelta`, and mismatch traceability. Failure artifacts preserve compute-stage `status`, `error`, attempts, report identifiers, lifecycle metadata, and the loader-originated contract message with file path, row context, and violated key.
 
 The verifier inspects only the newest CTR artifact and enforces:
 
@@ -104,7 +107,7 @@ cd scripts && node verify-latest-units-organic-run.js
 
 ## Sources
 
-- `file` (default): local JSON inputs such as `data/ctr-input.json`, `data/sales-organic-input.json`, and `data/sales-ppc-input.json`
+- `file` (default): local checked-in fixtures. CTR uses the canonical Ads CSV `data/ads-products-2026-04-15.csv`; sales-organic and sales-ppc use JSON inputs such as `data/sales-organic-input.json` and `data/sales-ppc-input.json`
 - `sheet`: Google Sheet rows where supported by the metric
 
 ## Output
