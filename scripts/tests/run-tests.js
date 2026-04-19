@@ -221,6 +221,7 @@ async function main(deps = {}) {
   const runBsrTestsFn = deps.runBsrTests || runBsrTests;
   const runSalesOrganicTestsFn = deps.runSalesOrganicTests || loadTestRunner('./sales-organic-tests', 'runSalesOrganicTests', { optional: true });
   const runSalesPpcTestsFn = deps.runSalesPpcTests || loadTestRunner('./sales-ppc-tests', 'runSalesPpcTests');
+  const runCtrTestsFn = deps.runCtrTests || loadTestRunner('./ctr-tests', 'runCtrTests');
   const runUnitsOrganicTestsFn = deps.runUnitsOrganicTests || loadTestRunner('./units-organic-tests', 'runUnitsOrganicTests', { optional: true });
   const log = deps.log || console.log;
   const runBsrOnly = argv.includes('--bsr-only');
@@ -230,6 +231,7 @@ async function main(deps = {}) {
   if (!runBsrOnly) {
     await runSalesOrganicTestsFn();
     await runSalesPpcTestsFn();
+    await runCtrTestsFn();
     await runUnitsOrganicTestsFn();
   }
 
