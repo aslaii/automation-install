@@ -75,7 +75,7 @@ function loadConfig({ source, metric = null, env = process.env } = {}) {
       polling: sharedAmazonAdsPolling(env),
     },
     ctr: {
-      fileInput: path.join(__dirname, '..', 'data', 'ctr-input.json'),
+      fileInput: path.join(__dirname, '..', 'data', 'ads-products-2026-04-15.csv'),
       comparisonTolerance: parsePositiveNumber(env.CTR_COMPARISON_TOLERANCE, 0.0001, 'CTR_COMPARISON_TOLERANCE'),
       report: {
         namePrefix: env.CTR_REPORT_NAME_PREFIX || 'SKU_CTR',
@@ -103,8 +103,8 @@ function loadConfig({ source, metric = null, env = process.env } = {}) {
 
 function sharedAmazonAdsPolling(env) {
   return {
-    maxAttempts: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS, 10, 'AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS'),
-    pollIntervalMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_INTERVAL_MS, 60000, 'AMAZON_ADS_REPORT_POLL_INTERVAL_MS'),
+    maxAttempts: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS, 20, 'AMAZON_ADS_REPORT_POLL_MAX_ATTEMPTS'),
+    pollIntervalMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_INTERVAL_MS, 45000, 'AMAZON_ADS_REPORT_POLL_INTERVAL_MS'),
     createTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_CREATE_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_CREATE_TIMEOUT_MS'),
     pollTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_POLL_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_POLL_TIMEOUT_MS'),
     downloadTimeoutMs: parsePositiveInteger(env.AMAZON_ADS_REPORT_DOWNLOAD_TIMEOUT_MS, 30000, 'AMAZON_ADS_REPORT_DOWNLOAD_TIMEOUT_MS'),
