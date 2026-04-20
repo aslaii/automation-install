@@ -1,0 +1,81 @@
+{
+  "reportRows": [
+    { "advertisedSku": "MIXED-SKU", "sales7d": 10.01 },
+    { "advertisedSku": "MIXED-SKU", "attributedSalesSameSku7d": "2.34" },
+    { "advertisedSku": "ATTR-ONLY", "attributedSalesSameSku7d": 7.89 },
+    { "advertisedSku": "ATTR-LOGICAL", "attributedSales7d": 3.21 },
+    { "advertisedSku": "ROUNDING-SKU", "sales7d": 1.005 },
+    { "advertisedSku": "ROUNDING-SKU", "sales7d": 2.005 }
+  ],
+  "expected": {
+    "preferredSalesField": "sales7d",
+    "rawPreferredSalesField": "sales7d",
+    "fieldUsage": {
+      "sales7d": 3,
+      "attributedSales7d": 1,
+      "attributedSalesSameSku7d": 2
+    },
+    "bySku": {
+      "MIXED-SKU": {
+        "reportSalesPpc": 12.35,
+        "provenance": {
+          "chosenField": "mixed",
+          "rawChosenField": "mixed",
+          "rowCount": 2,
+          "fallbackRows": 1,
+          "sales7d": 1,
+          "attributedSales7d": 0,
+          "attributedSalesSameSku7d": 1
+        }
+      },
+      "ATTR-ONLY": {
+        "reportSalesPpc": 7.89,
+        "provenance": {
+          "chosenField": "attributedSales7d",
+          "rawChosenField": "attributedSalesSameSku7d",
+          "rowCount": 1,
+          "fallbackRows": 1,
+          "sales7d": 0,
+          "attributedSales7d": 0,
+          "attributedSalesSameSku7d": 1
+        }
+      },
+      "ATTR-LOGICAL": {
+        "reportSalesPpc": 3.21,
+        "provenance": {
+          "chosenField": "attributedSales7d",
+          "rawChosenField": "attributedSales7d",
+          "rowCount": 1,
+          "fallbackRows": 1,
+          "sales7d": 0,
+          "attributedSales7d": 1,
+          "attributedSalesSameSku7d": 0
+        }
+      },
+      "ROUNDING-SKU": {
+        "reportSalesPpc": 3.02,
+        "provenance": {
+          "chosenField": "sales7d",
+          "rawChosenField": "sales7d",
+          "rowCount": 2,
+          "fallbackRows": 0,
+          "sales7d": 2,
+          "attributedSales7d": 0,
+          "attributedSalesSameSku7d": 0
+        }
+      }
+    }
+  },
+  "malformed": {
+    "missingSkuRows": [
+      { "sales7d": 10 }
+    ],
+    "missingSalesRows": [
+      { "advertisedSku": "NO-SALES" }
+    ],
+    "nonNumericSalesRows": [
+      { "advertisedSku": "BAD-NUMERIC", "attributedSalesSameSku7d": "not-a-number" }
+    ],
+    "emptyRows": []
+  }
+}

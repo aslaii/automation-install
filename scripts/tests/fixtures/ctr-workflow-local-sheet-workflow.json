@@ -1,0 +1,44 @@
+{
+  "date": "2026-04-15",
+  "sheetName": "Sheet1",
+  "values": [
+    ["CTR workflow parity fixture", "", ""],
+    ["Top matter row above the real header", "", ""],
+    ["SKU", "CTR", "Notes"],
+    ["CTR-MATCH", "", "match fixture"],
+    ["ZERO-IMP", 0, "zero impressions fixture"],
+    ["MISMATCH-SKU", "", "mismatch fixture"],
+    ["SHEET-ONLY", "", "sheet-only target set"],
+    ["SHEET-ONLY_TOTALS", "", "ignored totals row"]
+  ],
+  "fileRows": [
+    {
+      "Products": "B0CTR-CTR-MATCH",
+      "Status": "Eligible",
+      "Clicks": 8,
+      "Impressions": 160,
+      "CTR": 5
+    },
+    {
+      "Products": "B0ZERO-ZERO-IMP",
+      "Status": "Eligible",
+      "Clicks": 4,
+      "Impressions": 0,
+      "CTR": 0
+    },
+    {
+      "Products": "B0MIS-MISMATCH-SKU",
+      "Status": "Eligible",
+      "Clicks": 7,
+      "Impressions": 70,
+      "CTR": 10
+    },
+    {
+      "Products": "B0SHEET-SHEET-ONLY",
+      "Status": "Eligible",
+      "Clicks": 0,
+      "Impressions": 0,
+      "CTR": 0
+    }
+  ]
+}

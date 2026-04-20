@@ -1,0 +1,30 @@
+[
+  {
+    "date": "2026-04-15",
+    "sku": "CTR-MATCH",
+    "expectedCtr": 5,
+    "notes": "match fixture",
+    "productLabel": "CTR Match"
+  },
+  {
+    "date": "2026-04-15",
+    "sku": "ZERO-IMP",
+    "expectedCtr": 0,
+    "notes": "zero impressions fixture",
+    "productLabel": "Zero Impression"
+  },
+  {
+    "date": "2026-04-15",
+    "sku": "MISMATCH-SKU",
+    "expectedCtr": 12.5,
+    "notes": "mismatch fixture",
+    "productLabel": "Mismatch SKU"
+  },
+  {
+    "date": "2026-04-15",
+    "sku": "SHEET-ONLY",
+    "expectedCtr": 0,
+    "notes": "sheet-only traceability fixture",
+    "productLabel": "Sheet Only"
+  }
+]

@@ -1,0 +1,127 @@
+{
+  "reportRows": [
+    { "advertisedSku": "CTR-MATCH", "clicks": 5, "impressions": 100 },
+    { "advertisedSku": "CTR-MATCH", "clicks": 3, "impressions": 60 },
+    { "advertisedSku": "ZERO-IMP", "clicks": 4, "impressions": 0 },
+    { "advertisedSku": "MISMATCH-SKU", "clicks": 7, "impressions": 70 },
+    { "advertisedSku": "REPORT-ONLY", "clicks": 9, "impressions": 90 }
+  ],
+  "expected": {
+    "bySku": {
+      "CTR-MATCH": {
+        "clicks": 8,
+        "impressions": 160,
+        "ctr": 5,
+        "rowCount": 2
+      },
+      "ZERO-IMP": {
+        "clicks": 4,
+        "impressions": 0,
+        "ctr": 0,
+        "rowCount": 1
+      },
+      "MISMATCH-SKU": {
+        "clicks": 7,
+        "impressions": 70,
+        "ctr": 10,
+        "rowCount": 1
+      },
+      "REPORT-ONLY": {
+        "clicks": 9,
+        "impressions": 90,
+        "ctr": 10,
+        "rowCount": 1
+      }
+    },
+    "summary": {
+      "rowCount": 5,
+      "skuCount": 4
+    },
+    "compute": {
+      "items": [
+        {
+          "sku": "CTR-MATCH",
+          "clicks": 8,
+          "impressions": 160,
+          "ctr": 5,
+          "expectedCtr": 5,
+          "ctrDelta": 0,
+          "comparisonStatus": "match",
+          "traceability": {
+            "report": { "rowCount": 2 },
+            "expected": {
+              "filePath": "fixtures/ctr-workflow-local-sheet.json",
+              "rowNumber": 0,
+              "date": "2026-04-15"
+            }
+          }
+        },
+        {
+          "sku": "MISMATCH-SKU",
+          "clicks": 7,
+          "impressions": 70,
+          "ctr": 10,
+          "expectedCtr": 12.5,
+          "ctrDelta": -2.5,
+          "comparisonStatus": "mismatch",
+          "traceability": {
+            "report": { "rowCount": 1 },
+            "expected": {
+              "filePath": "fixtures/ctr-workflow-local-sheet.json",
+              "rowNumber": 2,
+              "date": "2026-04-15"
+            }
+          }
+        },
+        {
+          "sku": "ZERO-IMP",
+          "clicks": 4,
+          "impressions": 0,
+          "ctr": 0,
+          "expectedCtr": 0,
+          "ctrDelta": 0,
+          "comparisonStatus": "match",
+          "traceability": {
+            "report": { "rowCount": 1 },
+            "expected": {
+              "filePath": "fixtures/ctr-workflow-local-sheet.json",
+              "rowNumber": 1,
+              "date": "2026-04-15"
+            }
+          }
+        }
+      ],
+      "extraReportSkus": ["REPORT-ONLY"],
+      "mismatches": [
+        {
+          "sku": "MISMATCH-SKU",
+          "clicks": 7,
+          "impressions": 70,
+          "ctr": 10,
+          "expectedCtr": 12.5,
+          "ctrDelta": -2.5,
+          "traceability": {
+            "report": { "rowCount": 1 },
+            "expected": {
+              "filePath": "fixtures/ctr-workflow-local-sheet.json",
+              "rowNumber": 2,
+              "date": "2026-04-15"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "malformed": {
+    "missingSkuRows": [
+      { "clicks": 1, "impressions": 2 }
+    ],
+    "nonNumericClicksRows": [
+      { "advertisedSku": "BAD-CLICKS", "clicks": "nope", "impressions": 2 }
+    ],
+    "nonNumericImpressionsRows": [
+      { "advertisedSku": "BAD-IMP", "clicks": 1, "impressions": "nope" }
+    ],
+    "emptyRows": []
+  }
+}

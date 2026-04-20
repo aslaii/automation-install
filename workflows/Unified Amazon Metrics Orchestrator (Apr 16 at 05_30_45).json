@@ -14,7 +14,87 @@
     },
     {
       "parameters": {
-        "jsCode": "const registry = [\n  { metricKey: 'bsr', displayName: 'Get BSR', workflowId: 'zC5vJ22Tb7i4dli8', dateMode: 'snapshot-metadata' },\n  { metricKey: 'ads_spend', displayName: 'Get Ad Spend', workflowId: 'nWQo0Pz3qHzQO0My', dateMode: 'range-ready' },\n  { metricKey: 'ctr', displayName: 'Get CTR', workflowId: 'wJaKKBJzcgUUoahu', dateMode: 'range-ready' },\n  { metricKey: 'refunds', displayName: 'Get Refund', workflowId: 'mV21sXm6RdaCfPet', dateMode: 'range-ready' },\n  { metricKey: 'sales_ppc', displayName: 'Get Sales PPC', workflowId: 'PzN4mNPLpYAS85WV', dateMode: 'range-ready' },\n  { metricKey: 'clicks', displayName: 'Get Clicks', workflowId: 'iVZAWiAvfBrQVOpi', dateMode: 'range-ready' },\n  { metricKey: 'units_ppc', displayName: 'Get Units PPC', workflowId: '0D4iLq9dHrac09vy', dateMode: 'range-ready' },\n  { metricKey: 'fba_fbm_stock', displayName: 'Get FBA/FBM Stock', workflowId: 'T6pc0F0RULowHQu0', dateMode: 'snapshot-metadata' },\n  { metricKey: 'sales_organic', displayName: 'Get Sales Organic', workflowId: 'KTNa277JLZ8hDZ89', dateMode: 'range-ready' },\n  { metricKey: 'units_organic', displayName: 'Get Units Organic', workflowId: 'siWvymzWJu7Ns1VG', dateMode: 'range-ready' },\n  { metricKey: 'reversal_reimbursement', displayName: 'Get Reversal Reimbursement', workflowId: 'fsJgfd11tF3nPprY', dateMode: 'range-ready' },\n  { metricKey: 'fba_per_unit_fulfillment_fee', displayName: 'Get FBAPerUnitFulfillmentFee', workflowId: 'TLMr85JcV4bwDySu', dateMode: 'snapshot-metadata' },\n];\nconst raw = String($json.INCLUDE_LIST || '').trim();\nconst selectedMetrics = raw ? [...new Set(raw.split(',').map((value) => value.trim()).filter(Boolean))] : [];\nreturn [{\n  json: {\n    '✅START_DATE': $json['✅START_DATE'],\n    '✅END_DATE': $json['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': $json['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': $json['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': $json['✅SHEET_NAME'],\n    '✅RANGE': $json['✅RANGE'],\n    '✅COLUMNS': $json['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': $json['✅AMAZON_MARKETPLACE_ID'],\n    INCLUDE_LIST: $json.INCLUDE_LIST || '',\n    selectedMetrics,\n    runAll: selectedMetrics.length === 0,\n    auth: $json.auth,\n    summary: [],\n    registry,\n  },\n}];"
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "✅START_DATE"
+            },
+            {
+              "name": "✅END_DATE"
+            },
+            {
+              "name": "INCLUDE_LIST"
+            },
+            {
+              "name": "MAX_RETRIES"
+            },
+            {
+              "name": "ENABLE_RETRY_WORKFLOW"
+            },
+            {
+              "name": "✅AMAZON_ADS_CLIENT_ID"
+            },
+            {
+              "name": "✅AMAZON_ADS_CLIENT_SECRET"
+            },
+            {
+              "name": "✅AMAZON_ADS_REFRESH_TOKEN"
+            },
+            {
+              "name": "✅AMAZON_ADS_PROFILE_ID"
+            },
+            {
+              "name": "✅AMAZON_SP_CLIENT_ID"
+            },
+            {
+              "name": "✅AMAZON_SP_CLIENT_SECRET: "
+            },
+            {
+              "name": "✅AMAZON_SP_REFRESH_TOKEN"
+            },
+            {
+              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL"
+            },
+            {
+              "name": "✅GOOGLE_PRIVATE_KEY"
+            },
+            {
+              "name": "✅GOOGLE_SCOPE"
+            },
+            {
+              "name": "✅SPREADSHEET_URL_OR_ID"
+            },
+            {
+              "name": "✅SPREADSHEET_ID"
+            },
+            {
+              "name": "✅SHEET_NAME"
+            },
+            {
+              "name": "✅RANGE"
+            },
+            {
+              "name": "✅COLUMNS"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID"
+            }
+          ]
+        }
+      },
+      "id": "e5bc9aa3-74b1-48cb-9741-d0b63f0bd826",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3104,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const registry = [\n  { metricKey: 'bsr', displayName: 'Get BSR', workflowId: 'zC5vJ22Tb7i4dli8', dateMode: 'snapshot-metadata' },\n  { metricKey: 'ads_spend', displayName: 'Get Ad Spend', workflowId: 'nWQo0Pz3qHzQO0My', dateMode: 'range-ready' },\n  { metricKey: 'ctr', displayName: 'Get CTR', workflowId: 'wJaKKBJzcgUUoahu', dateMode: 'range-ready' },\n  { metricKey: 'refunds', displayName: 'Get Refund', workflowId: 'mV21sXm6RdaCfPet', dateMode: 'range-ready' },\n  { metricKey: 'sales_ppc', displayName: 'Get Sales PPC', workflowId: 'PzN4mNPLpYAS85WV', dateMode: 'range-ready' },\n  { metricKey: 'clicks', displayName: 'Get Clicks', workflowId: 'iVZAWiAvfBrQVOpi', dateMode: 'range-ready' },\n  { metricKey: 'units_ppc', displayName: 'Get Units PPC', workflowId: '0D4iLq9dHrac09vy', dateMode: 'range-ready' },\n  { metricKey: 'fba_fbm_stock', displayName: 'Get FBA/FBM Stock', workflowId: 'T6pc0F0RULowHQu0', dateMode: 'snapshot-metadata' },\n  { metricKey: 'sales_organic', displayName: 'Get Sales Organic', workflowId: 'KTNa277JLZ8hDZ89', dateMode: 'range-ready' },\n  { metricKey: 'units_organic', displayName: 'Get Units Organic', workflowId: 'siWvymzWJu7Ns1VG', dateMode: 'range-ready' },\n  { metricKey: 'reversal_reimbursement', displayName: 'Get Reversal Reimbursement', workflowId: 'fsJgfd11tF3nPprY', dateMode: 'range-ready' },\n  { metricKey: 'fba_per_unit_fulfillment_fee', displayName: 'Get FBAPerUnitFulfillmentFee', workflowId: 'TLMr85JcV4bwDySu', dateMode: 'snapshot-metadata' },\n];\nconst raw = String($json.INCLUDE_LIST || '').trim();\nconst selectedMetrics = raw ? [...new Set(raw.split(',').map((value) => value.trim()).filter(Boolean))] : [];\nreturn [{\n  json: {\n    '✅START_DATE': $json['✅START_DATE'],\n    '✅END_DATE': $json['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': $json['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': $json['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': $json['✅SHEET_NAME'],\n    '✅RANGE': $json['✅RANGE'],\n    '✅COLUMNS': $json['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': $json['✅AMAZON_MARKETPLACE_ID'],\n    '✅AMAZON_ADS_CLIENT_ID': $json['✅AMAZON_ADS_CLIENT_ID'],\n    '✅AMAZON_ADS_CLIENT_SECRET': $json['✅AMAZON_ADS_CLIENT_SECRET'],\n    '✅AMAZON_ADS_REFRESH_TOKEN': $json['✅AMAZON_ADS_REFRESH_TOKEN'],\n    '✅AMAZON_ADS_PROFILE_ID': $json['✅AMAZON_ADS_PROFILE_ID'],\n    '✅AMAZON_SP_CLIENT_ID': $json['✅AMAZON_SP_CLIENT_ID'],\n    '✅AMAZON_SP_CLIENT_SECRET: ': $json['✅AMAZON_SP_CLIENT_SECRET: '],\n    '✅AMAZON_SP_REFRESH_TOKEN': $json['✅AMAZON_SP_REFRESH_TOKEN'],\n    '✅GOOGLE_SERVICE_ACCOUNT_EMAIL': $json['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '✅GOOGLE_PRIVATE_KEY': $json['✅GOOGLE_PRIVATE_KEY'],\n    '✅GOOGLE_SCOPE': $json['✅GOOGLE_SCOPE'],\n    INCLUDE_LIST: $json.INCLUDE_LIST || '',\n    MAX_RETRIES: $json.MAX_RETRIES || '3',\n    ENABLE_RETRY_WORKFLOW: $json.ENABLE_RETRY_WORKFLOW ?? 'true',\n    selectedMetrics,\n    runAll: selectedMetrics.length === 0,\n    auth: $json.auth,\n    summary: [],\n    registry,\n  },\n}];"
       },
       "id": "9ab7ff96-a858-4f5d-89dd-6eae4df70259",
       "name": "Build Workflow Registry",
@@ -1446,7 +1526,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nreturn [{ json: { summary: input.summary || [] } }];"
+        "jsCode": "const input = $input.first().json;\nconst summary = input.summary || [];\nconst failedMetrics = summary.filter((entry) => entry.status === 'failed');\nconst failedMetricKeys = [...new Set(failedMetrics.map((entry) => entry.metricKey).filter(Boolean))];\nconst enableRetryWorkflow = String(input.ENABLE_RETRY_WORKFLOW ?? 'true').toLowerCase() !== 'false';\nconst maxRetries = Math.max(1, Number(input.MAX_RETRIES || 3));\nreturn [{\n  json: {\n    summary,\n    failedMetrics,\n    failedMetricKeys,\n    '✅START_DATE': input['✅START_DATE'],\n    '✅END_DATE': input['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': input['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': input['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': input['✅SHEET_NAME'],\n    '✅RANGE': input['✅RANGE'],\n    '✅COLUMNS': input['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': input['✅AMAZON_MARKETPLACE_ID'],\n    '✅AMAZON_ADS_CLIENT_ID': input['✅AMAZON_ADS_CLIENT_ID'],\n    '✅AMAZON_ADS_CLIENT_SECRET': input['✅AMAZON_ADS_CLIENT_SECRET'],\n    '✅AMAZON_ADS_REFRESH_TOKEN': input['✅AMAZON_ADS_REFRESH_TOKEN'],\n    '✅AMAZON_ADS_PROFILE_ID': input['✅AMAZON_ADS_PROFILE_ID'],\n    '✅AMAZON_SP_CLIENT_ID': input['✅AMAZON_SP_CLIENT_ID'],\n    '✅AMAZON_SP_CLIENT_SECRET: ': input['✅AMAZON_SP_CLIENT_SECRET: '],\n    '✅AMAZON_SP_REFRESH_TOKEN': input['✅AMAZON_SP_REFRESH_TOKEN'],\n    '✅GOOGLE_SERVICE_ACCOUNT_EMAIL': input['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '✅GOOGLE_PRIVATE_KEY': input['✅GOOGLE_PRIVATE_KEY'],\n    '✅GOOGLE_SCOPE': input['✅GOOGLE_SCOPE'],\n    INCLUDE_LIST: input.INCLUDE_LIST || '',\n    MAX_RETRIES: String(maxRetries),\n    ENABLE_RETRY_WORKFLOW: enableRetryWorkflow ? 'true' : 'false',\n    shouldAutoRetry: enableRetryWorkflow && failedMetricKeys.length > 0,\n    orchestratorRunId: $execution.id,\n  },\n}];"
       },
       "id": "cb2054c8-299b-414e-86a3-b578d73d746f",
       "name": "Final Summary",
@@ -1454,6 +1534,104 @@
       "typeVersion": 2,
       "position": [
         2672,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-auto-retry-needed",
+              "leftValue": "={{ $json.shouldAutoRetry ? 'true' : 'false' }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f2427f59-48d4-45d2-9ec8-af0f95f8b421",
+      "name": "If Auto Retry Needed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2896,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "sJw7kKf3NqP1tR8M",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/sJw7kKf3NqP1tR8M",
+          "cachedResultName": "Retry Failed Amazon Metrics"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "FAILED_METRIC_KEYS": "={{ ($json.failedMetricKeys || []).join(',') }}",
+            "MAX_RETRIES": "={{ $json.MAX_RETRIES || '3' }}",
+            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
+            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
+            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
+            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "✅AMAZON_ADS_CLIENT_ID": "={{ $json[\"✅AMAZON_ADS_CLIENT_ID\"] || \"\" }}",
+            "✅AMAZON_ADS_CLIENT_SECRET": "={{ $json[\"✅AMAZON_ADS_CLIENT_SECRET\"] || \"\" }}",
+            "✅AMAZON_ADS_REFRESH_TOKEN": "={{ $json[\"✅AMAZON_ADS_REFRESH_TOKEN\"] || \"\" }}",
+            "✅AMAZON_ADS_PROFILE_ID": "={{ $json[\"✅AMAZON_ADS_PROFILE_ID\"] || \"\" }}",
+            "✅AMAZON_SP_CLIENT_ID": "={{ $json[\"✅AMAZON_SP_CLIENT_ID\"] || \"\" }}",
+            "✅AMAZON_SP_CLIENT_SECRET: ": "={{ $json[\"✅AMAZON_SP_CLIENT_SECRET: \"] || \"\" }}",
+            "✅AMAZON_SP_REFRESH_TOKEN": "={{ $json[\"✅AMAZON_SP_REFRESH_TOKEN\"] || \"\" }}",
+            "✅GOOGLE_SERVICE_ACCOUNT_EMAIL": "={{ $json[\"✅GOOGLE_SERVICE_ACCOUNT_EMAIL\"] || \"\" }}",
+            "✅GOOGLE_PRIVATE_KEY": "={{ $json[\"✅GOOGLE_PRIVATE_KEY\"] || \"\" }}",
+            "✅GOOGLE_SCOPE": "={{ $json[\"✅GOOGLE_SCOPE\"] || \"https://www.googleapis.com/auth/spreadsheets\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "c707b37c-1d55-4c2f-bd16-b4c0b65e9f4c",
+      "name": "Execute Retry Failed Amazon Metrics",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3120,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all();"
+      },
+      "id": "cfa17ca8-3a64-4a2c-adb5-dcbd4f0f1c68",
+      "name": "Return Orchestrator Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3344,
         576
       ]
     },
@@ -1568,114 +1746,126 @@
             {
               "id": "76a6c500-c2c0-4339-8299-682826c4452b",
               "name": "✅START_DATE",
-              "value": "2026-04-17",
+              "value": "={{ $json[\"✅START_DATE\"] || \"2026-04-17\" }}",
               "type": "string"
             },
             {
               "id": "2a1915cd-7949-44ff-952b-9ab2aa6365f5",
               "name": "✅END_DATE",
-              "value": "2026-04-17",
+              "value": "={{ $json[\"✅END_DATE\"] || \"2026-04-17\" }}",
               "type": "string"
             },
             {
               "id": "6944e5f6-f22f-4bf8-9746-13b9e5ee8f91",
               "name": "INCLUDE_LIST",
-              "value": "",
+              "value": "={{ $json.INCLUDE_LIST || \"\" }}",
               "type": "string"
+            },
+            {
+              "name": "MAX_RETRIES",
+              "value": "={{ $json.MAX_RETRIES || \"3\" }}",
+              "type": "string",
+              "id": "b129cb7c-0f98-40eb-bf18-ea42e4b1cbd0"
+            },
+            {
+              "name": "ENABLE_RETRY_WORKFLOW",
+              "value": "={{ $json.ENABLE_RETRY_WORKFLOW !== undefined && $json.ENABLE_RETRY_WORKFLOW !== null && $json.ENABLE_RETRY_WORKFLOW !== '' ? String($json.ENABLE_RETRY_WORKFLOW) : 'true' }}",
+              "type": "string",
+              "id": "0f7e0a35-8d67-4c89-9fca-0efec2d38f2d"
             },
             {
               "id": "d2a87c47-b55e-4641-90c9-4b7c204d8955",
               "name": "✅AMAZON_ADS_CLIENT_ID",
-              "value": "",
+              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_ID\"] || \"\" }}",
               "type": "string"
             },
             {
               "id": "f6bcc963-0897-455c-ac16-e86f3deca6ef",
               "name": "✅AMAZON_ADS_CLIENT_SECRET",
-              "value": "",
+              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_SECRET\"] || \"\" }}",
               "type": "string"
             },
             {
               "id": "6e513cbb-157d-4f5b-a18f-6f2b212157f5",
               "name": "✅AMAZON_ADS_REFRESH_TOKEN",
-              "value": "",
+              "value": "={{ $json[\"✅AMAZON_ADS_REFRESH_TOKEN\"] || \"\" }}",
               "type": "string"
             },
             {
               "id": "15f4bb08-6a83-4e2f-bf3f-706b362ee4af",
               "name": "✅AMAZON_ADS_PROFILE_ID",
-              "value": "873689645456341",
+              "value": "={{ $json[\"✅AMAZON_ADS_PROFILE_ID\"] || \"873689645456341\" }}",
               "type": "string"
             },
             {
               "id": "55f35d9b-4dd4-4594-af0c-08185938f2ac",
               "name": "✅AMAZON_SP_CLIENT_ID",
-              "value": "",
+              "value": "={{ $json[\"✅AMAZON_SP_CLIENT_ID\"] || \"\" }}",
               "type": "string"
             },
             {
               "id": "2aa06f79-f2f4-4d4f-8a4a-bf328f2de798",
               "name": "✅AMAZON_SP_CLIENT_SECRET: ",
-              "value": "",
+              "value": "={{ $json[\"✅AMAZON_SP_CLIENT_SECRET: \"] || \"\" }}",
               "type": "string"
             },
             {
               "id": "518c7b45-f2de-42ad-b944-6342308f9e41",
               "name": "✅AMAZON_SP_REFRESH_TOKEN",
-              "value": "",
+              "value": "={{ $json[\"✅AMAZON_SP_REFRESH_TOKEN\"] || \"\" }}",
               "type": "string"
             },
             {
               "id": "d02eed0a-85e5-4723-97a0-2ef963c0cb91",
               "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL",
-              "value": "",
+              "value": "={{ $json[\"✅GOOGLE_SERVICE_ACCOUNT_EMAIL\"] || \"\" }}",
               "type": "string"
             },
             {
               "id": "fe461a50-becf-4868-9675-eba1f00317b1",
               "name": "✅GOOGLE_PRIVATE_KEY",
-              "value": "",
+              "value": "={{ $json[\"✅GOOGLE_PRIVATE_KEY\"] || \"\" }}",
               "type": "string"
             },
             {
               "id": "51f84e29-8590-46e0-bb22-c92f5900bcd7",
               "name": "✅GOOGLE_SCOPE",
-              "value": "https://www.googleapis.com/auth/spreadsheets",
+              "value": "={{ $json[\"✅GOOGLE_SCOPE\"] || \"https://www.googleapis.com/auth/spreadsheets\" }}",
               "type": "string"
             },
             {
               "id": "297bd6d8-b645-41fa-baf6-9ac1a3b4a682",
               "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "https://docs.google.com/spreadsheets/d/1vK8PB8jug1NakLBF81_lpEq66De_RbHe-6tG063ibnM/edit?gid=962294707#gid=962294707",
+              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"https://docs.google.com/spreadsheets/d/1vK8PB8jug1NakLBF81_lpEq66De_RbHe-6tG063ibnM/edit?gid=962294707#gid=962294707\" }}",
               "type": "string"
             },
             {
               "id": "c0aec1b6-f8fc-49fd-82aa-03fbb686df99",
               "name": "✅SHEET_NAME",
-              "value": "N8N_DOWNLOAD",
+              "value": "={{ $json[\"✅SHEET_NAME\"] || \"N8N_DOWNLOAD\" }}",
               "type": "string"
             },
             {
               "id": "163475ec-2602-4c9e-9200-3277ef26934d",
               "name": "✅RANGE",
-              "value": "A:BD",
+              "value": "={{ $json[\"✅RANGE\"] || \"A:BD\" }}",
               "type": "string"
             },
             {
               "id": "05c6613c-5ce9-418b-9067-8ca2a91dec71",
               "name": "✅COLUMNS",
-              "value": "[\"cost\", \"clicks\", \"impressions\", \"advertisedAsin\", \"advertisedSku\"]",
+              "value": "={{ $json[\"✅COLUMNS\"] || '[\"cost\", \"clicks\", \"impressions\", \"advertisedAsin\", \"advertisedSku\"]' }}",
               "type": "string"
             },
             {
               "id": "e05654b1-70f3-45f6-ba57-3f3b7bb1a8bf",
               "name": "✅SPREADSHEET_ID",
-              "value": "1vK8PB8jug1NakLBF81_lpEq66De_RbHe-6tG063ibnM",
+              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"1vK8PB8jug1NakLBF81_lpEq66De_RbHe-6tG063ibnM\" }}",
               "type": "string"
             },
             {
               "name": "✅AMAZON_MARKETPLACE_ID",
-              "value": "ATVPDKIKX0DER",
+              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"ATVPDKIKX0DER\" }}",
               "type": "string",
               "id": "67e27ab3-87d9-4ca2-bc01-21d681d1b080"
             }
@@ -1694,7 +1884,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function b64urlFromString(str) {\n  return Buffer.from(str, 'utf8')\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction b64urlFromBytes(bytes) {\n  return Buffer.from(bytes)\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction hexToBytes(hex) {\n  const out = new Uint8Array(hex.length / 2);\n  for (let i = 0; i < out.length; i++) {\n    out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);\n  }\n  return out;\n}\n\nfunction bytesToBigInt(bytes) {\n  let n = 0n;\n  for (let i = 0; i < bytes.length; i++) {\n    n = (n << 8n) | BigInt(bytes[i]);\n  }\n  return n;\n}\n\nfunction bigIntToBytes(num, length) {\n  const out = new Uint8Array(length);\n  let x = num;\n  for (let i = length - 1; i >= 0; i--) {\n    out[i] = Number(x & 0xffn);\n    x >>= 8n;\n  }\n  return out;\n}\n\nfunction modPow(base, exp, mod) {\n  let result = 1n;\n  let b = base % mod;\n  let e = exp;\n  while (e > 0n) {\n    if (e & 1n) result = (result * b) % mod;\n    b = (b * b) % mod;\n    e >>= 1n;\n  }\n  return result;\n}\n\nfunction readAsn1Element(bytes, offset) {\n  const tag = bytes[offset++];\n  const lenByte = bytes[offset++];\n  let length = 0;\n  if ((lenByte & 0x80) === 0) {\n    length = lenByte;\n  } else {\n    const numBytes = lenByte & 0x7f;\n    for (let i = 0; i < numBytes; i++) {\n      length = (length << 8) | bytes[offset++];\n    }\n  }\n  const valueStart = offset;\n  const valueEnd = valueStart + length;\n  return { tag, valueStart, valueEnd, nextOffset: valueEnd };\n}\n\nfunction readAsn1Integer(bytes, offset) {\n  const el = readAsn1Element(bytes, offset);\n  if (el.tag !== 0x02) throw new Error('Invalid ASN.1 INTEGER');\n  let start = el.valueStart;\n  while (start < el.valueEnd - 1 && bytes[start] === 0x00) start++;\n  return { value: bytesToBigInt(bytes.slice(start, el.valueEnd)), nextOffset: el.nextOffset };\n}\n\nfunction parsePkcs8RsaPrivateKey(pem) {\n  const der = Buffer.from(\n    pem\n      .replace(/-----BEGIN PRIVATE KEY-----/g, '')\n      .replace(/-----END PRIVATE KEY-----/g, '')\n      .replace(/\\s+/g, ''),\n    'base64'\n  );\n  const bytes = new Uint8Array(der);\n\n  const top = readAsn1Element(bytes, 0);\n  if (top.tag !== 0x30) throw new Error('Invalid PKCS#8');\n\n  let o = top.valueStart;\n  const version = readAsn1Element(bytes, o);\n  if (version.tag !== 0x02) throw new Error('Invalid PKCS#8 version');\n  o = version.nextOffset;\n\n  const alg = readAsn1Element(bytes, o);\n  if (alg.tag !== 0x30) throw new Error('Invalid PKCS#8 algorithm identifier');\n  o = alg.nextOffset;\n\n  const pk = readAsn1Element(bytes, o);\n  if (pk.tag !== 0x04) throw new Error('Invalid PKCS#8 privateKey');\n\n  const rsaBytes = bytes.slice(pk.valueStart, pk.valueEnd);\n  const rsaSeq = readAsn1Element(rsaBytes, 0);\n  if (rsaSeq.tag !== 0x30) throw new Error('Invalid RSAPrivateKey');\n\n  let r = rsaSeq.valueStart;\n  r = readAsn1Element(rsaBytes, r).nextOffset; // version\n  const nEl = readAsn1Integer(rsaBytes, r); r = nEl.nextOffset;\n  const eEl = readAsn1Integer(rsaBytes, r); r = eEl.nextOffset;\n  const dEl = readAsn1Integer(rsaBytes, r);\n\n  return {\n    n: nEl.value,\n    e: eEl.value,\n    d: dEl.value,\n  };\n}\n\nfunction rotr(x, n) {\n  return ((x >>> n) | (x << (32 - n))) >>> 0;\n}\n\nfunction sha256(msgBytes) {\n  const K = [\n    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,\n    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,\n    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,\n    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,\n    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,\n    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,\n    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,\n    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,\n  ];\n\n  const H = [\n    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,\n    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,\n  ];\n\n  const bitLen = msgBytes.length * 8;\n  const withOne = msgBytes.length + 1;\n  const padLen = (64 - ((withOne + 8) % 64)) % 64;\n  const totalLen = withOne + padLen + 8;\n  const data = new Uint8Array(totalLen);\n  data.set(msgBytes, 0);\n  data[msgBytes.length] = 0x80;\n  const hi = Math.floor(bitLen / 0x100000000);\n  const lo = bitLen >>> 0;\n  data[totalLen - 8] = (hi >>> 24) & 0xff;\n  data[totalLen - 7] = (hi >>> 16) & 0xff;\n  data[totalLen - 6] = (hi >>> 8) & 0xff;\n  data[totalLen - 5] = hi & 0xff;\n  data[totalLen - 4] = (lo >>> 24) & 0xff;\n  data[totalLen - 3] = (lo >>> 16) & 0xff;\n  data[totalLen - 2] = (lo >>> 8) & 0xff;\n  data[totalLen - 1] = lo & 0xff;\n\n  const W = new Uint32Array(64);\n\n  for (let i = 0; i < data.length; i += 64) {\n    for (let t = 0; t < 16; t++) {\n      const j = i + t * 4;\n      W[t] = ((data[j] << 24) | (data[j + 1] << 16) | (data[j + 2] << 8) | data[j + 3]) >>> 0;\n    }\n    for (let t = 16; t < 64; t++) {\n      const s0 = (rotr(W[t - 15], 7) ^ rotr(W[t - 15], 18) ^ (W[t - 15] >>> 3)) >>> 0;\n      const s1 = (rotr(W[t - 2], 17) ^ rotr(W[t - 2], 19) ^ (W[t - 2] >>> 10)) >>> 0;\n      W[t] = (((W[t - 16] + s0) >>> 0) + ((W[t - 7] + s1) >>> 0)) >>> 0;\n    }\n\n    let a = H[0], b = H[1], c = H[2], d = H[3];\n    let e = H[4], f = H[5], g = H[6], h = H[7];\n\n    for (let t = 0; t < 64; t++) {\n      const S1 = (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) >>> 0;\n      const ch = ((e & f) ^ (~e & g)) >>> 0;\n      const temp1 = (((((h + S1) >>> 0) + ch) >>> 0) + ((K[t] + W[t]) >>> 0)) >>> 0;\n      const S0 = (rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) >>> 0;\n      const maj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;\n      const temp2 = (S0 + maj) >>> 0;\n\n      h = g;\n      g = f;\n      f = e;\n      e = (d + temp1) >>> 0;\n      d = c;\n      c = b;\n      b = a;\n      a = (temp1 + temp2) >>> 0;\n    }\n\n    H[0] = (H[0] + a) >>> 0;\n    H[1] = (H[1] + b) >>> 0;\n    H[2] = (H[2] + c) >>> 0;\n    H[3] = (H[3] + d) >>> 0;\n    H[4] = (H[4] + e) >>> 0;\n    H[5] = (H[5] + f) >>> 0;\n    H[6] = (H[6] + g) >>> 0;\n    H[7] = (H[7] + h) >>> 0;\n  }\n\n  const out = new Uint8Array(32);\n  for (let i = 0; i < 8; i++) {\n    out[i * 4] = (H[i] >>> 24) & 0xff;\n    out[i * 4 + 1] = (H[i] >>> 16) & 0xff;\n    out[i * 4 + 2] = (H[i] >>> 8) & 0xff;\n    out[i * 4 + 3] = H[i] & 0xff;\n  }\n  return out;\n}\n\nfunction rsassaPkcs1V15Sha256Sign(messageUtf8, privateKeyPem) {\n  const key = parsePkcs8RsaPrivateKey(privateKeyPem);\n  const k = Math.ceil(key.n.toString(2).length / 8);\n\n  const hash = sha256(new TextEncoder().encode(messageUtf8));\n  const digestInfoPrefix = hexToBytes('3031300d060960864801650304020105000420');\n  const tLen = digestInfoPrefix.length + hash.length;\n  const psLen = k - tLen - 3;\n  if (psLen < 8) throw new Error('RSA key too short for PKCS#1 v1.5 SHA-256');\n\n  const em = new Uint8Array(k);\n  em[0] = 0x00;\n  em[1] = 0x01;\n  for (let i = 0; i < psLen; i++) em[2 + i] = 0xff;\n  em[2 + psLen] = 0x00;\n  em.set(digestInfoPrefix, 3 + psLen);\n  em.set(hash, 3 + psLen + digestInfoPrefix.length);\n\n  const m = bytesToBigInt(em);\n  const s = modPow(m, key.d, key.n);\n  return bigIntToBytes(s, k);\n}\n\nconst input = $input.first().json;\nconst serviceAccountEmail = $('Set Credentials').first().json[\"✅GOOGLE_SERVICE_ACCOUNT_EMAIL\"];\nconst privateKeyPem = String($('Set Credentials').first().json[\"✅GOOGLE_PRIVATE_KEY\"] || '').replace(/\\\\n/g, '\\n');\nconst scope = $('Set Credentials').first().json[\"✅GOOGLE_SCOPE\"] || 'https://www.googleapis.com/auth/spreadsheets.readonly';\n\nif (!serviceAccountEmail || !privateKeyPem) {\n  throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY');\n}\n\nconst now = Math.floor(Date.now() / 1000);\nconst header = { alg: 'RS256', typ: 'JWT' };\nconst payload = {\n  iss: serviceAccountEmail,\n  scope,\n  aud: 'https://oauth2.googleapis.com/token',\n  iat: now,\n  exp: now + 3600,\n};\n\nconst encodedHeader = b64urlFromString(JSON.stringify(header));\nconst encodedPayload = b64urlFromString(JSON.stringify(payload));\nconst signingInput = `${encodedHeader}.${encodedPayload}`;\n\nconst signatureBytes = rsassaPkcs1V15Sha256Sign(signingInput, privateKeyPem);\nconst signature = b64urlFromBytes(signatureBytes);\nconst assertion = `${signingInput}.${signature}`;\n\nreturn [\n  {\n    json: {\n      ...input,\n      assertion,\n    },\n  },\n];\n"
+        "jsCode": "const crypto = require('crypto');\n\nfunction b64url(value) {\n  return Buffer.from(value)\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction getCredentials() {\n  try {\n    return $('Set Credentials').first().json || {};\n  } catch {\n    return $input.first().json || {};\n  }\n}\n\nconst input = $input.first().json || {};\nconst credentials = { ...getCredentials(), ...input };\nconst serviceAccountEmail = credentials['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'];\nconst privateKeyPem = String(credentials['✅GOOGLE_PRIVATE_KEY'] || '').replace(/\\n/g, '\n');\nconst scope = credentials['✅GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets.readonly';\n\nif (!serviceAccountEmail || !privateKeyPem) {\n  throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY');\n}\n\nconst now = Math.floor(Date.now() / 1000);\nconst encodedHeader = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));\nconst encodedPayload = b64url(JSON.stringify({\n  iss: serviceAccountEmail,\n  scope,\n  aud: 'https://oauth2.googleapis.com/token',\n  iat: now,\n  exp: now + 3600,\n}));\nconst signingInput = `${encodedHeader}.${encodedPayload}`;\nconst signature = crypto\n  .createSign('RSA-SHA256')\n  .update(signingInput)\n  .end()\n  .sign(privateKeyPem, 'base64')\n  .replace(/=/g, '')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_');\n\nreturn [{\n  json: {\n    ...input,\n    assertion: `${signingInput}.${signature}`,\n  },\n}];\n"
       },
       "id": "ccccc996-2d47-48fe-a659-6c8e16dc18de",
       "name": "Build JWT Assertion",
@@ -2515,6 +2705,46 @@
         ]
       ]
     },
+    "Final Summary": {
+      "main": [
+        [
+          {
+            "node": "If Auto Retry Needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Auto Retry Needed": {
+      "main": [
+        [
+          {
+            "node": "Execute Retry Failed Amazon Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Orchestrator Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Retry Failed Amazon Metrics": {
+      "main": [
+        [
+          {
+            "node": "Return Orchestrator Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Mint Amazon Access Token": {
       "main": [
         [
@@ -2571,6 +2801,17 @@
       ]
     },
     "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
       "main": [
         [
           {

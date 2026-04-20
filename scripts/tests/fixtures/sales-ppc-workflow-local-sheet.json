@@ -1,0 +1,49 @@
+{
+  "date": "2026-04-15",
+  "sheetName": "Sheet1",
+  "values": [
+    ["SKU", "SALESPPC", "Notes"],
+    ["MIXED-SKU", "", "mixed provenance"],
+    ["ATTR-ONLY", "", "same-sku fallback only"],
+    ["ROUNDING-SKU", "", "rounding coverage"],
+    ["SHEET-ONLY", "", "present only in sheet target set"],
+    ["ATTR-ONLY_TOTALS", "", "ignored totals row"]
+  ],
+  "fileRows": [
+    {
+      "date": "2026-04-15",
+      "sku": "MIXED-SKU",
+      "expectedSalesPpc": 12.35,
+      "notes": "fixture parity",
+      "productLabel": "MIXED-SKU"
+    },
+    {
+      "date": "2026-04-15",
+      "sku": "ATTR-ONLY",
+      "expectedSalesPpc": 7.89,
+      "notes": "fixture parity",
+      "productLabel": "ATTR-ONLY"
+    },
+    {
+      "date": "2026-04-15",
+      "sku": "ATTR-LOGICAL",
+      "expectedSalesPpc": 3.21,
+      "notes": "report only",
+      "productLabel": "ATTR-LOGICAL"
+    },
+    {
+      "date": "2026-04-15",
+      "sku": "ROUNDING-SKU",
+      "expectedSalesPpc": 3.02,
+      "notes": "fixture parity",
+      "productLabel": "ROUNDING-SKU"
+    },
+    {
+      "date": "2026-04-15",
+      "sku": "SHEET-ONLY",
+      "expectedSalesPpc": 0,
+      "notes": "sheet only",
+      "productLabel": "SHEET-ONLY"
+    }
+  ]
+}
