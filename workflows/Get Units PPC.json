@@ -1,11 +1,5 @@
 {
-  "updatedAt": "2026-04-17T05:46:26.244Z",
-  "createdAt": "2026-04-14T00:48:48.803Z",
-  "id": "0D4iLq9dHrac09vy",
   "name": "Get Units PPC",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -534,6 +528,7 @@
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Wait": {
       "main": [
@@ -726,6 +721,7 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -733,37 +729,11 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "pinData": {},
   "versionId": "1144aa4b-fdd7-4446-bf3b-931f322c4962",
-  "activeVersionId": "6763c31a-ca7d-4d21-93c1-96cd070004f7",
-  "versionCounter": 67,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-14T00:48:48.807Z",
-      "createdAt": "2026-04-14T00:48:48.807Z",
-      "role": "workflow:owner",
-      "workflowId": "0D4iLq9dHrac09vy",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "0D4iLq9dHrac09vy",
+  "tags": []
 }

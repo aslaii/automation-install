@@ -1,21 +1,15 @@
 {
-  "updatedAt": "2026-04-17T05:46:08.420Z",
-  "createdAt": "2026-04-13T23:23:04.701Z",
-  "id": "PzN4mNPLpYAS85WV",
   "name": "Get Sales PPC",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1520,
-        208
+        -624,
+        -48
       ],
-      "id": "a6fccc8c-2df4-4374-beb2-ba0a2a99ae5f",
+      "id": "95c9e742-d13f-4306-9737-db647235d7e2",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -89,10 +83,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1072,
-        112
+        -176,
+        -144
       ],
-      "id": "61c148a9-aa32-481f-b8ec-9bf35f125506",
+      "id": "3f4a190c-a11f-4e88-a790-7f3b3b06d8d9",
       "name": "Set Credentials"
     },
     {
@@ -102,10 +96,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -176,
-        112
+        720,
+        -144
       ],
-      "id": "f405308f-86b5-48e6-a397-e1be2d15bacc",
+      "id": "5f908467-bd7b-4fd4-85bb-57db8d3883bc",
       "name": "Wait",
       "webhookId": "d6068b12-ad75-49df-b262-f0a0a7e1d15e"
     },
@@ -138,10 +132,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        48,
-        48
+        944,
+        -208
       ],
-      "id": "b7525e40-a85d-49f0-8302-aa6f5c8065d5",
+      "id": "60702ef6-686c-4240-9ae8-a605b09f4ca1",
       "name": "Check if its okay",
       "onError": "continueRegularOutput"
     },
@@ -172,10 +166,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        496,
-        112
+        1392,
+        -144
       ],
-      "id": "b480acc3-927f-4342-83d5-075bc8e29fda",
+      "id": "7305a30c-1df6-417b-9115-f92188933324",
       "name": "If"
     },
     {
@@ -211,10 +205,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -848,
-        112
+        48,
+        -144
       ],
-      "id": "4ee08523-a0b3-41d9-8a75-b3c545c7f82a",
+      "id": "cc6b86d6-727d-47c2-9752-929193f74f2c",
       "name": "Send a Request for Report",
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
@@ -233,10 +227,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        720,
-        112
+        1616,
+        -144
       ],
-      "id": "bbf40f16-d735-498f-827c-a2c71c4cfec9",
+      "id": "30759d03-444e-42a8-ab8c-7c5c22d5cc49",
       "name": "Download the File"
     },
     {
@@ -244,10 +238,10 @@
       "type": "n8n-nodes-base.compression",
       "typeVersion": 1.1,
       "position": [
-        944,
-        112
+        1840,
+        -144
       ],
-      "id": "fdeece29-1ece-44ed-85b3-e0186eabafad",
+      "id": "47d7fc3a-3b34-4c49-98d2-5268506abcf1",
       "name": "Decompress"
     },
     {
@@ -278,10 +272,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -624,
-        112
+        272,
+        -144
       ],
-      "id": "ae47453e-5518-48ed-a4a0-8e04c878ccd6",
+      "id": "a2b90d4c-19e2-43e7-893f-d0b686ab9d64",
       "name": "If error"
     },
     {
@@ -291,10 +285,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -400,
-        48
+        496,
+        -208
       ],
-      "id": "9bcc1faa-da3b-4f17-bf48-a021f51c2408",
+      "id": "fea4aa5c-91b5-493e-b4ac-4c17aaa66c2d",
       "name": "Extract Report Id From Error"
     },
     {
@@ -306,10 +300,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        1168,
-        112
+        2064,
+        -144
       ],
-      "id": "2ce42842-9912-45b4-ba88-b7a3432f4557",
+      "id": "654a3502-d6b5-4594-acc7-3e8b8ea2e546",
       "name": "Extract from File"
     },
     {
@@ -330,13 +324,13 @@
         },
         "options": {}
       },
-      "id": "45723c7e-ee0b-4c48-9094-b2d77e41a441",
+      "id": "41144fd9-8f55-42b7-8171-194e2b96b830",
       "name": "Webhook Read Google Sheet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1392,
-        112
+        2288,
+        -144
       ]
     },
     {
@@ -361,26 +355,26 @@
         "jsonBody": "={{ $json }}",
         "options": {}
       },
-      "id": "9178d1cb-5240-44ba-9367-beb68e9882ae",
+      "id": "6b18e527-782a-467f-8645-f6d14995ef75",
       "name": "Webhook Update Google Sheet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1840,
-        112
+        2736,
+        -144
       ]
     },
     {
       "parameters": {
-        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined || v === '') return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction roundCurrency(value) {\n  const numeric = Number(value || 0);\n  return Math.round((numeric + Number.EPSILON) * 100) / 100;\n}\n\nfunction resolveSalesField(row) {\n  if (row && row.sales7d !== undefined && row.sales7d !== null && row.sales7d !== '') return 'sales7d';\n  if (row && row.attributedSales7d !== undefined && row.attributedSales7d !== null && row.attributedSales7d !== '') return 'attributedSales7d';\n  if (row && row.attributedSalesSameSku7d !== undefined && row.attributedSalesSameSku7d !== null && row.attributedSalesSameSku7d !== '') return 'attributedSalesSameSku7d';\n  return null;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nfunction findHeaderIndex(headerRow, aliases) {\n  const normalizedAliases = aliases.map(normalizeHeader);\n  return headerRow.findIndex((cell) => normalizedAliases.includes(normalizeHeader(cell)));\n}\n\nconst sheet = $json;\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst salesBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n  const salesField = resolveSalesField(row);\n  const sales = roundCurrency(toNumber(salesField ? row[salesField] : 0));\n  salesBySku.set(sku, roundCurrency((salesBySku.get(sku) || 0) + sales));\n}\n\nconst headerRow = values[0] || [];\nconst skuCol = findHeaderIndex(headerRow, ['SKU']);\nconst targetCol = findHeaderIndex(headerRow, ['AD_SALES_$', 'AD SALES', 'ADSALES', 'SALESPPC']);\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and AD_SALES_$ columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /_TOTALS$/i.test(sku)) continue;\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[roundCurrency(salesBySku.get(sku) || 0)]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined || v === '') return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nfunction findHeaderIndex(headerRow, aliases) {\n  const normalizedAliases = aliases.map(normalizeHeader);\n  return headerRow.findIndex((cell) => normalizedAliases.includes(normalizeHeader(cell)));\n}\n\nconst sheet = $json;\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst salesField = reportData.find((row) => row && (row.sales7d !== undefined || row.attributedSales7d !== undefined))?.sales7d !== undefined\n  ? 'sales7d'\n  : 'attributedSales7d';\n\nconst salesBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n  const sales = toNumber(row[salesField]);\n  salesBySku.set(sku, Number(((salesBySku.get(sku) || 0) + sales).toFixed(2)));\n}\n\nconst headerRow = values[0] || [];\nconst skuCol = findHeaderIndex(headerRow, ['SKU']);\nconst targetCol = findHeaderIndex(headerRow, ['AD_SALES_$', 'AD SALES', 'ADSALES', 'SALESPPC']);\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and AD_SALES_$ columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /_TOTALS$/i.test(sku)) continue;\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[Number((salesBySku.get(sku) || 0).toFixed(2))]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1616,
-        112
+        2512,
+        -144
       ],
-      "id": "59513603-17e1-4ae8-9225-5e3b14147eb5",
+      "id": "f438fc00-c6b2-40b1-ba41-ee5372c3024e",
       "name": "Code in JavaScript"
     },
     {
@@ -393,10 +387,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1200,
-        -160
+        -304,
+        -416
       ],
-      "id": "4ef01d5f-eced-43ba-9465-60a373132421",
+      "id": "e4bb465d-d5ab-4d05-9142-3e2c5826e6cf",
       "name": "Sticky Note"
     },
     {
@@ -409,36 +403,36 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1104,
-        -160
+        2000,
+        -416
       ],
-      "id": "987e9d48-aa25-4ea5-b7d9-079ab5b35545",
+      "id": "fc204009-f379-4bc8-bf4c-d88c20cf733f",
       "name": "Sticky Note1"
     },
     {
       "parameters": {
         "jsCode": "function parseRetryAfterSeconds(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;\n}\n\nfunction nextBackoffSeconds(previousAttempt, retryAfterSeconds) {\n  const capped = Math.min(300, 60 * (2 ** Math.max(1, previousAttempt + 1)));\n  const jitter = Math.floor(Math.random() * 31);\n  return Math.max(capped + jitter, retryAfterSeconds || 0, 60);\n}\n\nconst input = $input.first().json || {};\nconst previousAttempt = Number(input.pollAttempt || 0);\nconst error = input.error || null;\nconst rawStatus = String(input.status || '').toUpperCase();\n\nif (error) {\n  const message = String(error.message || input.message || 'Unknown polling error');\n  const httpCode = Number(error.httpCode || input.httpCode || 0);\n  const retryAfterSeconds = parseRetryAfterSeconds(error.retryAfter || error.headers?.['retry-after'] || error.response?.headers?.['retry-after']);\n\n  if (httpCode === 429 || message.toLowerCase().includes('too many requests')) {\n    return [{\n      json: {\n        ...input,\n        status: 'THROTTLED',\n        pollAttempt: previousAttempt + 1,\n        nextWaitSeconds: nextBackoffSeconds(previousAttempt, retryAfterSeconds),\n      },\n    }];\n  }\n\n  throw new Error(message);\n}\n\nif (rawStatus === 'FAILED' || rawStatus === 'CANCELLED') {\n  throw new Error(`Amazon Ads report ${rawStatus}: ${input.failureReason || 'No failure reason provided'}`);\n}\n\nif (rawStatus === 'COMPLETED') {\n  return [{\n    json: {\n      ...input,\n      status: 'COMPLETED',\n      pollAttempt: previousAttempt,\n    },\n  }];\n}\n\nreturn [{\n  json: {\n    ...input,\n    status: rawStatus || 'PENDING',\n    pollAttempt: previousAttempt + 1,\n    nextWaitSeconds: nextBackoffSeconds(previousAttempt, 0),\n  },\n}];"
       },
-      "id": "271d56f4-3f12-441a-bcf7-c8ab4cfa64ec",
+      "id": "5741a81c-d13f-4a61-ae10-08b3e99b9843",
       "name": "Normalize Poll Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        272,
-        48
+        1168,
+        -208
       ]
     },
     {
       "parameters": {
         "inputSource": "passthrough"
       },
-      "id": "cef41de4-0680-40a1-b71b-6a062f95e1dc",
+      "id": "eb872077-3cdf-481d-9d86-297f76612010",
       "name": "When executed by another workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1520,
-        16
+        -624,
+        -240
       ]
     },
     {
@@ -524,16 +518,17 @@
         },
         "options": {}
       },
-      "id": "2a300776-4e9b-47ac-9345-5c75f79f5c78",
+      "id": "02589b4c-e838-423e-82ad-b20aea6c416f",
       "name": "Orchestrator Input Adapter",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1296,
-        112
+        -400,
+        -144
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Wait": {
       "main": [
@@ -726,6 +721,7 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -733,37 +729,11 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "staticData": null,
+  "versionId": "02ea7864-ffeb-4cb4-a1d4-e986e13fcc30",
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
   },
-  "pinData": {},
-  "versionId": "e03cd0bd-0a84-4a41-94bf-24f53692e59a",
-  "activeVersionId": "e7925812-7f8f-4b33-b722-af8ab81a247b",
-  "versionCounter": 70,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-13T23:23:04.705Z",
-      "createdAt": "2026-04-13T23:23:04.705Z",
-      "role": "workflow:owner",
-      "workflowId": "PzN4mNPLpYAS85WV",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "id": "PzN4mNPLpYAS85WV",
+  "tags": []
 }

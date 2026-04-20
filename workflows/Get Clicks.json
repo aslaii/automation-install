@@ -1,11 +1,5 @@
 {
-  "updatedAt": "2026-04-17T05:45:05.593Z",
-  "createdAt": "2026-04-14T00:49:02.724Z",
-  "id": "iVZAWiAvfBrQVOpi",
   "name": "Get Clicks",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -534,6 +528,7 @@
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Wait": {
       "main": [
@@ -726,6 +721,7 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -733,37 +729,11 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "pinData": {},
   "versionId": "f03a2352-1ef4-41b0-911b-93fedef42e0e",
-  "activeVersionId": "8077547f-bac3-4c2c-ae18-12ae41ac9722",
-  "versionCounter": 65,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-14T00:49:02.727Z",
-      "createdAt": "2026-04-14T00:49:02.727Z",
-      "role": "workflow:owner",
-      "workflowId": "iVZAWiAvfBrQVOpi",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "iVZAWiAvfBrQVOpi",
+  "tags": []
 }

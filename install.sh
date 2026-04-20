@@ -502,6 +502,16 @@ workflow_import_already_done() {
 	[[ "$REIMPORT_WORKFLOWS" != "1" && -f "$STATE_DIR/workflows-imported" ]]
 }
 
+backup_existing_workflows_for_replace() {
+	local backup_dir="$STATE_DIR/workflows-existing"
+
+	rm -rf "$backup_dir"
+	if [[ "$REIMPORT_WORKFLOWS" == "1" && -d "$TARGET_DIR/workflows" ]]; then
+		mkdir -p "$backup_dir"
+		cp -R "$TARGET_DIR/workflows/." "$backup_dir/"
+	fi
+}
+
 download_workflows() {
 	local base_url manifest_url manifest_file workflow_dir entry workflow_url local_name
 	base_url="$(source_base_url)"
@@ -532,6 +542,105 @@ download_workflows() {
 	return 0
 }
 
+replace_existing_workflows() {
+	local compose_file db_path backup_dir current_dir
+	compose_file="$TARGET_DIR/docker-compose.yml"
+	db_path="$TARGET_DIR/n8n_data/database.sqlite"
+	backup_dir="$STATE_DIR/workflows-existing"
+	current_dir="$TARGET_DIR/workflows"
+
+	if [[ "$REIMPORT_WORKFLOWS" != "1" ]]; then
+		return 0
+	fi
+
+	if [[ ! -f "$db_path" ]]; then
+		log "No existing n8n database found. Skipping workflow replacement cleanup."
+		return 0
+	fi
+
+	if ! command_exists sqlite3; then
+		fail "sqlite3 is required to replace existing workflows during reimport."
+	fi
+
+	log "Replacing previously imported workflows before reimport..."
+	docker compose -f "$compose_file" stop n8n >/dev/null
+
+	if ! node - "$db_path" "$backup_dir" "$current_dir" <<'NODE'; then
+const fs = require('fs');
+const path = require('path');
+const { spawnSync } = require('child_process');
+
+const [, , dbPath, ...dirs] = process.argv;
+
+function collectWorkflowMetadata(dirPath, ids, names) {
+  if (!dirPath || !fs.existsSync(dirPath)) return;
+  for (const entry of fs.readdirSync(dirPath)) {
+    if (!entry.endsWith('.json')) continue;
+    const filePath = path.join(dirPath, entry);
+    const workflow = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    if (typeof workflow.id === 'string' && workflow.id.trim()) ids.add(workflow.id.trim());
+    if (typeof workflow.name === 'string' && workflow.name.trim()) names.add(workflow.name.trim());
+  }
+}
+
+function sqlText(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+const ids = new Set();
+const names = new Set();
+for (const dirPath of dirs) collectWorkflowMetadata(dirPath, ids, names);
+
+if (ids.size === 0 && names.size === 0) process.exit(0);
+
+const idList = [...ids].map(sqlText).join(', ');
+const nameList = [...names].map(sqlText).join(', ');
+const whereClauses = [];
+if (idList) whereClauses.push(`id IN (${idList})`);
+if (nameList) whereClauses.push(`name IN (${nameList})`);
+
+const sql = `
+PRAGMA foreign_keys = ON;
+BEGIN IMMEDIATE;
+CREATE TEMP TABLE _automation_replace_targets (
+  id TEXT PRIMARY KEY
+);
+INSERT INTO _automation_replace_targets (id)
+SELECT id
+FROM workflow_entity
+WHERE ${whereClauses.join(' OR ')};
+DELETE FROM webhook_entity
+WHERE workflowId IN (SELECT id FROM _automation_replace_targets);
+DELETE FROM workflow_statistics
+WHERE workflowId IN (SELECT id FROM _automation_replace_targets);
+DELETE FROM workflow_publish_history
+WHERE workflowId IN (SELECT id FROM _automation_replace_targets);
+DELETE FROM workflow_published_version
+WHERE workflowId IN (SELECT id FROM _automation_replace_targets);
+DELETE FROM workflow_entity
+WHERE id IN (SELECT id FROM _automation_replace_targets);
+COMMIT;
+`;
+
+const result = spawnSync('sqlite3', [dbPath], {
+  input: sql,
+  encoding: 'utf8',
+});
+
+if (result.status !== 0) {
+  process.stderr.write(result.stderr || 'sqlite3 workflow replacement failed\n');
+  process.exit(result.status || 1);
+}
+NODE
+		docker compose -f "$compose_file" up -d n8n >/dev/null || true
+		fail "Failed to delete existing workflows before reimport."
+	fi
+
+	docker compose -f "$compose_file" up -d n8n >/dev/null
+	wait_for_n8n_http
+	rm -rf "$backup_dir"
+}
+
 import_workflows() {
 	local container_id remote_dir
 
@@ -540,9 +649,13 @@ import_workflows() {
 		return 0
 	fi
 
+	backup_existing_workflows_for_replace
+
 	if ! download_workflows; then
 		return 0
 	fi
+
+	replace_existing_workflows
 
 	container_id="$(docker compose -f "$TARGET_DIR/docker-compose.yml" ps -q n8n)"
 	[[ -n "$container_id" ]] || fail "Could not find the running n8n container for workflow import."

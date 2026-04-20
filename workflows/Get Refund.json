@@ -1,11 +1,5 @@
 {
-  "updatedAt": "2026-04-17T05:47:38.590Z",
-  "createdAt": "2026-04-13T02:25:54.451Z",
-  "id": "mV21sXm6RdaCfPet",
   "name": "Get Refund",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -471,6 +465,7 @@
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "SP Create Returns Report": {
       "main": [
@@ -645,6 +640,7 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -652,35 +648,10 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "staticData": null,
-  "meta": null,
-  "pinData": {},
   "versionId": "cc3ba345-ebf4-4fae-b23e-4d0606abb056",
-  "activeVersionId": "0f695207-1ce0-4013-adae-1968b8dfeb37",
-  "versionCounter": 181,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-13T02:25:54.454Z",
-      "createdAt": "2026-04-13T02:25:54.454Z",
-      "role": "workflow:owner",
-      "workflowId": "mV21sXm6RdaCfPet",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "mV21sXm6RdaCfPet",
+  "tags": []
 }

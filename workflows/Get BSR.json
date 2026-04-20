@@ -1,21 +1,15 @@
 {
-  "updatedAt": "2026-04-17T05:47:03.820Z",
-  "createdAt": "2026-04-14T05:48:30.198Z",
-  "id": "zC5vJ22Tb7i4dli8",
   "name": "Get BSR",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        4064,
-        464
+        6256,
+        1200
       ],
-      "id": "9621347b-f113-460d-99b2-dea15c113379",
+      "id": "e9c89c07-6772-4fac-be9b-f230e0ede0f8",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -74,10 +68,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4512,
-        384
+        6704,
+        1120
       ],
-      "id": "48c2042a-1a1a-44fd-a7d7-0511d1f535e9",
+      "id": "a64e6a55-c432-488a-a649-c6aa1ae9d02a",
       "name": "Set Credentials",
       "notes": "Use ✅START_DATE and ✅END_DATE for every run. Same-day runs are valid. This workflow keeps snapshot semantics and stores the chosen range as operator metadata."
     },
@@ -99,13 +93,13 @@
         },
         "options": {}
       },
-      "id": "563dbd14-c214-47f8-9920-ea18f3a46534",
+      "id": "b04ea507-5822-4254-9374-2ff22b2cfa92",
       "name": "Webhook Read Google Sheet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4736,
-        384
+        6928,
+        1120
       ]
     },
     {
@@ -130,13 +124,13 @@
         "jsonBody": "={{ $json }}",
         "options": {}
       },
-      "id": "9ea7a85a-3ed0-48d1-9e60-13dc8241fdba",
+      "id": "08140453-e8f5-4f5c-8134-adc935316521",
       "name": "Webhook Update Google Sheet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5632,
-        192
+        7824,
+        928
       ]
     },
     {
@@ -146,10 +140,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5408,
-        192
+        7600,
+        928
       ],
-      "id": "a757ec9c-650e-43c2-affd-07c5f5e2da89",
+      "id": "892b94c8-bb7a-4d88-a04b-9ba71162e43e",
       "name": "Code in JavaScript"
     },
     {
@@ -162,23 +156,23 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3952,
-        160
+        6144,
+        896
       ],
-      "id": "f88f405f-ac0c-4e11-8b33-6fcf448bde61",
+      "id": "8a7b87c0-7a18-49ef-8ddd-aa092281b8ec",
       "name": "Sticky Note2"
     },
     {
       "parameters": {
         "jsCode": "const sheet = $input.first().json || {};\nconst values = sheet.values || [];\nlet headerRowIdx = -1;\nlet skuCol = -1;\nlet asinCol = -1;\nfor (let i = 0; i < Math.min(values.length, 12); i++) {\n  const row = values[i] || [];\n  const foundSkuCol = row.findIndex((c) => String(c).trim().toUpperCase() === 'SKU');\n  const foundAsinCol = row.findIndex((c) => String(c).trim().toUpperCase() === 'ASIN');\n  if (foundSkuCol !== -1) {\n    headerRowIdx = i;\n    skuCol = foundSkuCol;\n  }\n  if (foundAsinCol !== -1) {\n    asinCol = foundAsinCol;\n  }\n}\nif (headerRowIdx === -1 || skuCol === -1 || asinCol === -1) {\n  throw new Error('Could not find SKU and ASIN header columns');\n}\nconst items = [];\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  const asin = String(row[asinCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  if (!asin || !/^[A-Z0-9]{10}$/i.test(asin)) continue;\n  items.push({ json: { rowNumber: i + 1, sku, asin: asin.toUpperCase() } });\n}\nreturn items;"
       },
-      "id": "build-bsr-requests",
+      "id": "9fb73324-6c90-4a64-bc57-8e0143cc492d",
       "name": "Build BSR Requests",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4960,
-        384
+        7152,
+        1120
       ]
     },
     {
@@ -212,13 +206,13 @@
         },
         "options": {}
       },
-      "id": "sp-get-bsr",
+      "id": "b6667d72-b358-4014-88d6-3bf280957d16",
       "name": "SP Get BSR by ASIN",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5408,
-        384
+        7600,
+        1120
       ],
       "retryOnFail": true,
       "maxTries": 5,
@@ -229,26 +223,26 @@
       "parameters": {
         "options": {}
       },
-      "id": "bsr-split-batches",
+      "id": "17a5c362-b88a-467a-96a2-e3a01fa594c7",
       "name": "BSR Split In Batches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        5184,
-        384
+        7376,
+        1120
       ]
     },
     {
       "parameters": {
         "amount": 1.5
       },
-      "id": "bsr-wait",
+      "id": "2bbc8c26-e97b-40ab-887f-9a9a791eb96a",
       "name": "BSR Wait",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        5632,
-        464
+        7824,
+        1200
       ],
       "webhookId": "1e4020f7-c0d0-4330-a3fe-5e60016158b8"
     },
@@ -256,13 +250,13 @@
       "parameters": {
         "inputSource": "passthrough"
       },
-      "id": "c76f8b42-f765-4880-b7b1-748293f3dbc2",
+      "id": "693b6191-8afb-4cfe-9054-6058231b06cf",
       "name": "When executed by another workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        4064,
-        272
+        6256,
+        1008
       ]
     },
     {
@@ -333,16 +327,17 @@
         },
         "options": {}
       },
-      "id": "4f9a6f75-91c1-44a9-a823-f2146916ddf9",
+      "id": "f0c66980-4d17-4d79-ac67-a2c40fbd8536",
       "name": "Orchestrator Input Adapter",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4288,
-        384
+        6480,
+        1120
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Code in JavaScript": {
       "main": [
@@ -462,6 +457,7 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -469,35 +465,10 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "staticData": null,
-  "meta": null,
-  "pinData": {},
-  "versionId": "51643995-907e-4510-b009-7c59c60f8967",
-  "activeVersionId": "e0d9ba2f-3c5f-44c4-80d2-2154b19590a6",
-  "versionCounter": 110,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-14T05:48:30.208Z",
-      "createdAt": "2026-04-14T05:48:30.208Z",
-      "role": "workflow:owner",
-      "workflowId": "zC5vJ22Tb7i4dli8",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "versionId": "be2813a0-ad69-417a-9a9a-f1c0ce180438",
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "zC5vJ22Tb7i4dli8",
+  "tags": []
 }

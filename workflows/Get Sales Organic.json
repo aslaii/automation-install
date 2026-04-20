@@ -1,21 +1,15 @@
 {
-  "updatedAt": "2026-04-17T05:48:05.164Z",
-  "createdAt": "2026-04-14T05:08:25.599Z",
-  "id": "KTNa277JLZ8hDZ89",
   "name": "Get Sales Organic",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        4064,
-        592
+        4848,
+        1248
       ],
-      "id": "1f347c51-dab2-401c-b0e8-e01d1324238c",
+      "id": "9b900f3f-2c99-4d4a-bca4-bb23c5aeeb57",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -74,10 +68,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4512,
-        496
+        5296,
+        1152
       ],
-      "id": "45efb791-c03f-4948-af0d-4fbaf129d3e0",
+      "id": "59ac93bd-d804-46d4-aeb0-e53fed0f7750",
       "name": "Set Credentials"
     },
     {
@@ -98,13 +92,13 @@
         },
         "options": {}
       },
-      "id": "1b1e6bcc-6bf4-46a8-95d6-3959bc1c2e32",
+      "id": "839d5df7-2562-4858-9b82-c343c34f1da8",
       "name": "Webhook Read Google Sheet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        6752,
-        496
+        7536,
+        1152
       ]
     },
     {
@@ -129,26 +123,26 @@
         "jsonBody": "={{ $json }}",
         "options": {}
       },
-      "id": "ad1a4a80-66c3-45cc-9208-6a1f5a082452",
+      "id": "d7e800a8-85c5-4be1-a333-ddea5b29a1e9",
       "name": "Webhook Update Google Sheet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        7200,
-        496
+        7984,
+        1152
       ]
     },
     {
       "parameters": {
-        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined || v === '') return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction parseSheetNumber(value, context) {\n  if (value === undefined || value === null || String(value).trim() === '') return 0;\n  const parsed = Number(String(value ?? '').replace(/[\\s,$]/g, ''));\n  if (!Number.isFinite(parsed)) {\n    throw new Error(`Invalid numeric value for ${context}`);\n  }\n  return Number(parsed.toFixed(2));\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nfunction findHeaderIndex(headerRow, aliases) {\n  const normalizedAliases = aliases.map(normalizeHeader);\n  return headerRow.findIndex((cell) => normalizedAliases.includes(normalizeHeader(cell)));\n}\n\nfunction findPrimaryHeaderRow(rows, requiredAliasGroups) {\n  for (let index = 0; index < Math.min(rows.length, 12); index += 1) {\n    const row = rows[index] || [];\n    const hasAll = requiredAliasGroups.every((aliases) => findHeaderIndex(row, aliases) !== -1);\n    if (hasAll) {\n      return { index, row };\n    }\n  }\n\n  return { index: 0, row: rows[0] || [] };\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = Array.isArray(sheet.values) ? sheet.values : [];\nconst parserOutput = $('SP Parse Sales Organic by SKU').first().json || {};\nif (!parserOutput.bySku || typeof parserOutput.bySku !== 'object') {\n  throw new Error('Missing parser totals payload from SP Parse Sales Organic by SKU');\n}\nconst totalsBySku = parserOutput.bySku;\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst headerInfo = findPrimaryHeaderRow(values, [\n  ['SKU'],\n  ['AD_SALES_$', 'AD SALES', 'ADSALES'],\n]);\nconst headerRowIndex = headerInfo.index;\nconst headerRow = headerInfo.row || [];\nconst skuCol = findHeaderIndex(headerRow, ['SKU']);\nconst adSalesCol = findHeaderIndex(headerRow, ['AD_SALES_$', 'AD SALES', 'ADSALES']);\nconst targetCol = findHeaderIndex(headerRow, ['SALES_ORGANIC_$', 'SALES ORGANIC', 'SALESORGANIC']);\n\nif (skuCol === -1 || adSalesCol === -1 || targetCol === -1) {\n  throw new Error('source=sheet missing required SKU, AD_SALES_$, and SALES_ORGANIC_$ columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = headerRowIndex + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  const totalSales = toNumber(totalsBySku[sku]?.totalSales || 0);\n  const adSales = parseSheetNumber(row[adSalesCol], `adSales source=sheet row ${i + 1} sku ${sku}`);\n  const salesOrganic = Number(Math.max(0, totalSales - adSales).toFixed(2));\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[salesOrganic]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];"
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const n = Number(String(v).replace(/[$,%\\s,]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst totalsBySku = $('SP Parse Returns by SKU').first().json.bySku || {};\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst headerRow = values[0] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst adSalesCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'ADSALES');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SALESORGANIC');\n\nif (skuCol === -1 || adSalesCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU, AD_SALES_$, and SALES_ORGANIC_$ columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  const totalSales = toNumber(totalsBySku[sku]?.totalSales || 0);\n  const adSales = toNumber(row[adSalesCol] || 0);\n  const salesOrganic = Number(Math.max(0, totalSales - adSales).toFixed(2));\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[salesOrganic]],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6976,
-        496
+        7760,
+        1152
       ],
-      "id": "d70c88a2-f8ae-471d-8877-90ce3339efce",
+      "id": "2179ac8a-bb46-4389-aeec-a98eb33a9dee",
       "name": "Code in JavaScript"
     },
     {
@@ -161,10 +155,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        6480,
-        144
+        7264,
+        800
       ],
-      "id": "179ec0b6-9fab-40de-8658-5191a072f4c9",
+      "id": "75cff463-61e2-488e-960a-5570921bbd47",
       "name": "Sticky Note1"
     },
     {
@@ -189,32 +183,32 @@
         "jsonBody": "={\n  \"reportType\": \"GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL\",\n  \"marketplaceIds\": [\"{{ $('Set Credentials').item.json['✅AMAZON_MARKETPLACE_ID'] }}\"],\n  \"dataStartTime\": \"{{ $('Set Credentials').item.json['✅START_DATE'] }}T00:00:00Z\",\n  \"dataEndTime\": \"{{ $('Set Credentials').item.json['✅END_DATE'] }}T23:59:59Z\"\n}",
         "options": {}
       },
-      "id": "38f5efd8-3748-4275-b501-b89f0da050af",
-      "name": "SP Create Sales Organic Report",
+      "id": "5ef2fa78-2c60-42d6-aeef-f2daad07102c",
+      "name": "SP Create Returns Report",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4736,
-        496
+        5520,
+        1152
       ]
     },
     {
       "parameters": {
         "amount": "={{ Math.max(60, Number($json.nextWaitSeconds || 60)) }}"
       },
-      "id": "fdcfbc0c-fa98-4956-8a2a-1c10cbf03ffc",
+      "id": "e6d44a5b-b7bb-4e9c-9651-697078d45622",
       "name": "SP Wait",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        4960,
-        496
+        5744,
+        1152
       ],
       "webhookId": "6b2a771b-a82b-47bd-9e85-c64855c0bac5"
     },
     {
       "parameters": {
-        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create Sales Organic Report').item.json.reportId }}",
+        "url": "=https://sellingpartnerapi-na.amazon.com/reports/2021-06-30/reports/{{ $('SP Create Returns Report').item.json.reportId }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -230,13 +224,13 @@
         },
         "options": {}
       },
-      "id": "c3ea035b-f26a-4bc6-a29f-a6a3a59a3c83",
+      "id": "cf19d4d7-d56d-41a8-a528-d3fa7c90df69",
       "name": "SP Check Report Status",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5184,
-        432
+        5968,
+        1088
       ],
       "onError": "continueRegularOutput"
     },
@@ -264,13 +258,13 @@
         },
         "options": {}
       },
-      "id": "91d07f3b-15de-4d48-bff8-ae4ff1c5c6e1",
+      "id": "539c9282-f068-4ce1-a7c5-d070ac88c0ff",
       "name": "SP If",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        5632,
-        496
+        6416,
+        1152
       ]
     },
     {
@@ -291,13 +285,13 @@
         },
         "options": {}
       },
-      "id": "8b0cc0a2-2c4d-43f0-b4ad-8f4757e2dccd",
+      "id": "511b82df-2f9d-4a36-9a72-991dbda20583",
       "name": "SP Get Report Document",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        5856,
-        496
+        6640,
+        1152
       ]
     },
     {
@@ -311,26 +305,26 @@
           }
         }
       },
-      "id": "622017c9-284c-448c-b38d-10bcf1bcf9c2",
+      "id": "d1f7de73-764e-44a2-94e8-edd068f880d5",
       "name": "SP Download Report File",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        6080,
-        496
+        6864,
+        1152
       ]
     },
     {
       "parameters": {
-        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');\n}\n\nfunction parseRequiredNumber(input, context) {\n  if (input === null || input === undefined || String(input).trim() === '') return 0;\n  const normalized = String(input).replace(/[\\s,$]/g, '');\n  const parsed = Number(normalized);\n  if (!Number.isFinite(parsed)) {\n    throw new Error(`Invalid numeric value for ${context}`);\n  }\n  return parsed;\n}\n\nfunction roundCurrency(value) {\n  return Number(Number(value || 0).toFixed(2));\n}\n\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'Order report text empty' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'Order report has no data rows' } }];\n}\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => normalizeHeader(header));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\nconst skuIdx = pickIndex(['sku', 'sellersku', 'merchantsku']);\nconst salesIdx = pickIndex(['itemprice', 'productsales', 'itempriceperunit']);\nconst qtyIdx = pickIndex(['quantity', 'quantitypurchased', 'unitsordered']);\nconst statusIdx = pickIndex(['orderstatus', 'status']);\nif (skuIdx === -1 || salesIdx === -1 || qtyIdx === -1) {\n  throw new Error('Could not locate sku, sales, and quantity columns in orders report');\n}\nconst skipStatuses = new Set(['CANCELLED']);\nconst includeStatuses = new Set(['SHIPPED', 'PENDING']);\nconst bySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n\n  const status = statusIdx === -1 ? '' : String(cols[statusIdx] || '').trim().toUpperCase();\n  if (skipStatuses.has(status)) continue;\n  if (statusIdx !== -1 && status && !includeStatuses.has(status)) continue;\n\n  const rowContext = `line ${i + 1} sku ${sku}`;\n  const sales = parseRequiredNumber(cols[salesIdx], `sales ${rowContext}`);\n  const units = parseRequiredNumber(cols[qtyIdx], `quantity ${rowContext}`);\n  const record = bySku[sku] || { sku, totalSales: 0, totalUnits: 0 };\n  record.totalSales = roundCurrency(record.totalSales + sales);\n  record.totalUnits = roundCurrency(record.totalUnits + units);\n  bySku[sku] = record;\n}\n\nconst skuCount = Object.keys(bySku).length;\nreturn [{ json: { bySku, skuCount, parseWarning: skuCount === 0 ? 'Order report has no qualifying SKU rows' : null } }];"
+        "jsCode": "function parseDelimitedLine(line, delimiter) {\n  const out = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n    if (ch === delimiter && !inQuotes) {\n      out.push(current);\n      current = '';\n      continue;\n    }\n    current += ch;\n  }\n  out.push(current);\n  return out.map((value) => String(value || '').trim());\n}\nfunction toNumber(input) {\n  if (input === null || input === undefined || input === '') return 0;\n  const n = Number(String(input).replace(/[\\s,$]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\nlet text = String($json.reportText || '').trim();\nif (!text) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'Order report text empty' } }];\n}\nif (!text.includes('\\n') && text.includes('\\\\n')) {\n  text = text.replace(/\\\\r\\\\n/g, '\\n').replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\nconst lines = text.split(/\\r?\\n/).filter((line) => line.trim());\nif (lines.length < 2) {\n  return [{ json: { bySku: {}, skuCount: 0, parseWarning: 'Order report has no data rows' } }];\n}\nconst delimiter = lines[0].includes('\\t') ? '\\t' : ',';\nconst headers = parseDelimitedLine(lines[0], delimiter);\nconst normalized = headers.map((header) => header.toLowerCase().replace(/[^a-z0-9]/g, ''));\nconst pickIndex = (candidates) => normalized.findIndex((header) => candidates.includes(header));\nconst skuIdx = pickIndex(['sku','sellersku','merchantsku']);\nconst salesIdx = pickIndex(['itemprice','productsales','itempriceperunit']);\nconst qtyIdx = pickIndex(['quantity','quantitypurchased','unitsordered']);\nconst statusIdx = pickIndex(['orderstatus','status']);\nif (skuIdx === -1 || salesIdx === -1 || qtyIdx === -1) {\n  throw new Error('Could not locate sku, sales, and quantity columns in orders report');\n}\nconst skipStatuses = new Set(['CANCELLED']);\nconst includeStatuses = new Set(['SHIPPED','PENDING']);\nconst bySku = {};\nfor (let i = 1; i < lines.length; i++) {\n  const cols = parseDelimitedLine(lines[i], delimiter);\n  const sku = String(cols[skuIdx] || '').trim();\n  if (!sku) continue;\n  const status = statusIdx === -1 ? '' : String(cols[statusIdx] || '').trim().toUpperCase();\n  if (skipStatuses.has(status)) continue;\n  if (statusIdx !== -1 && status && !includeStatuses.has(status)) continue;\n  const sales = toNumber(cols[salesIdx]);\n  const units = toNumber(cols[qtyIdx]);\n  const record = bySku[sku] || { sku, totalSales: 0, totalUnits: 0 };\n  record.totalSales = Number((record.totalSales + sales).toFixed(2));\n  record.totalUnits = Number((record.totalUnits + units).toFixed(2));\n  bySku[sku] = record;\n}\nreturn [{ json: { bySku, skuCount: Object.keys(bySku).length, parseWarning: null } }];"
       },
-      "id": "adf80aa0-62ea-4181-a16c-b299ca564134",
-      "name": "SP Parse Sales Organic by SKU",
+      "id": "65c5c8f8-9d18-4b05-aaad-7d9ac1ae772a",
+      "name": "SP Parse Returns by SKU",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6528,
-        496
+        7312,
+        1152
       ]
     },
     {
@@ -343,10 +337,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4352,
-        -640
+        5136,
+        16
       ],
-      "id": "5fedcd52-caa9-4fb9-8743-92f3c91b9a85",
+      "id": "8ab58d0f-c174-41c1-85a5-0890f8beb151",
       "name": "Sticky Note2"
     },
     {
@@ -358,39 +352,39 @@
           "stripBOM": true
         }
       },
-      "id": "7f2e52fb-cb45-4d8b-9ac1-36843cb3aeec",
+      "id": "788b1502-62e4-442a-95fc-ffeee593d352",
       "name": "SP Extract Report Text",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        6304,
-        496
+        7088,
+        1152
       ]
     },
     {
       "parameters": {
         "jsCode": "function parseRetryAfterSeconds(value) {\n  if (value === null || value === undefined || value === '') return 0;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;\n}\n\nfunction nextBackoffSeconds(previousAttempt, retryAfterSeconds) {\n  const capped = Math.min(300, 60 * (2 ** Math.max(1, previousAttempt + 1)));\n  const jitter = Math.floor(Math.random() * 31);\n  return Math.max(capped + jitter, retryAfterSeconds || 0, 60);\n}\n\nconst input = $input.first().json || {};\nconst previousAttempt = Number(input.pollAttempt || 0);\nconst error = input.error || null;\nconst rawStatus = String(input.processingStatus || '').toUpperCase();\n\nif (error) {\n  const message = String(error.message || input.message || 'Unknown polling error');\n  const httpCode = Number(error.httpCode || input.httpCode || 0);\n  const retryAfterSeconds = parseRetryAfterSeconds(error.retryAfter || error.headers?.['retry-after'] || error.response?.headers?.['retry-after']);\n\n  if (httpCode === 429 || message.toLowerCase().includes('too many requests') || message.toLowerCase().includes('thrott')) {\n    return [{\n      json: {\n        ...input,\n        processingStatus: 'THROTTLED',\n        pollAttempt: previousAttempt + 1,\n        nextWaitSeconds: nextBackoffSeconds(previousAttempt, retryAfterSeconds),\n      },\n    }];\n  }\n\n  throw new Error(message);\n}\n\nif (rawStatus === 'FATAL' || rawStatus === 'CANCELLED') {\n  throw new Error(`SP report ${rawStatus}: ${input.processingEndTime || input.reportId || 'No report details provided'}`);\n}\n\nif (rawStatus === 'DONE') {\n  return [{\n    json: {\n      ...input,\n      processingStatus: 'DONE',\n      pollAttempt: previousAttempt,\n    },\n  }];\n}\n\nreturn [{\n  json: {\n    ...input,\n    processingStatus: rawStatus || 'IN_PROGRESS',\n    pollAttempt: previousAttempt + 1,\n    nextWaitSeconds: nextBackoffSeconds(previousAttempt, 0),\n  },\n}];"
       },
-      "id": "fd1ae619-cc96-4f2b-96ab-7d3dc26fb98d",
+      "id": "c0f6d45b-2324-401c-b684-a5d5941f96c7",
       "name": "SP Normalize Poll Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5408,
-        432
+        6192,
+        1088
       ]
     },
     {
       "parameters": {
         "inputSource": "passthrough"
       },
-      "id": "468ebaa7-a853-4a04-a4cd-62b2bcf496d6",
+      "id": "1e9074c5-a4bb-4285-8856-d5215efd24d4",
       "name": "When executed by another workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        4064,
-        400
+        4848,
+        1056
       ]
     },
     {
@@ -461,18 +455,19 @@
         },
         "options": {}
       },
-      "id": "9d3251d0-564c-4a02-982f-b0bd12c0b995",
+      "id": "665640cc-bb15-4857-bfc5-f91b697d23a9",
       "name": "Orchestrator Input Adapter",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4288,
-        496
+        5072,
+        1152
       ]
     }
   ],
+  "pinData": {},
   "connections": {
-    "SP Create Sales Organic Report": {
+    "SP Create Returns Report": {
       "main": [
         [
           {
@@ -560,7 +555,7 @@
       "main": [
         [
           {
-            "node": "SP Parse Sales Organic by SKU",
+            "node": "SP Parse Returns by SKU",
             "type": "main",
             "index": 0
           }
@@ -626,14 +621,14 @@
       "main": [
         [
           {
-            "node": "SP Create Sales Organic Report",
+            "node": "SP Create Returns Report",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SP Parse Sales Organic by SKU": {
+    "SP Parse Returns by SKU": {
       "main": [
         [
           {
@@ -645,6 +640,7 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -652,35 +648,10 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "staticData": null,
-  "meta": null,
-  "pinData": {},
-  "versionId": "2ab084ed-910a-40b0-b96d-faa0deb2c600",
-  "activeVersionId": "33c96e53-a5d7-4b0b-840e-2cbc1881455d",
-  "versionCounter": 52,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-14T05:08:25.609Z",
-      "createdAt": "2026-04-14T05:08:25.609Z",
-      "role": "workflow:owner",
-      "workflowId": "KTNa277JLZ8hDZ89",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "versionId": "dd92d5b8-4b38-4e71-a04b-28ce9a084dc2",
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "KTNa277JLZ8hDZ89",
+  "tags": []
 }

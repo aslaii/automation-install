@@ -1,11 +1,5 @@
 {
-  "updatedAt": "2026-04-17T04:22:46.382Z",
-  "createdAt": "2026-04-16T21:24:50.262Z",
-  "id": "Hh8rWhCpyt6n8QHT",
   "name": "Unified Amazon Metrics Orchestrator (Apr 16 at 05:30:45)",
-  "description": null,
-  "active": false,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -1574,13 +1568,13 @@
             {
               "id": "76a6c500-c2c0-4339-8299-682826c4452b",
               "name": "✅START_DATE",
-              "value": "2026-04-07",
+              "value": "2026-04-17",
               "type": "string"
             },
             {
               "id": "2a1915cd-7949-44ff-952b-9ab2aa6365f5",
               "name": "✅END_DATE",
-              "value": "2026-04-07",
+              "value": "2026-04-17",
               "type": "string"
             },
             {
@@ -1592,19 +1586,19 @@
             {
               "id": "d2a87c47-b55e-4641-90c9-4b7c204d8955",
               "name": "✅AMAZON_ADS_CLIENT_ID",
-              "value": "YOUR_AMAZON_CLIENT_ID",
+              "value": "",
               "type": "string"
             },
             {
               "id": "f6bcc963-0897-455c-ac16-e86f3deca6ef",
               "name": "✅AMAZON_ADS_CLIENT_SECRET",
-              "value": "amzn1.oa2-cs.v1.c8d866128f6e2dbe406785ea446654c10bc921de4d1ac4256fa96a63f5a47971",
+              "value": "",
               "type": "string"
             },
             {
               "id": "6e513cbb-157d-4f5b-a18f-6f2b212157f5",
               "name": "✅AMAZON_ADS_REFRESH_TOKEN",
-              "value": "Atzr|IwEBID_-DsgS6HGOaBkUmeUGN3_4CG7Skx-lQJuchtu5WaP852TE32iP4z9PUNBlnkOJPJoyn4nbKFnAGXJDbedu5th0VlxqZFU125TiPIpGkYLBieEPgkiIMSLV6vJOjB6Xm7nnmNd4_KXtLnH4x69IkhJ0cYSQgWpy9nc1c71hEX8lht3kD7qHsAByw4Wd8sYuOlfzxCeepOAHsv2h76XSA629pZglhVNNXQLPFKpXBRwoVjaI1j_EueHE0iQ50IPNWjC38A7WT2ZEaRlj7pkjSvmh13v-zeLHvpkWD31g5mIj-SeCUalwlFDkdMgOLM2wI1zCW_GhpI3bipRYbjrT2Deog_suuskEK1l8hCBtnUAZZflZLo3e6s3SIeSPJDTmShRDuBDjGPX3Qz1rDa1LUk0UU0ON-Z-eLXbhSKOdYQKLhFNA0UMc9cHT1polWR_iuvd13z7u2OrB-Q5EF6sdhxyLFR9QiqwNqT9T5-XUfRgNUWexJyEYQVsrcClCdTjrwg-y0xo8EmkCLAgoRCaXPnVd",
+              "value": "",
               "type": "string"
             },
             {
@@ -1616,31 +1610,31 @@
             {
               "id": "55f35d9b-4dd4-4594-af0c-08185938f2ac",
               "name": "✅AMAZON_SP_CLIENT_ID",
-              "value": "YOUR_AMAZON_CLIENT_ID",
+              "value": "",
               "type": "string"
             },
             {
               "id": "2aa06f79-f2f4-4d4f-8a4a-bf328f2de798",
               "name": "✅AMAZON_SP_CLIENT_SECRET: ",
-              "value": "amzn1.oa2-cs.v1.7952b2a0ac9fc179d52a158485b1755be99e2f56c256c5009bf5b23c373ac7f4",
+              "value": "",
               "type": "string"
             },
             {
               "id": "518c7b45-f2de-42ad-b944-6342308f9e41",
               "name": "✅AMAZON_SP_REFRESH_TOKEN",
-              "value": "Atzr|IwEBIIvWPTsQK2VYjuqsRqPryHsxWgSLgEqW54kRaFox8SHBd9VIV60_VVt0p2XJMvBPT7-1YJ7amEx8kuoRL-wT6-lkg2yDOMnMo1SswpohWcq5Pune77FhhIg5NYacOZIFUUqwsPCnLijKtHqWFdhOmXFzc-1Q7tbhJYvmi3EC7NQDJupcQ8xMw6sbqQCOInwGReb0Be6uHxN_M1-IN_VLDdN-6iaYCkN8eDBcZWrOunKpSUnzjp72RraWSF2pekXs88zrMOhT78vMdevSDus18Nrp2V6GdNSmPci3QLlqam2FDHCDFgQQM6hHnz3Zwv4t9pM",
+              "value": "",
               "type": "string"
             },
             {
               "id": "d02eed0a-85e5-4723-97a0-2ef963c0cb91",
               "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL",
-              "value": "n8n-268@amazon-automation-493007.iam.gserviceaccount.com",
+              "value": "",
               "type": "string"
             },
             {
               "id": "fe461a50-becf-4868-9675-eba1f00317b1",
               "name": "✅GOOGLE_PRIVATE_KEY",
-              "value": "-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC8c0JZmC0qtMMW\\nH588LkS3fVUWusX30OQASwFyJY5jjndDvGva5kHxvORBTn+/YB7Ei9YyAIXqcZYU\\nFVAP1nCNJtNI9TiamZGP/c3P2XRdPlK0TLCqWMpYqg7iXp8Rrv4YOtpzEpnxeMsx\\n3saKrqccA969jAaSC9aCaa1O5wHmNQlk2pPD9TEywuBIMJeSllsZbxiTYQC7olWy\\nG1HhOFgU7xFVe7YVrQMI/O43uWXCB7BdpHUoCKGaxnOvWINOMbIIRLvi1GUTC30L\\nUPq14S0bDqnzu4En4Cd0WcpBqpsWutnqu9YEtDjV1eeFyg2F3DPYU2JmxeBX89eY\\nJUuL9S1lAgMBAAECggEAJPXvMr7Vxv0+kQmBM+64NAvNI0DdIJp0CXmsjix/BZg0\\n3JBpT/zevLCpTQS+KfUKe86YY2S2XzHJd2Vptz1+BDUz9eiAolPR2J21Htm9yKb3\\nVhz/fl2dTDAIbM4VoUSC2hI685xXnKRuJ/kTVDJmnKhGqML8q+rN9vSOlP3aYcG5\\nD84TH3xY2pjl0vV3L4Qm7gmzkBepbbz6IDPNZJKz1C5H7k9mitkQMwIlRsaj0BQ4\\n7Kdh1Hg/670vUu6AHFsebDtXmIQVpKln9D11wBszpH/D7NclwFnIiP102xBMgH5L\\n/7UUcavrUvOvoljICT41O0R41Ad295b+mT9K8fum0QKBgQD0cPhITWP9kUYFHDb5\\ntkga3p8pPajVWnuKGafuNvzt1/GzaDrg3/lwejua2Ht6KdSi/IkL8Ucx8SNaJk1/\\nROH4mfaS2lGG+7VPRD019iEkA7eqUoTvpQWyLFS4Rw/oTzaWdlWAgqzqyNlvaEON\\nD0Y+QAOgKoCWqMuhlRbUoXLeNQKBgQDFXIB97hX+BaRhuYFE5P9Wne7ymaojULt9\\nFitUezFVk8xJKDvkPJhrqh5N9hmdr/LxAD9nuR3ZrX0jTU6w1CKX4TesVGny8ZRG\\nlyzS0tdHJsv5TyV1Wrsr+opS4YgPcH254d5VA9TJf/pmsqQTMQxDWVT62kgBqRpv\\nYE/kE7+4cQKBgA5ZP0nHOTJeP7T3FgcMeykQnlkmZG25tPzDSsdB9RDlFywH10Ty\\nAMtocW1CfeUK5Y93sXfA/wPgesnE69GnsngMWZv/Mr/wsJDpmYo8W2+oxDQ8Sc9j\\naXUvAv4aNcXWOIcWhShZA1t41MKkZSq3ldD7ovrY49l0KRfgD4oFvB9tAoGAcdFV\\n3MoIbtWMJjuYHEZAJxCvs8MAxpsRdSLq3C6rleHFh08nswlrEXQrQ+SwgyrsXSY6\\narPsThPqPgigYAQG6zYcKEsKSuwdCdS3KeIj+smaCm4leRdZKBS13vRnxhemuiNT\\nWA38kjQ3ETDmxJadrt1+z6hArIx8TUzq5eqpv1ECgYAsNgy7dzdxPPaA6hH9LKMD\\nSNK2XNNTYFboktV6UEHIx1ZQ6sEim/W83KZZx4azV1leJ7olCsRkibzyQUHikVlC\\nvZuWbd/0oClYd+IPODafrgD310zcrYP43YbDPjZyK/C+ZztpwUjSkSQY9QLtqKQp\\njmyybrA+ZAHcBtdhnqKx+A==\\n-----END PRIVATE KEY-----\\n",
+              "value": "",
               "type": "string"
             },
             {
@@ -1747,8 +1741,24 @@
         -1536,
         720
       ]
+    },
+    {
+      "parameters": {
+        "path": "fb6e9b68-d6c5-4a22-9d4b-e9b00a06ffa4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3264,
+        320
+      ],
+      "id": "101d5017-ed72-4189-96e8-75be455ffa35",
+      "name": "Webhook",
+      "webhookId": "fb6e9b68-d6c5-4a22-9d4b-e9b00a06ffa4"
     }
   ],
+  "pinData": {},
   "connections": {
     "Build Workflow Registry": {
       "main": [
@@ -2603,43 +2613,30 @@
           }
         ]
       ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
+  "active": true,
   "settings": {
-    "availableInMCP": true,
     "executionOrder": "v1",
     "binaryMode": "separate",
+    "availableInMCP": true,
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "staticData": null,
-  "meta": null,
-  "pinData": {},
-  "versionId": "d686fec4-37d7-4e05-96ff-39edd0abece2",
-  "activeVersionId": null,
-  "versionCounter": 32,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-16T21:24:50.267Z",
-      "createdAt": "2026-04-16T21:24:50.267Z",
-      "role": "workflow:owner",
-      "workflowId": "Hh8rWhCpyt6n8QHT",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "versionId": "2d7a867e-2a41-4d18-a654-be7969e280a8",
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "Hh8rWhCpyt6n8QHT",
+  "tags": []
 }

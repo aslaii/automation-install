@@ -1,11 +1,5 @@
 {
-  "updatedAt": "2026-04-17T05:50:24.324Z",
-  "createdAt": "2026-04-14T22:30:08.373Z",
-  "id": "TLMr85JcV4bwDySu",
   "name": "Get FBAPerUnitFulfillmentFee",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -301,6 +295,7 @@
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Code in JavaScript": {
       "main": [
@@ -391,6 +386,7 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -398,35 +394,10 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "staticData": null,
-  "meta": null,
-  "pinData": {},
   "versionId": "3ca1a416-9a98-4cd5-8565-50c3e45ff759",
-  "activeVersionId": "f73e6487-f4a8-48ab-9b22-82972448f7aa",
-  "versionCounter": 59,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-14T22:30:08.404Z",
-      "createdAt": "2026-04-14T22:30:08.404Z",
-      "role": "workflow:owner",
-      "workflowId": "TLMr85JcV4bwDySu",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "TLMr85JcV4bwDySu",
+  "tags": []
 }

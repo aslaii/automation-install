@@ -1,11 +1,5 @@
 {
-  "updatedAt": "2026-04-17T05:44:40.678Z",
-  "createdAt": "2026-04-12T23:21:21.568Z",
-  "id": "nWQo0Pz3qHzQO0My",
   "name": "Get Ad Spend",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -535,6 +529,7 @@
       "notes": "write-health-check"
     }
   ],
+  "pinData": {},
   "connections": {
     "Wait": {
       "main": [
@@ -727,6 +722,7 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -734,37 +730,11 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "pinData": {},
   "versionId": "09edb40c-e4e9-4b3c-bdb9-2cd65079002b",
-  "activeVersionId": "80a9a12e-98f1-488c-8334-94231b118683",
-  "versionCounter": 301,
-  "triggerCount": 0,
-  "tags": [],
-  "shared": [
-    {
-      "updatedAt": "2026-04-12T23:21:21.576Z",
-      "createdAt": "2026-04-12T23:21:21.576Z",
-      "role": "workflow:owner",
-      "workflowId": "nWQo0Pz3qHzQO0My",
-      "projectId": "A9JoI2uB9gEuVNGo",
-      "project": {
-        "updatedAt": "2026-04-12T23:15:35.657Z",
-        "createdAt": "2026-04-12T23:15:20.662Z",
-        "id": "A9JoI2uB9gEuVNGo",
-        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
-      }
-    }
-  ],
-  "versionMetadata": {
-    "name": null,
-    "description": null
-  }
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  },
+  "id": "nWQo0Pz3qHzQO0My",
+  "tags": []
 }
