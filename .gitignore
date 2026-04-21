@@ -35,3 +35,6 @@ tmp/
 .mcp.json
 skills-lock.json
 scripts/runs/
+
+# Private workflow exports (contain live credentials, for manual handoff only)
+workflow-2/
