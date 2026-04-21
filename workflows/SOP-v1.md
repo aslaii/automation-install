@@ -215,10 +215,12 @@ Apply to: Get Refund, Get BSR, Get Sales Organic, Get Units Organic, Get Reversa
 
 ### 5.5 Deploying workflow changes — `REIMPORT_WORKFLOWS=1`
 
-Editing the `.json` files in `workflows/` does **not** push them into n8n. The n8n database has its own copy, and by default the installer only imports once (tracked via `$STATE_DIR/workflows-imported`). After any edit to a workflow file you must force a reimport:
+Editing the `.json` files in `workflows/` does **not** push them into n8n. The n8n database has its own copy, and by default the installer only imports once (tracked via `workflows-imported` in the install state dir). After any edit to a workflow file you must force a reimport.
+
+Canonical command (from the repo README — pulls the installer directly from GitHub `main`):
 
 ```bash
-AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 bash ./install.sh --target "$(pwd)"
+AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash
 ```
 
 What that flag does (see `install.sh`):
@@ -226,26 +228,25 @@ What that flag does (see `install.sh`):
 2. Stops the n8n container.
 3. Deletes the existing workflow rows from n8n's SQLite DB (requires `sqlite3` on host).
 4. Brings n8n back up and runs `n8n import:workflow --separate --input=<workflows dir>` inside the container.
-5. Stamps `$STATE_DIR/workflows-imported` with the new timestamp.
+5. Stamps the install state with the new timestamp so subsequent plain runs skip reimport.
 
-Without `REIMPORT_WORKFLOWS=1`, the installer short-circuits on `workflow_import_already_done()` and your edits will not hit n8n.
+Without `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1`, the installer short-circuits on `workflow_import_already_done()` and your edits will not hit n8n.
 
-> **Heads-up for the team:** commit your workflow `.json` changes, pull on the target machine, then run the reimport command above. Verify in the n8n UI (Executions → run the orchestrator once) that your change is live before closing the ticket.
+> **Heads-up for the team:** the command above is self-contained — it fetches the latest `install.sh` from GitHub, which in turn pulls the latest `workflows/*.json` from the repo. No local `git pull` needed. Verify in the n8n UI (Executions → run the orchestrator once) that your change is live before closing the ticket.
 
 #### 5.5.1 Don't want to run the command yourself? Ask the AI.
 
-If you are working inside Claude Code (or any terminal-capable AI assistant) with the repo open, you can skip typing the command by giving the assistant this one-liner:
+If you are working inside Claude Code (or any terminal-capable AI assistant) with terminal access, you can skip typing the command by giving the assistant this one-liner:
 
 > **Prompt to paste:**
-> "Pull the latest `main`, then reimport the n8n workflows by running `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 bash ./install.sh --target "$(pwd)"` from the repo root. Report back when the import completes and confirm n8n is healthy on http://localhost:5678."
+> "Reimport the n8n workflows by running `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash`. Report back when the import completes and confirm n8n is healthy on http://localhost:5678."
 
 The assistant will:
-1. `git pull origin main` to fetch the latest workflow JSON.
-2. Execute the reimport command above (it will prompt for confirmation the first time — approve it).
-3. Watch the installer output and tell you when `Importing workflows into n8n...` finishes cleanly.
-4. Optionally hit `http://localhost:5678/healthz` to confirm n8n came back up.
+1. Execute the one-liner above (it will prompt for confirmation the first time — approve it).
+2. Watch the installer output and tell you when `Importing workflows into n8n...` finishes cleanly.
+3. Optionally hit `http://localhost:5678/healthz` to confirm n8n came back up.
 
-If the assistant asks for permission to run `docker`, `sqlite3`, or `bash ./install.sh`, **approve** — those are the exact commands the installer needs. Decline anything else.
+If the assistant asks for permission to run `curl`, `docker`, `sqlite3`, or `bash`, **approve** — those are the exact commands the installer needs. Decline anything else.
 
 ### 5.6 One-time local provisioning — run the `Local Setup` workflow
 
@@ -270,7 +271,7 @@ If `Verify PDF Renderer Package` fails with *"pdftoppm is missing. Rebuild the n
 #### 5.6.1 Ask the AI to do it for you
 
 > **Prompt to paste:**
-> "Trigger the `Local Setup` workflow in n8n at http://localhost:5678 and confirm all nodes complete successfully. The final node should return `status: 'ready'` with a populated `rendererVersion`. If `Verify PDF Renderer Package` fails, re-run `bash ./install.sh --target "$(pwd)"` to rebuild the image, then retry."
+> "Trigger the `Local Setup` workflow in n8n at http://localhost:5678 and confirm all nodes complete successfully. The final node should return `status: 'ready'` with a populated `rendererVersion`. If `Verify PDF Renderer Package` fails, re-run `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash` to rebuild the image, then retry."
 
 The assistant can hit the n8n REST API to trigger the workflow and poll the execution status, or guide you through clicking through the UI — whichever it has permission for.
 
@@ -308,7 +309,7 @@ To reproduce the cached-report healthy path: run the orchestrator twice in quick
 - [ ] Fix #4 (`MAX_POLL_ATTEMPTS` guard) rolled out to all ~11 Normalize Poll Status nodes.
 - [ ] Fix #6 — n8n image pinned to a tested tag.
 - [ ] **Fix #11 — per-retry token refresh applied to every SP-API and Ads-API child** (see 5.4).
-- [ ] Workflows reimported after edits via `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 bash ./install.sh --target "$(pwd)"` (see 5.5).
+- [ ] Workflows reimported after edits via `AUTOMATION_INSTALLER_REIMPORT_WORKFLOWS=1 curl -fsSL https://raw.githubusercontent.com/aslaii/automation-install/main/install.sh | bash` (see 5.5).
 - [ ] **`Local Setup` workflow executed once** after fresh install / reimport — `Build Setup Summary` returns `status: "ready"` with a `rendererVersion` (see 5.6).
 - [ ] Orchestrator runs to completion **5 times in a row**, including at least one fresh-report run that crosses the 60-min LWA TTL, with zero child errors.
 - [ ] Retry Failed Amazon Metrics cleans up any outstanding failures in one pass.
