@@ -420,7 +420,7 @@ install_docker_desktop_for_current_user() {
 	[[ -x "$install_binary" ]] || fail "Docker Desktop install helper is missing."
 	current_user="${USER:-$(id -un)}"
 	ensure_admin_access
-	run_cmd "Running Docker Desktop installer for ${current_user}..." "$install_binary" --accept-license "--user=${current_user}"
+	run_cmd "Running Docker Desktop installer for ${current_user}..." sudo "$install_binary" --accept-license "--user=${current_user}"
 }
 
 start_docker_desktop() {
