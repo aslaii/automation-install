@@ -1,20 +1,18 @@
 {
-  "name": "Retry Failed Amazon Metrics",
   "nodes": [
     {
       "parameters": {},
-      "id": "ab2db611-344a-45f7-87c7-ee4c1c17d7d9",
+      "id": "90331a7f-4920-4b5a-b906-e5b6850ab5f3",
       "name": "When clicking ‘Execute workflow’",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1328,
-        352
+        -1552,
+        176
       ]
     },
     {
       "parameters": {
-        "inputSource": "workflowInputs",
         "workflowInputs": {
           "values": [
             {
@@ -83,26 +81,26 @@
           ]
         }
       },
-      "id": "d31c83d3-8ef8-41da-851f-9247d55ca423",
+      "id": "1aeec2fc-d813-49f1-8854-011d53bed2e9",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1328,
-        576
+        -1552,
+        400
       ]
     },
     {
       "parameters": {
         "jsCode": "function normalizeMetricKeys(raw) {\n  if (Array.isArray(raw)) {\n    return raw.map((value) => String(value).trim()).filter(Boolean);\n  }\n  if (typeof raw === 'string') {\n    return raw.split(',').map((value) => value.trim()).filter(Boolean);\n  }\n  return [];\n}\n\nconst input = $input.first().json || {};\nconst remainingFailedMetricKeys = [...new Set(normalizeMetricKeys(input.FAILED_METRIC_KEYS ?? input.failedMetricKeys))];\nconst maxRetries = Math.max(1, Number(input.MAX_RETRIES || input.maxRetries || 3));\nconst retryRound = Math.max(1, Number(input.RETRY_ROUND || input.retryRound || 1));\n\nreturn [{\n  json: {\n    '✅START_DATE': input['✅START_DATE'],\n    '✅END_DATE': input['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': input['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': input['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': input['✅SHEET_NAME'],\n    '✅RANGE': input['✅RANGE'],\n    '✅COLUMNS': input['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': input['✅AMAZON_MARKETPLACE_ID'],\n    '✅AMAZON_ADS_CLIENT_ID': input['✅AMAZON_ADS_CLIENT_ID'],\n    '✅AMAZON_ADS_CLIENT_SECRET': input['✅AMAZON_ADS_CLIENT_SECRET'],\n    '✅AMAZON_ADS_REFRESH_TOKEN': input['✅AMAZON_ADS_REFRESH_TOKEN'],\n    '✅AMAZON_ADS_PROFILE_ID': input['✅AMAZON_ADS_PROFILE_ID'],\n    '✅AMAZON_SP_CLIENT_ID': input['✅AMAZON_SP_CLIENT_ID'],\n    '✅AMAZON_SP_CLIENT_SECRET: ': input['✅AMAZON_SP_CLIENT_SECRET: '],\n    '✅AMAZON_SP_REFRESH_TOKEN': input['✅AMAZON_SP_REFRESH_TOKEN'],\n    '✅GOOGLE_SERVICE_ACCOUNT_EMAIL': input['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '✅GOOGLE_PRIVATE_KEY': input['✅GOOGLE_PRIVATE_KEY'],\n    '✅GOOGLE_SCOPE': input['✅GOOGLE_SCOPE'],\n    remainingFailedMetricKeys,\n    retryRound,\n    maxRetries,\n    attempts: [],\n    finalSummary: Array.isArray(input.summary) ? input.summary : [],\n    completed: remainingFailedMetricKeys.length === 0,\n  },\n}];"
       },
-      "id": "86b709df-790e-4f83-b65d-fcc11063078d",
+      "id": "31c655e7-4933-4940-a40b-2b9ef521b127",
       "name": "Initialize Retry State",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1104,
-        352
+        -1328,
+        176
       ]
     },
     {
@@ -129,26 +127,26 @@
         },
         "options": {}
       },
-      "id": "7ec66399-a804-4f35-9880-8d161f526cab",
+      "id": "c720a480-35a2-4d50-ac0d-f4e51ba524a2",
       "name": "If Has Retry Targets",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -880,
-        352
+        -1104,
+        176
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nreturn [{\n  json: {\n    ...input,\n    INCLUDE_LIST: (input.remainingFailedMetricKeys || []).join(','),\n    ENABLE_RETRY_WORKFLOW: 'false',\n    MAX_RETRIES: String(input.maxRetries || 3),\n    RETRY_ROUND: String(input.retryRound || 1),\n  },\n}];"
       },
-      "id": "c09425c7-aa12-4f64-94d8-12a6deee2c30",
+      "id": "8d441a46-9b99-4efe-933c-3d14327aa81b",
       "name": "Prepare Retry Request",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -656,
-        224
+        -880,
+        48
       ]
     },
     {
@@ -158,7 +156,7 @@
           "value": "Hh8rWhCpyt6n8QHT",
           "mode": "list",
           "cachedResultUrl": "/workflow/Hh8rWhCpyt6n8QHT",
-          "cachedResultName": "Unified Amazon Metrics Orchestrator (Apr 16 at 05:30:45)"
+          "cachedResultName": "Unified Amazon Metrics Orchestrator"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -195,26 +193,26 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "dfc2ff24-b584-4d0d-b593-09036df5c348",
+      "id": "0cea0c35-8458-4ad2-b1d5-be8fe48c0e20",
       "name": "Execute Unified Amazon Metrics Orchestrator",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -432,
-        224
+        -656,
+        48
       ]
     },
     {
       "parameters": {
         "jsCode": "function normalizeMetricKeys(raw) {\n  if (Array.isArray(raw)) {\n    return raw.map((value) => String(value).trim()).filter(Boolean);\n  }\n  if (typeof raw === 'string') {\n    return raw.split(',').map((value) => value.trim()).filter(Boolean);\n  }\n  return [];\n}\n\nconst state = $('Prepare Retry Request').first().json;\nconst payload = $input.first().json || {};\nconst summary = payload.finalSummary || payload.summary || [];\nconst failedMetricKeys = [...new Set(normalizeMetricKeys(payload.remainingFailedMetricKeys ?? payload.failedMetricKeys))];\nconst attempts = [\n  ...(state.attempts || []),\n  {\n    retryRound: state.retryRound,\n    includeList: state.INCLUDE_LIST || '',\n    failedMetricKeys,\n    summary,\n  },\n];\n\nreturn [{\n  json: {\n    ...state,\n    attempts,\n    finalSummary: summary,\n    remainingFailedMetricKeys: failedMetricKeys,\n    completed: failedMetricKeys.length === 0,\n  },\n}];"
       },
-      "id": "ad04445f-66ee-45cb-b7f7-009ab0ab7afc",
+      "id": "6d1e6f11-403f-4ef4-aa24-952f1df740a4",
       "name": "Capture Retry Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -208,
-        224
+        -432,
+        48
       ]
     },
     {
@@ -241,43 +239,42 @@
         },
         "options": {}
       },
-      "id": "17b25f98-c29c-4962-ae57-ce63d67637bf",
+      "id": "2e7f4eb3-56bc-48d2-acce-c49ed9978fd0",
       "name": "If Retry Finished",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        16,
-        224
+        -208,
+        48
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nreturn [{\n  json: {\n    ...input,\n    retryRound: Number(input.retryRound || 1) + 1,\n  },\n}];"
       },
-      "id": "8f11f94e-d9d3-41b2-9177-e933125d3e61",
+      "id": "b66ad42a-0db9-40c0-8a8c-051408c7c461",
       "name": "Advance Retry Round",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        352
+        16,
+        176
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json || {};\nconst attempts = input.attempts || [];\nconst remainingFailedMetricKeys = input.remainingFailedMetricKeys || [];\nconst completed = Boolean(input.completed || remainingFailedMetricKeys.length === 0);\nreturn [{\n  json: {\n    attemptsUsed: attempts.length,\n    maxRetries: Number(input.maxRetries || 3),\n    finalSummary: input.finalSummary || [],\n    remainingFailedMetricKeys,\n    completed,\n    attempts,\n  },\n}];"
       },
-      "id": "84723c7d-b476-48ec-8601-0c5ad0f75af6",
+      "id": "34ed861c-b45c-4fcc-98bc-319509d2530a",
       "name": "Finalize Retry Output",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        96
+        16,
+        -80
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "When clicking ‘Execute workflow’": {
       "main": [
@@ -393,17 +390,8 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate",
-    "availableInMCP": true,
-    "callerPolicy": "workflowsFromSameOwner"
-  },
-  "versionId": "60871845-2302-4ca1-b65a-76a0e6045e7d",
+  "pinData": {},
   "meta": {
     "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
-  },
-  "id": "sJw7kKf3NqP1tR8M",
-  "tags": []
+  }
 }

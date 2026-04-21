@@ -1,0 +1,960 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "9efa4100-6038-4c77-9fe2-d56442e5dd52",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "message-text",
+              "name": "✅message",
+              "type": "string",
+              "value": "Amazon metrics snapshot is ready."
+            },
+            {
+              "id": "report-date",
+              "name": "✅reportDate",
+              "type": "string",
+              "value": "={{ $now.toISODate() }}"
+            },
+            {
+              "id": "source-name",
+              "name": "✅source",
+              "type": "string",
+              "value": "Report"
+            },
+            {
+              "id": "spreadsheet-id",
+              "name": "✅spreadsheetId",
+              "type": "string",
+              "value": "<YOUR_SPREADSHEET_ID>"
+            },
+            {
+              "id": "sheet-gid",
+              "name": "✅sheetGid",
+              "type": "string",
+              "value": "962294707"
+            },
+            {
+              "id": "sheet-name",
+              "name": "✅sheetName",
+              "type": "string",
+              "value": "N8N_DOWNLOAD"
+            },
+            {
+              "id": "slack-bot-token",
+              "name": "✅slackBotToken",
+              "type": "string",
+              "value": "<YOUR_SLACK_BOT_TOKEN>"
+            },
+            {
+              "id": "slack-channel-id",
+              "name": "✅slackChannelId",
+              "type": "string",
+              "value": "<YOUR_SLACK_CHANNEL_ID>"
+            },
+            {
+              "id": "google-client-email",
+              "name": "✅googleClientEmail",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_SERVICE_ACCOUNT_EMAIL>"
+            },
+            {
+              "id": "google-private-key",
+              "name": "✅googlePrivateKey",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_PRIVATE_KEY_PEM>"
+            },
+            {
+              "id": "google-scope",
+              "name": "✅googleScope",
+              "type": "string",
+              "value": "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly"
+            },
+            {
+              "id": "google-oauth-client-id",
+              "name": "✅GOOGLE_OAUTH_CLIENT_ID",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_OAUTH_CLIENT_ID>"
+            },
+            {
+              "id": "google-oauth-client-secret",
+              "name": "✅GOOGLE_OAUTH_CLIENT_SECRET",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_OAUTH_CLIENT_SECRET>"
+            },
+            {
+              "id": "google-refresh-token",
+              "name": "✅GOOGLE_REFRESH_TOKEN",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_REFRESH_TOKEN>"
+            },
+            {
+              "id": "google-drive-folder-id",
+              "name": "✅GOOGLE_DRIVE_FOLDER_ID",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_DRIVE_FOLDER_ID>"
+            },
+            {
+              "id": "telegram-bot-api",
+              "name": "✅TELEGRAM_BOT_API",
+              "type": "string",
+              "value": "<YOUR_TELEGRAM_BOT_TOKEN>"
+            },
+            {
+              "id": "telegram-message-to",
+              "name": "✅TELEGRAM_MESSAGE_TO",
+              "type": "string",
+              "value": "<YOUR_TELEGRAM_CHAT_ID>"
+            },
+            {
+              "id": "temp-root",
+              "name": "✅localTempRoot",
+              "type": "string",
+              "value": "/home/node/.n8n/local-tools/tmp"
+            },
+            {
+              "id": "output-root",
+              "name": "✅snapshotOutputRoot",
+              "type": "string",
+              "value": "/home/node/.n8n-files/snapshots"
+            },
+            {
+              "id": "renderer-binary",
+              "name": "✅pdfRendererBinary",
+              "type": "string",
+              "value": "pdftoppm"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b0c7f631-9bbe-4558-8d94-a6c074a7229e",
+      "name": "Set Credentials",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nfunction b64urlFromString(str) { return Buffer.from(str, 'utf8').toString('base64').replace(/=/g, '').replace(/\\+/g, '-').replace(/\\//g, '_'); }\nconst input = $input.first().json;\nconst serviceAccountEmail = input['✅googleClientEmail'];\nconst privateKeyPem = String(input['✅googlePrivateKey'] || '').replace(/\\\\n/g, '\\n');\nconst scope = input['✅googleScope'] || 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly';\nif (!serviceAccountEmail || !privateKeyPem) throw new Error('Missing googleClientEmail or googlePrivateKey');\nconst now = Math.floor(Date.now() / 1000);\nconst header = { alg: 'RS256', typ: 'JWT' };\nconst payload = { iss: serviceAccountEmail, scope, aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 };\nconst signingInput = b64urlFromString(JSON.stringify(header)) + '.' + b64urlFromString(JSON.stringify(payload));\nconst signer = crypto.createSign('RSA-SHA256');\nsigner.update(signingInput);\nsigner.end();\nconst signature = signer.sign(privateKeyPem, 'base64').replace(/=/g, '').replace(/\\+/g, '-').replace(/\\//g, '_');\nreturn [{ json: { ...input, assertion: signingInput + '.' + signature } }];"
+      },
+      "id": "1d37104c-c3e9-494e-b11a-7c90c25d7ede",
+      "name": "Create Google JWT",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth2.googleapis.com/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "urn:ietf:params:oauth:grant-type:jwt-bearer"
+            },
+            {
+              "name": "assertion",
+              "value": "={{ $json.assertion }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55ab0c25-3a65-41aa-b67a-7027bb29dd1d",
+      "name": "Get Google Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        912,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ \"https://docs.google.com/spreadsheets/d/\" + $(\"Set Credentials\").first().json[\"✅spreadsheetId\"] + \"/export?format=pdf&gid=\" + $(\"Set Credentials\").first().json[\"✅sheetGid\"] + \"&single=true&size=7&portrait=false&fitw=true&sheetnames=false&printtitle=false&pagenumbers=false&gridlines=false&fzr=false\" }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.access_token }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "pdfData"
+            }
+          }
+        }
+      },
+      "id": "46964e0e-29f3-44b2-8000-b9dab9f821ea",
+      "name": "Export Snapshot PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1136,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst payload = $('Set Credentials').first().json;\nconst pdfBinary = $input.first().binary?.pdfData;\nif (!pdfBinary) throw new Error('Expected exported PDF binary at item.binary.pdfData');\nconst reportDate = String(payload['✅reportDate'] || '').replace(/-/g, '_');\nconst baseName = String(payload['✅sheetName'] || 'SNAPSHOT').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').toUpperCase() + '_' + reportDate;\nconst tempRoot = (payload['✅localTempRoot'] || '/tmp').replace(/[\\\\/]+$/, '');\nconst outputRoot = (payload['✅snapshotOutputRoot'] || tempRoot).replace(/[\\\\/]+$/, '');\nfs.mkdirSync(tempRoot, { recursive: true });\nfs.mkdirSync(outputRoot, { recursive: true });\nconst pdfFileName = baseName + '.pdf';\nconst pngFileName = baseName + '.png';\nconst pdfPath = tempRoot + '/' + pdfFileName;\nconst pngPrefix = outputRoot + '/' + baseName;\nconst pngPath = outputRoot + '/' + pngFileName;\nconst pngDir = outputRoot;\nif (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);\nif (fs.existsSync(pngPath)) fs.unlinkSync(pngPath);\nconst pdfBuffer = await this.helpers.getBinaryDataBuffer(0, 'pdfData');\nfs.writeFileSync(pdfPath, pdfBuffer);\nreturn [{ json: { baseName, pdfFileName, pngFileName, pdfPath, pngPrefix, pngPath, pngDir, reportDate: payload['✅reportDate'], source: payload['✅source'], message: payload['✅message'], sheetName: payload['✅sheetName'] } }];"
+      },
+      "id": "25c0a9a8-5ca0-473c-961a-887fedf9b3e0",
+      "name": "Prepare File Paths",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=mkdir -p \"{{ $json.pngDir }}\" && \"{{ $(\"Set Credentials\").first().json[\"✅pdfRendererBinary\"] }}\" -png -f 1 -singlefile \"{{ $json.pdfPath }}\" \"{{ $json.pngPrefix }}\""
+      },
+      "id": "6c144d0d-1a1d-4a95-91d8-9014841b169d",
+      "name": "Render PDF To PNG",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst meta = $('Prepare File Paths').first().json;\nif (!fs.existsSync(meta.pdfPath)) throw new Error('PDF output not found: ' + meta.pdfPath);\nif (!fs.existsSync(meta.pngPath)) throw new Error('PNG output not found: ' + meta.pngPath);\nconst pdfBuffer = fs.readFileSync(meta.pdfPath);\nconst pngBuffer = fs.readFileSync(meta.pngPath);\nconst pdfStats = fs.statSync(meta.pdfPath);\nconst pngStats = fs.statSync(meta.pngPath);\nconst pdfBinary = await this.helpers.prepareBinaryData(pdfBuffer, meta.pdfFileName, 'application/pdf');\nconst imageBinary = await this.helpers.prepareBinaryData(pngBuffer, meta.pngFileName, 'image/png');\nconst caption = meta.message + ' - ' + meta.source + ' - Date: ' + meta.reportDate;\nreturn [{ json: { ...meta, pdfSize: pdfStats.size, pngSize: pngStats.size, slackInitialComment: caption, telegramCaption: caption }, binary: { pdf: pdfBinary, image: imageBinary } }];"
+      },
+      "id": "243c4d1c-7952-4d89-9bc4-6cc06ee15e18",
+      "name": "Attach File Binaries",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth2.googleapis.com/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $(\"Set Credentials\").first().json[\"✅GOOGLE_OAUTH_CLIENT_ID\"] }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $(\"Set Credentials\").first().json[\"✅GOOGLE_OAUTH_CLIENT_SECRET\"] }}"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $(\"Set Credentials\").first().json[\"✅GOOGLE_REFRESH_TOKEN\"] }}"
+            },
+            {
+              "name": "grant_type",
+              "value": "refresh_token"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fcff51a5-7d8c-4c6c-a15b-805c5460961f",
+      "name": "Get Drive Upload Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2032,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const token = $input.first().json.access_token;\nif (!token) throw new Error('Missing Drive OAuth access token');\nconst files = $('Attach File Binaries').first();\nreturn [{ json: { ...files.json, driveAccessToken: token, driveFolderId: $('Set Credentials').first().json['✅GOOGLE_DRIVE_FOLDER_ID'] }, binary: { ...files.binary } }];"
+      },
+      "id": "f19577e3-e622-4fac-9eb4-b5267902207e",
+      "name": "Attach Drive Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true&fields=id,name,parents,webViewLink,webContentLink",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.driveAccessToken }}"
+            },
+            {
+              "name": "X-Upload-Content-Type",
+              "value": "application/pdf"
+            },
+            {
+              "name": "X-Upload-Content-Length",
+              "value": "={{ String($json.pdfSize) }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=UTF-8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { name: $json.pdfFileName, parents: [$json.driveFolderId] } }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "2e4cc399-58af-4f5d-8296-f12ac4bead56",
+      "name": "Drive Start PDF Upload",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2480,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst uploadUrl = headers.location || headers.Location;\nif (!uploadUrl) throw new Error('Missing Drive PDF upload URL');\nconst payload = $('Attach Drive Token').first();\nreturn [{ json: { ...payload.json, pdfUploadUrl: uploadUrl }, binary: { ...payload.binary } }];"
+      },
+      "id": "53c80e95-8263-4ca1-80c1-28f15da39b1c",
+      "name": "Extract PDF Upload URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $json.pdfUploadUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/pdf"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "pdf",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "1c658b7b-0b97-4aaf-a1cb-765d26ba4671",
+      "name": "Drive Upload PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2928,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true&fields=id,name,parents,webViewLink,webContentLink",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $(\"Attach Drive Token\").first().json.driveAccessToken }}"
+            },
+            {
+              "name": "X-Upload-Content-Type",
+              "value": "image/png"
+            },
+            {
+              "name": "X-Upload-Content-Length",
+              "value": "={{ String($(\"Attach Drive Token\").first().json.pngSize) }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=UTF-8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { name: $(\"Attach Drive Token\").first().json.pngFileName, parents: [$(\"Attach Drive Token\").first().json.driveFolderId] } }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "da8c1d2d-ce0e-4de1-9765-a74518ef949e",
+      "name": "Drive Start PNG Upload",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3152,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst uploadUrl = headers.location || headers.Location;\nif (!uploadUrl) throw new Error('Missing Drive PNG upload URL');\nconst payload = $('Attach Drive Token').first();\nreturn [{ json: { ...payload.json, pngUploadUrl: uploadUrl, pdfDriveFile: $('Drive Upload PDF').first().json }, binary: { ...payload.binary } }];"
+      },
+      "id": "ad2d7b9a-e9ee-49f8-92fc-38a5112bf843",
+      "name": "Extract PNG Upload URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3376,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $json.pngUploadUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "image/png"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "image",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "033ba56b-e2fa-433f-b5eb-1c0bddeb9043",
+      "name": "Drive Upload PNG",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3600,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const files = $('Attach File Binaries').first();\nreturn [{ json: { ...files.json, pdfDriveFile: $('Drive Upload PDF').first().json, pngDriveFile: $input.first().json }, binary: { ...files.binary } }];"
+      },
+      "id": "6dd22a7d-3e44-49b3-bace-4552a2824a9a",
+      "name": "Restore Delivery Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3824,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/files.getUploadURLExternal",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $(\"Set Credentials\").first().json[\"✅slackBotToken\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "filename",
+              "value": "={{ $json.pngFileName }}"
+            },
+            {
+              "name": "length",
+              "value": "={{ String($json.pngSize) }}"
+            },
+            {
+              "name": "alt_txt",
+              "value": "={{ $json.sheetName + \" snapshot\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5ea03cc1-ccec-40b7-998d-cee9a3529fb5",
+      "name": "Slack Get Upload URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4048,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst meta = $('Restore Delivery Payload').first();\nif (!input.ok || !input.upload_url || !input.file_id) throw new Error('Slack getUploadURLExternal failed: ' + (input.error || 'unknown_error'));\nreturn [{ json: { ...meta.json, uploadUrl: input.upload_url, fileId: input.file_id }, binary: { image: meta.binary.image } }];"
+      },
+      "id": "cd9d0d71-a2ad-4f48-b98c-da96bc2d543f",
+      "name": "Extract Slack Upload Meta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4272,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.uploadUrl }}",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "image"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "uploadResponse"
+            }
+          }
+        }
+      },
+      "id": "8623d7b8-1ba8-4b75-88da-79a09ba1ce1f",
+      "name": "Slack Upload Binary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4496,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst values = typeof item.json === 'object' && item.json !== null ? Object.values(item.json) : [item.json];\nconst text = values.map((value) => String(value)).join(' ').trim();\nif (!text.startsWith('OK')) throw new Error('Slack binary upload failed: ' + text);\nconst meta = $('Extract Slack Upload Meta').first().json;\nreturn [{ json: { ...meta, uploadResponse: text.substring(0, 200), uploadTransport: 'http-request-multipart' } }];"
+      },
+      "id": "624082ea-3849-46e7-a557-59a75168339c",
+      "name": "Parse Slack Upload Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4720,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/files.completeUploadExternal",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $(\"Set Credentials\").first().json[\"✅slackBotToken\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "files",
+              "value": "={{ JSON.stringify([{ id: $json.fileId, title: $json.sheetName + \" snapshot\" }]) }}"
+            },
+            {
+              "name": "channel_id",
+              "value": "={{ $(\"Set Credentials\").first().json[\"✅slackChannelId\"] }}"
+            },
+            {
+              "name": "initial_comment",
+              "value": "={{ $json.slackInitialComment }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bfbfeb17-24f8-4b13-a76a-b2c2eced8632",
+      "name": "Slack Complete Upload",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4944,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $(\"Set Credentials\").first().json[\"✅TELEGRAM_BOT_API\"] }}/sendPhoto",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $(\"Set Credentials\").first().json[\"✅TELEGRAM_MESSAGE_TO\"] }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $(\"Restore Delivery Payload\").first().json.telegramCaption }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photo",
+              "inputDataFieldName": "image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6e5c0bfd-aa65-4026-9681-f3377564a0c8",
+      "name": "Telegram Send PNG",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5392,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const files = $('Restore Delivery Payload').first();\nreturn [{ json: { ...$input.first().json }, binary: { image: files.binary.image } }];"
+      },
+      "id": "e2ba9077-d6fc-46bc-8ea9-21a4f08e48fc",
+      "name": "Restore Telegram Binary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5168,
+        352
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "Create Google JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Google JWT": {
+      "main": [
+        [
+          {
+            "node": "Get Google Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Google Access Token": {
+      "main": [
+        [
+          {
+            "node": "Export Snapshot PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Export Snapshot PDF": {
+      "main": [
+        [
+          {
+            "node": "Prepare File Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare File Paths": {
+      "main": [
+        [
+          {
+            "node": "Render PDF To PNG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render PDF To PNG": {
+      "main": [
+        [
+          {
+            "node": "Attach File Binaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach File Binaries": {
+      "main": [
+        [
+          {
+            "node": "Get Drive Upload Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Drive Upload Access Token": {
+      "main": [
+        [
+          {
+            "node": "Attach Drive Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Drive Token": {
+      "main": [
+        [
+          {
+            "node": "Drive Start PDF Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Start PDF Upload": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Upload URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Upload URL": {
+      "main": [
+        [
+          {
+            "node": "Drive Upload PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Upload PDF": {
+      "main": [
+        [
+          {
+            "node": "Drive Start PNG Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Start PNG Upload": {
+      "main": [
+        [
+          {
+            "node": "Extract PNG Upload URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PNG Upload URL": {
+      "main": [
+        [
+          {
+            "node": "Drive Upload PNG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Upload PNG": {
+      "main": [
+        [
+          {
+            "node": "Restore Delivery Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Delivery Payload": {
+      "main": [
+        [
+          {
+            "node": "Slack Get Upload URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Get Upload URL": {
+      "main": [
+        [
+          {
+            "node": "Extract Slack Upload Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Slack Upload Meta": {
+      "main": [
+        [
+          {
+            "node": "Slack Upload Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Upload Binary": {
+      "main": [
+        [
+          {
+            "node": "Parse Slack Upload Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Slack Upload Result": {
+      "main": [
+        [
+          {
+            "node": "Slack Complete Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Complete Upload": {
+      "main": [
+        [
+          {
+            "node": "Restore Telegram Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Telegram Binary": {
+      "main": [
+        [
+          {
+            "node": "Telegram Send PNG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  }
+}

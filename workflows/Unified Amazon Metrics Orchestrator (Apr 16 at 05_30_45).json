@@ -1,20 +1,18 @@
 {
-  "name": "Unified Amazon Metrics Orchestrator (Apr 16 at 05:30:45)",
   "nodes": [
     {
       "parameters": {},
-      "id": "manual-trigger",
+      "id": "2d59206d-ecba-4b5b-bcf0-b3b4904b5e2f",
       "name": "When clicking ‘Execute workflow’",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -3104,
-        720
+        -5104,
+        144
       ]
     },
     {
       "parameters": {
-        "inputSource": "workflowInputs",
         "workflowInputs": {
           "values": [
             {
@@ -83,39 +81,39 @@
           ]
         }
       },
-      "id": "e5bc9aa3-74b1-48cb-9741-d0b63f0bd826",
+      "id": "12e60e8a-8c75-4034-aa73-d361932b2fc6",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -3104,
-        944
+        -5104,
+        368
       ]
     },
     {
       "parameters": {
         "jsCode": "const registry = [\n  { metricKey: 'bsr', displayName: 'Get BSR', workflowId: 'zC5vJ22Tb7i4dli8', dateMode: 'snapshot-metadata' },\n  { metricKey: 'ads_spend', displayName: 'Get Ad Spend', workflowId: 'nWQo0Pz3qHzQO0My', dateMode: 'range-ready' },\n  { metricKey: 'ctr', displayName: 'Get CTR', workflowId: 'wJaKKBJzcgUUoahu', dateMode: 'range-ready' },\n  { metricKey: 'refunds', displayName: 'Get Refund', workflowId: 'mV21sXm6RdaCfPet', dateMode: 'range-ready' },\n  { metricKey: 'sales_ppc', displayName: 'Get Sales PPC', workflowId: 'PzN4mNPLpYAS85WV', dateMode: 'range-ready' },\n  { metricKey: 'clicks', displayName: 'Get Clicks', workflowId: 'iVZAWiAvfBrQVOpi', dateMode: 'range-ready' },\n  { metricKey: 'units_ppc', displayName: 'Get Units PPC', workflowId: '0D4iLq9dHrac09vy', dateMode: 'range-ready' },\n  { metricKey: 'fba_fbm_stock', displayName: 'Get FBA/FBM Stock', workflowId: 'T6pc0F0RULowHQu0', dateMode: 'snapshot-metadata' },\n  { metricKey: 'sales_organic', displayName: 'Get Sales Organic', workflowId: 'KTNa277JLZ8hDZ89', dateMode: 'range-ready' },\n  { metricKey: 'units_organic', displayName: 'Get Units Organic', workflowId: 'siWvymzWJu7Ns1VG', dateMode: 'range-ready' },\n  { metricKey: 'reversal_reimbursement', displayName: 'Get Reversal Reimbursement', workflowId: 'fsJgfd11tF3nPprY', dateMode: 'range-ready' },\n  { metricKey: 'fba_per_unit_fulfillment_fee', displayName: 'Get FBAPerUnitFulfillmentFee', workflowId: 'TLMr85JcV4bwDySu', dateMode: 'snapshot-metadata' },\n];\nconst raw = String($json.INCLUDE_LIST || '').trim();\nconst selectedMetrics = raw ? [...new Set(raw.split(',').map((value) => value.trim()).filter(Boolean))] : [];\nreturn [{\n  json: {\n    '✅START_DATE': $json['✅START_DATE'],\n    '✅END_DATE': $json['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': $json['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': $json['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': $json['✅SHEET_NAME'],\n    '✅RANGE': $json['✅RANGE'],\n    '✅COLUMNS': $json['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': $json['✅AMAZON_MARKETPLACE_ID'],\n    '✅AMAZON_ADS_CLIENT_ID': $json['✅AMAZON_ADS_CLIENT_ID'],\n    '✅AMAZON_ADS_CLIENT_SECRET': $json['✅AMAZON_ADS_CLIENT_SECRET'],\n    '✅AMAZON_ADS_REFRESH_TOKEN': $json['✅AMAZON_ADS_REFRESH_TOKEN'],\n    '✅AMAZON_ADS_PROFILE_ID': $json['✅AMAZON_ADS_PROFILE_ID'],\n    '✅AMAZON_SP_CLIENT_ID': $json['✅AMAZON_SP_CLIENT_ID'],\n    '✅AMAZON_SP_CLIENT_SECRET: ': $json['✅AMAZON_SP_CLIENT_SECRET: '],\n    '✅AMAZON_SP_REFRESH_TOKEN': $json['✅AMAZON_SP_REFRESH_TOKEN'],\n    '✅GOOGLE_SERVICE_ACCOUNT_EMAIL': $json['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '✅GOOGLE_PRIVATE_KEY': $json['✅GOOGLE_PRIVATE_KEY'],\n    '✅GOOGLE_SCOPE': $json['✅GOOGLE_SCOPE'],\n    INCLUDE_LIST: $json.INCLUDE_LIST || '',\n    MAX_RETRIES: $json.MAX_RETRIES || '3',\n    ENABLE_RETRY_WORKFLOW: $json.ENABLE_RETRY_WORKFLOW ?? 'true',\n    selectedMetrics,\n    runAll: selectedMetrics.length === 0,\n    auth: $json.auth,\n    summary: [],\n    registry,\n  },\n}];"
       },
-      "id": "9ab7ff96-a858-4f5d-89dd-6eae4df70259",
+      "id": "2f5594d3-b46e-4d90-be5a-1ed5c7bf3e1b",
       "name": "Build Workflow Registry",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1088,
-        720
+        -3088,
+        144
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[0];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "6f1f4940-cac1-4c5e-a305-5b0e5a18ec8e",
+      "id": "adbd15e9-a17b-4194-bb2c-f4c36200c15e",
       "name": "Prepare BSR",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -864,
-        720
+        -2880,
+        144
       ]
     },
     {
@@ -142,13 +140,13 @@
         },
         "options": {}
       },
-      "id": "c8bdd615-a4fd-40e1-be87-1528dfe3925b",
+      "id": "004edbdb-5541-46f5-8d5d-e0e7e5acbdb4",
       "name": "If Run BSR",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -672,
-        16
+        -2672,
+        -560
       ]
     },
     {
@@ -186,13 +184,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "fb40ff56-767e-4a9a-9b65-1225a195b237",
+      "id": "a7e57d68-08c8-4fc8-a7f5-6d20696db064",
       "name": "Execute Get BSR",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -448,
-        -80
+        -2448,
+        -656
       ],
       "onError": "continueRegularOutput"
     },
@@ -200,39 +198,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "47af6bf1-e25a-44f5-a236-155e21b305d5",
+      "id": "481074ac-3bdd-48cd-b1a3-f749a3be7e68",
       "name": "Record BSR Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -224,
-        112
+        -2224,
+        -464
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare BSR').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "d4902b5d-86c7-407b-904a-74e4643870cb",
+      "id": "13f0ee66-4af2-47ad-aa00-cdf3912b8df5",
       "name": "Record BSR Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -224,
-        -80
+        -2224,
+        -656
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[1];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "d5231521-f556-4a61-a80c-39d8ea654841",
+      "id": "e1156ddf-5302-4100-b012-25f3cf440942",
       "name": "Prepare Ads Spend",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        0,
-        16
+        -2000,
+        -560
       ]
     },
     {
@@ -259,13 +257,13 @@
         },
         "options": {}
       },
-      "id": "7fd11713-9dd0-42af-b134-0f213fc1af9d",
+      "id": "e7b3aac2-6435-4a2c-91be-08f3e54d1b2a",
       "name": "If Run Ads Spend",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -656,
-        432
+        -2656,
+        -144
       ]
     },
     {
@@ -306,13 +304,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "3392ad08-f3b4-4c3d-b377-c07fe38faaba",
+      "id": "b1a2be39-985d-464a-b9d9-101929e8ff42",
       "name": "Execute Get Ad Spend",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -432,
-        336
+        -2432,
+        -240
       ],
       "onError": "continueRegularOutput"
     },
@@ -320,39 +318,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "5cdd2e35-07f8-4a0e-a3ec-5e0451ed5c44",
+      "id": "6947f166-ef6f-46e2-9c57-93a9d17f4301",
       "name": "Record Ads Spend Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -208,
-        528
+        -2208,
+        -48
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare Ads Spend').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "14741451-39d9-4d2b-a81c-eccba0432b65",
+      "id": "0511f81c-09cc-4106-89c0-177faca875c7",
       "name": "Record Ads Spend Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -208,
-        336
+        -2208,
+        -240
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[2];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "9f6bcb0c-b45d-402f-bd84-94896ac9cad8",
+      "id": "fa3f6afd-5e5f-419d-8d5d-ba373563a754",
       "name": "Prepare CTR",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        16,
-        432
+        -1984,
+        -144
       ]
     },
     {
@@ -379,13 +377,13 @@
         },
         "options": {}
       },
-      "id": "0e504471-06b3-4e78-8a4e-b488067e5ffa",
+      "id": "9b88ecd5-cd90-4966-ad47-81a9eb6b23c3",
       "name": "If Run CTR",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -656,
-        880
+        -2656,
+        304
       ]
     },
     {
@@ -426,13 +424,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "9e989c67-e1ff-4af0-a656-8ed0f710888a",
+      "id": "840a8ef9-3db4-4e32-91eb-416da69a11d0",
       "name": "Execute Get CTR",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -432,
-        784
+        -2432,
+        208
       ],
       "onError": "continueRegularOutput"
     },
@@ -440,39 +438,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "a5f61042-7217-48ee-8d54-f567b17f5c3c",
+      "id": "28c2233a-27e6-4425-950a-7c48e54af09f",
       "name": "Record CTR Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -208,
-        976
+        -2208,
+        400
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare CTR').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "10cd865b-1cdf-4689-be86-7579af209a4a",
+      "id": "5c2d710e-04e5-4215-bfdc-0e004fc3a430",
       "name": "Record CTR Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -208,
-        784
+        -2208,
+        208
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[3];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "014ea787-3a17-42e2-9f18-fae1bd2df197",
+      "id": "255f4c8a-cfee-46d1-aa50-c2261deb70b2",
       "name": "Prepare Refunds",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        16,
-        880
+        -1984,
+        304
       ]
     },
     {
@@ -499,13 +497,13 @@
         },
         "options": {}
       },
-      "id": "191d627f-2425-48b9-888a-6351ceeeec73",
+      "id": "c73599f5-3b99-4c88-8af2-df82a54ff515",
       "name": "If Run Refunds",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -672,
-        1328
+        -2672,
+        752
       ]
     },
     {
@@ -543,13 +541,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "56019631-1cb1-46d6-8ead-f6aea89a2abe",
+      "id": "22e808c1-228c-4197-9730-ded0fe963101",
       "name": "Execute Get Refund",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -448,
-        1232
+        -2448,
+        656
       ],
       "onError": "continueRegularOutput"
     },
@@ -557,39 +555,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "28755819-0ba5-488a-90e0-ce4b2553e2fe",
+      "id": "bc15af7e-6514-43d6-823c-939b0212e495",
       "name": "Record Refunds Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -224,
-        1424
+        -2224,
+        848
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare Refunds').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "b84d2228-768e-4b99-9170-4cf4be5235d8",
+      "id": "8a0cab1f-6608-4c82-9f5d-f132fc7305b7",
       "name": "Record Refunds Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -224,
-        1232
+        -2224,
+        656
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[4];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "218e26b7-e206-45aa-8de4-49775c4915ba",
+      "id": "1c2feba6-1a9f-4b79-88a1-6f03ddb15634",
       "name": "Prepare Sales PPC",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        0,
-        1328
+        -2000,
+        752
       ]
     },
     {
@@ -616,13 +614,13 @@
         },
         "options": {}
       },
-      "id": "be60610d-8f18-4e1b-a321-c03a36785515",
+      "id": "b33c4fe5-5dd7-4ce3-b193-1e6192b11862",
       "name": "If Run Sales PPC",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        432,
-        0
+        -1568,
+        -576
       ]
     },
     {
@@ -663,13 +661,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "6ade0ff4-2695-4a01-afe3-d29fb8d3edb0",
+      "id": "b9a8e73a-c383-47d8-9676-3bdcdb8d090b",
       "name": "Execute Get Sales PPC",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        656,
-        -96
+        -1344,
+        -672
       ],
       "onError": "continueRegularOutput"
     },
@@ -677,39 +675,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "b16cf5d6-bc58-4eed-9039-2e2340375fc1",
+      "id": "386a47af-a958-440b-974c-4b9e3ae1bed4",
       "name": "Record Sales PPC Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        96
+        -1120,
+        -480
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare Sales PPC').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "8aeed525-0407-4a8a-bbed-36e739ac7cf4",
+      "id": "fcd03657-0efa-4c11-b53e-e346e93f6b77",
       "name": "Record Sales PPC Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        -96
+        -1120,
+        -672
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[5];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "2a032e4e-d0ad-406a-8ca7-bf86a339fbc3",
+      "id": "ec77fc5f-545b-42c5-9fcd-3cf649082ab1",
       "name": "Prepare Clicks",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1104,
-        0
+        -896,
+        -576
       ]
     },
     {
@@ -736,13 +734,13 @@
         },
         "options": {}
       },
-      "id": "e89aa871-3f7c-4054-8cd4-74a36847c3ca",
+      "id": "94e93847-a1fb-423a-8a44-4688bacd0e38",
       "name": "If Run Clicks",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        432,
-        464
+        -1568,
+        -112
       ]
     },
     {
@@ -783,13 +781,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "3caf5926-0323-4a37-b459-813601554e68",
+      "id": "98c6dfbc-a337-4144-8e56-b8c14072ff19",
       "name": "Execute Get Clicks",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        656,
-        368
+        -1344,
+        -208
       ],
       "onError": "continueRegularOutput"
     },
@@ -797,39 +795,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "aa995847-83b2-49df-b0bb-801d7cc5a834",
+      "id": "b1a37ff4-0bb3-4c5b-a182-74c9492b64b9",
       "name": "Record Clicks Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        560
+        -1120,
+        -16
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare Clicks').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "7dbe5c77-f18d-4f53-99d0-303c15b6e47d",
+      "id": "f08fdd8c-912f-4f97-a112-aa4e308dcfd1",
       "name": "Record Clicks Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        368
+        -1120,
+        -208
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[6];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "a22b1b4a-1745-4196-82a5-cd05526647d9",
+      "id": "ab2510b3-5728-46a9-8ada-56a03530a9c9",
       "name": "Prepare Units PPC",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1104,
-        464
+        -896,
+        -112
       ]
     },
     {
@@ -856,13 +854,13 @@
         },
         "options": {}
       },
-      "id": "3a282ae5-31a0-4494-9e36-c71217311707",
+      "id": "e068a059-399c-498c-9ded-97c5a4fe3261",
       "name": "If Run Units PPC",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        432,
-        864
+        -1568,
+        288
       ]
     },
     {
@@ -903,13 +901,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "476b695d-1d9f-4976-8e68-5466fc848ceb",
+      "id": "b2f5be39-e64b-4241-80bd-75f5c5269f7f",
       "name": "Execute Get Units PPC",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        656,
-        768
+        -1344,
+        192
       ],
       "onError": "continueRegularOutput"
     },
@@ -917,39 +915,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "3929d186-c21b-4b0e-8acb-4ea5373bb8ba",
+      "id": "6e964db8-6472-4dfc-aa62-fdcb430ea93d",
       "name": "Record Units PPC Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        960
+        -1120,
+        384
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare Units PPC').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "f9a0ba0f-8474-421d-874f-b0dd08bbb5c4",
+      "id": "9e9a12d8-8f57-4f10-b757-df5541c3040c",
       "name": "Record Units PPC Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        768
+        -1120,
+        192
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[7];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "d09a65ac-875a-4ac6-a072-a969bf2f651b",
+      "id": "77a6d34a-7856-48a4-a334-337cfcc4303e",
       "name": "Prepare FBA FBM Stock",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1104,
-        864
+        -896,
+        288
       ]
     },
     {
@@ -976,13 +974,13 @@
         },
         "options": {}
       },
-      "id": "109a6faa-0960-453a-b459-92e592f0834a",
+      "id": "9d099d9d-2bed-4cc1-bcf0-10af46d494a5",
       "name": "If Run FBA FBM Stock",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        448,
-        1280
+        -1552,
+        704
       ]
     },
     {
@@ -1020,13 +1018,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "785b3593-6a02-4286-9c0e-0c50c74b74a3",
+      "id": "bbb1d6d6-eee9-4cd6-9127-e40cf1c981c5",
       "name": "Execute Get FBA FBM Stock",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        672,
-        1184
+        -1328,
+        608
       ],
       "onError": "continueRegularOutput"
     },
@@ -1034,39 +1032,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "3b47e002-dd02-463d-9c27-d26850581202",
+      "id": "fa9f9eca-2faf-4d27-a45a-8c3e7ebf5bdf",
       "name": "Record FBA FBM Stock Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        896,
-        1376
+        -1104,
+        800
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare FBA FBM Stock').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "beee0549-fb36-4919-9acd-b831bdf133da",
+      "id": "20995633-3f6e-4ae7-a268-5fe992da74f5",
       "name": "Record FBA FBM Stock Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        896,
-        1184
+        -1104,
+        608
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[8];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "db4b23af-306f-46bd-a5eb-06403b5270f4",
+      "id": "cf0653a4-2d16-4caf-9dc1-3f34c1548dae",
       "name": "Prepare Sales Organic",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
-        1280
+        -880,
+        704
       ]
     },
     {
@@ -1093,13 +1091,13 @@
         },
         "options": {}
       },
-      "id": "ce91917e-4b8c-430d-8542-9613377b1e26",
+      "id": "423e3893-db0d-46e5-9de0-48cc63cdfa39",
       "name": "If Run Sales Organic",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1488,
-        0
+        -512,
+        -576
       ]
     },
     {
@@ -1137,13 +1135,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "c593bfb8-6871-488b-9e2d-e049617fbf00",
+      "id": "11cfa947-a881-4ca1-a03a-7f9516ee2d2f",
       "name": "Execute Get Sales Organic",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1712,
-        -96
+        -288,
+        -672
       ],
       "onError": "continueRegularOutput"
     },
@@ -1151,39 +1149,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "f3e6dbcd-450d-4218-9961-7da6a222d57a",
+      "id": "874be049-b13a-41d4-99a6-f9196a349848",
       "name": "Record Sales Organic Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        96
+        -64,
+        -480
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare Sales Organic').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "528be04d-d640-4f8c-9a5e-1b0f5300b51e",
+      "id": "f013ced7-2d43-4242-9b35-51c1343e902f",
       "name": "Record Sales Organic Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        -96
+        -64,
+        -672
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[9];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "d997313b-c415-41e8-9310-4290f548642d",
+      "id": "aa2762b4-4ee0-452a-b197-cf32ce5bbcc6",
       "name": "Prepare Units Organic",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2160,
-        0
+        160,
+        -576
       ]
     },
     {
@@ -1210,13 +1208,13 @@
         },
         "options": {}
       },
-      "id": "f12cae94-6b43-4ee9-8b27-1a15851e4d9f",
+      "id": "58074b8f-f257-42fd-b9a5-11eee72fe7f0",
       "name": "If Run Units Organic",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1488,
-        464
+        -512,
+        -112
       ]
     },
     {
@@ -1254,13 +1252,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "28eec36f-a197-47fc-ac61-33a33e233718",
+      "id": "3cf5ee17-c513-43ce-a618-74404a340aa8",
       "name": "Execute Get Units Organic",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1712,
-        368
+        -288,
+        -208
       ],
       "onError": "continueRegularOutput"
     },
@@ -1268,39 +1266,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "ecfc4e8f-c4d3-4e13-8d09-01828a3e9772",
+      "id": "e51501d2-f1fa-4856-933d-688f4798e59c",
       "name": "Record Units Organic Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        560
+        -64,
+        -16
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare Units Organic').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "2dbc4d63-2b7d-4dd5-af01-18453e33d5c4",
+      "id": "f98cffce-1229-45e2-ac92-09bc88ed2211",
       "name": "Record Units Organic Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        368
+        -64,
+        -208
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[10];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "90030a24-34e0-4b53-9751-31ff0d1b775c",
+      "id": "ae7e8705-dedc-4cbd-aa2a-3ec1fa1a9193",
       "name": "Prepare Reversal Reimbursement",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2160,
-        464
+        160,
+        -112
       ]
     },
     {
@@ -1327,13 +1325,13 @@
         },
         "options": {}
       },
-      "id": "9b3b8777-5cb3-4405-ac4c-8817b19e009d",
+      "id": "8bbf9d1a-9dee-4de4-800f-a8af42e1c2a7",
       "name": "If Run Reversal Reimbursement",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1488,
-        864
+        -512,
+        288
       ]
     },
     {
@@ -1371,13 +1369,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "9e1ccde3-363c-47d3-8825-5c956ba171d5",
+      "id": "d920338d-2a29-4623-9b2f-c9a67deedca4",
       "name": "Execute Get Reversal Reimbursement",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1712,
-        768
+        -288,
+        192
       ],
       "onError": "continueRegularOutput"
     },
@@ -1385,39 +1383,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "2f6ba68f-ff72-42b6-a37e-8c74300e4d78",
+      "id": "7e530658-6b17-415b-966f-3702bd158aeb",
       "name": "Record Reversal Reimbursement Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        960
+        -64,
+        384
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare Reversal Reimbursement').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "d6c8dee0-9f0d-49c8-975e-3ca7cbe50afd",
+      "id": "d11f3970-ba42-48ab-b8c5-9c07a6ae661d",
       "name": "Record Reversal Reimbursement Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        768
+        -64,
+        192
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.registry[11];\nconst selected = input.runAll || input.selectedMetrics.includes(current.metricKey);\nreturn [{ json: { ...input, currentMetric: current, currentSelected: selected ? 'true' : 'false', currentStartedAt: new Date().toISOString() } }];"
       },
-      "id": "b349784d-971a-4812-a7d8-50598cc97ac0",
+      "id": "b53a5fb9-552c-4e55-bc02-1d16d5a35d2e",
       "name": "Prepare FBA Per Unit Fulfillment Fee",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2160,
-        864
+        160,
+        288
       ]
     },
     {
@@ -1444,13 +1442,13 @@
         },
         "options": {}
       },
-      "id": "06a341d1-bb2f-49fe-9045-7914d9b444b6",
+      "id": "50172026-f5b3-462b-8173-a99051e38413",
       "name": "If Run FBA Per Unit Fulfillment Fee",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1504,
-        1328
+        -496,
+        752
       ]
     },
     {
@@ -1488,13 +1486,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "2f6db2f0-94c3-4500-995b-a8c07fb862f7",
+      "id": "fbfbeb78-b3b3-4ae4-9557-37823156030c",
       "name": "Execute Get FBAPerUnitFulfillmentFee",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1728,
-        1232
+        -272,
+        656
       ],
       "onError": "continueRegularOutput"
     },
@@ -1502,39 +1500,39 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst current = input.currentMetric;\nreturn [{ json: { ...input, summary: [...(input.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: false, status: 'skipped', errorMessage: null, startedAt: null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "180a069e-aa39-4a22-a131-0a8bfc0fafd7",
+      "id": "b3b2df1b-caa6-47f3-af1e-31ba937f47b5",
       "name": "Record FBA Per Unit Fulfillment Fee Skipped",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1952,
-        1424
+        -48,
+        848
       ]
     },
     {
       "parameters": {
         "jsCode": "const previous = $('Prepare FBA Per Unit Fulfillment Fee').first().json;\nconst current = previous.currentMetric;\nconst payload = $input.first().json || {};\nconst error = payload.error || payload.execution?.error || null;\nreturn [{ json: { ...previous, summary: [...(previous.summary || []), { metricKey: current.metricKey, displayName: current.displayName, workflowId: current.workflowId, selected: true, status: error ? 'failed' : 'success', errorMessage: error ? String(error.message || payload.message || 'Child workflow failed') : null, startedAt: previous.currentStartedAt || null, finishedAt: new Date().toISOString() }] } }];"
       },
-      "id": "c2d5b882-a1cb-4b9d-a526-4c676b848ec3",
+      "id": "e95bfb85-a21b-4fa3-a2ee-d8bda17531f4",
       "name": "Record FBA Per Unit Fulfillment Fee Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1952,
-        1232
+        -48,
+        656
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst summary = input.summary || [];\nconst failedMetrics = summary.filter((entry) => entry.status === 'failed');\nconst failedMetricKeys = [...new Set(failedMetrics.map((entry) => entry.metricKey).filter(Boolean))];\nconst enableRetryWorkflow = String(input.ENABLE_RETRY_WORKFLOW ?? 'true').toLowerCase() !== 'false';\nconst maxRetries = Math.max(1, Number(input.MAX_RETRIES || 3));\nreturn [{\n  json: {\n    summary,\n    failedMetrics,\n    failedMetricKeys,\n    '✅START_DATE': input['✅START_DATE'],\n    '✅END_DATE': input['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': input['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': input['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': input['✅SHEET_NAME'],\n    '✅RANGE': input['✅RANGE'],\n    '✅COLUMNS': input['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': input['✅AMAZON_MARKETPLACE_ID'],\n    '✅AMAZON_ADS_CLIENT_ID': input['✅AMAZON_ADS_CLIENT_ID'],\n    '✅AMAZON_ADS_CLIENT_SECRET': input['✅AMAZON_ADS_CLIENT_SECRET'],\n    '✅AMAZON_ADS_REFRESH_TOKEN': input['✅AMAZON_ADS_REFRESH_TOKEN'],\n    '✅AMAZON_ADS_PROFILE_ID': input['✅AMAZON_ADS_PROFILE_ID'],\n    '✅AMAZON_SP_CLIENT_ID': input['✅AMAZON_SP_CLIENT_ID'],\n    '✅AMAZON_SP_CLIENT_SECRET: ': input['✅AMAZON_SP_CLIENT_SECRET: '],\n    '✅AMAZON_SP_REFRESH_TOKEN': input['✅AMAZON_SP_REFRESH_TOKEN'],\n    '✅GOOGLE_SERVICE_ACCOUNT_EMAIL': input['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '✅GOOGLE_PRIVATE_KEY': input['✅GOOGLE_PRIVATE_KEY'],\n    '✅GOOGLE_SCOPE': input['✅GOOGLE_SCOPE'],\n    INCLUDE_LIST: input.INCLUDE_LIST || '',\n    MAX_RETRIES: String(maxRetries),\n    ENABLE_RETRY_WORKFLOW: enableRetryWorkflow ? 'true' : 'false',\n    shouldAutoRetry: enableRetryWorkflow && failedMetricKeys.length > 0,\n    orchestratorRunId: $execution.id,\n  },\n}];"
       },
-      "id": "cb2054c8-299b-414e-86a3-b578d73d746f",
+      "id": "726d5d57-4b61-4df7-8baf-dd27092b7377",
       "name": "Final Summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2672,
-        576
+        672,
+        0
       ]
     },
     {
@@ -1561,22 +1559,22 @@
         },
         "options": {}
       },
-      "id": "f2427f59-48d4-45d2-9ec8-af0f95f8b421",
+      "id": "4535b669-d17a-43ca-ab3d-e450de58cfd1",
       "name": "If Auto Retry Needed",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2896,
-        576
+        896,
+        0
       ]
     },
     {
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "sJw7kKf3NqP1tR8M",
+          "value": "7qKcWP6U0y0xES06",
           "mode": "list",
-          "cachedResultUrl": "/workflow/sJw7kKf3NqP1tR8M",
+          "cachedResultUrl": "/workflow/7qKcWP6U0y0xES06",
           "cachedResultName": "Retry Failed Amazon Metrics"
         },
         "workflowInputs": {
@@ -1613,26 +1611,26 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "c707b37c-1d55-4c2f-bd16-b4c0b65e9f4c",
+      "id": "8f92898c-22e6-47c3-b411-ab2558476261",
       "name": "Execute Retry Failed Amazon Metrics",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        3120,
-        480
+        1120,
+        -96
       ]
     },
     {
       "parameters": {
         "jsCode": "return $input.all();"
       },
-      "id": "cfa17ca8-3a64-4a2c-adb5-dcbd4f0f1c68",
+      "id": "183df48a-774f-420b-8dbd-55ceaa5e2bc2",
       "name": "Return Orchestrator Output",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3344,
-        576
+        1344,
+        0
       ]
     },
     {
@@ -1662,26 +1660,26 @@
         },
         "options": {}
       },
-      "id": "131724be-1194-4fa4-ad8e-87fd0c534d33",
+      "id": "ac25143f-41a2-4e7a-8a73-f8ff70df7824",
       "name": "Mint Amazon Access Token",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -2656,
-        720
+        -4656,
+        144
       ]
     },
     {
       "parameters": {
         "jsCode": "return $input.all();"
       },
-      "id": "04c59770-30d9-42ea-9d31-b768024eef39",
+      "id": "fdb4c984-ab63-40a3-b97f-92216aabc949",
       "name": "Refresh Amazon Token",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2432,
-        720
+        -4432,
+        144
       ]
     },
     {
@@ -1704,195 +1702,39 @@
         },
         "options": {}
       },
-      "id": "2a201658-f325-423c-b8dc-7da5cad61342",
+      "id": "d4be86cd-b345-4ba7-a303-b93813171000",
       "name": "Mint Google Access Token",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -1984,
-        720
+        -3984,
+        144
       ]
     },
     {
       "parameters": {
         "jsCode": "return $input.all();"
       },
-      "id": "13be27ef-0fcb-4dfa-83f2-ba8e40ec6978",
+      "id": "fc1b9b1e-9952-43f0-9bcb-e39088ed7ead",
       "name": "Refresh Google Token",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1760,
-        720
+        -3760,
+        144
       ]
     },
     {
       "parameters": {
         "jsCode": "const seed = $('Set Credentials').first().json;\nconst input = $input.first().json;\nconst issuedAt = new Date().toISOString();\n\nconst refreshBufferSeconds = Number(seed.AUTH_REFRESH_BUFFER_SECONDS || input.AUTH_REFRESH_BUFFER_SECONDS || 300);\n\nconst amazonAdsNode = $('Mint Amazon Access Token').first().json;\nconst googleNode = $('Mint Google Access Token').first().json;\nconst spNode = $('Mint SP Access Token').first().json;\n\nconst amazonExpiresIn = Number(amazonAdsNode.expires_in || 3600);\nconst googleExpiresIn = Number(googleNode.expires_in || 3600);\nconst spExpiresIn = Number(spNode.expires_in || 3600);\n\nreturn [{\n  json: {\n    ...seed,\n    ...input,\n    auth: {\n      amazon: {\n        accessToken: amazonAdsNode.access_token,\n        clientId: seed['✅AMAZON_ADS_CLIENT_ID'],\n        profileId: seed['✅AMAZON_ADS_PROFILE_ID'],\n        issuedAt,\n        expiresAt: new Date(Date.now() + amazonExpiresIn * 1000).toISOString(),\n        spAccessToken: spNode.access_token,\n        spIssuedAt: issuedAt,\n        spExpiresAt: new Date(Date.now() + spExpiresIn * 1000).toISOString(),\n      },\n      google: {\n        accessToken: googleNode.access_token,\n        scope: seed['✅GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets',\n        issuedAt: seed.googleIssuedAt || input.googleIssuedAt || issuedAt,\n        expiresAt: seed.googleExpiresAt || input.googleExpiresAt || new Date(Date.now() + googleExpiresIn * 1000).toISOString(),\n      },\n      meta: {\n        refreshBufferSeconds,\n      },\n    },\n  },\n}];"
       },
-      "id": "196cd93e-f36a-4b77-bb65-3a1677c07974",
+      "id": "c63cb2e7-26f2-43ec-b31d-7df06cfcc5b6",
       "name": "Attach Shared Auth Bundle",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1312,
-        720
-      ]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "76a6c500-c2c0-4339-8299-682826c4452b",
-              "name": "✅START_DATE",
-              "value": "={{ $json[\"✅START_DATE\"] || \"2026-04-17\" }}",
-              "type": "string"
-            },
-            {
-              "id": "2a1915cd-7949-44ff-952b-9ab2aa6365f5",
-              "name": "✅END_DATE",
-              "value": "={{ $json[\"✅END_DATE\"] || \"2026-04-17\" }}",
-              "type": "string"
-            },
-            {
-              "id": "6944e5f6-f22f-4bf8-9746-13b9e5ee8f91",
-              "name": "INCLUDE_LIST",
-              "value": "={{ $json.INCLUDE_LIST || \"\" }}",
-              "type": "string"
-            },
-            {
-              "name": "MAX_RETRIES",
-              "value": "={{ $json.MAX_RETRIES || \"3\" }}",
-              "type": "string",
-              "id": "b129cb7c-0f98-40eb-bf18-ea42e4b1cbd0"
-            },
-            {
-              "name": "ENABLE_RETRY_WORKFLOW",
-              "value": "={{ $json.ENABLE_RETRY_WORKFLOW !== undefined && $json.ENABLE_RETRY_WORKFLOW !== null && $json.ENABLE_RETRY_WORKFLOW !== '' ? String($json.ENABLE_RETRY_WORKFLOW) : 'true' }}",
-              "type": "string",
-              "id": "0f7e0a35-8d67-4c89-9fca-0efec2d38f2d"
-            },
-            {
-              "id": "d2a87c47-b55e-4641-90c9-4b7c204d8955",
-              "name": "✅AMAZON_ADS_CLIENT_ID",
-              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_ID\"] || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "f6bcc963-0897-455c-ac16-e86f3deca6ef",
-              "name": "✅AMAZON_ADS_CLIENT_SECRET",
-              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_SECRET\"] || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "6e513cbb-157d-4f5b-a18f-6f2b212157f5",
-              "name": "✅AMAZON_ADS_REFRESH_TOKEN",
-              "value": "={{ $json[\"✅AMAZON_ADS_REFRESH_TOKEN\"] || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "15f4bb08-6a83-4e2f-bf3f-706b362ee4af",
-              "name": "✅AMAZON_ADS_PROFILE_ID",
-              "value": "={{ $json[\"✅AMAZON_ADS_PROFILE_ID\"] || \"873689645456341\" }}",
-              "type": "string"
-            },
-            {
-              "id": "55f35d9b-4dd4-4594-af0c-08185938f2ac",
-              "name": "✅AMAZON_SP_CLIENT_ID",
-              "value": "={{ $json[\"✅AMAZON_SP_CLIENT_ID\"] || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "2aa06f79-f2f4-4d4f-8a4a-bf328f2de798",
-              "name": "✅AMAZON_SP_CLIENT_SECRET: ",
-              "value": "={{ $json[\"✅AMAZON_SP_CLIENT_SECRET: \"] || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "518c7b45-f2de-42ad-b944-6342308f9e41",
-              "name": "✅AMAZON_SP_REFRESH_TOKEN",
-              "value": "={{ $json[\"✅AMAZON_SP_REFRESH_TOKEN\"] || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "d02eed0a-85e5-4723-97a0-2ef963c0cb91",
-              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL",
-              "value": "={{ $json[\"✅GOOGLE_SERVICE_ACCOUNT_EMAIL\"] || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "fe461a50-becf-4868-9675-eba1f00317b1",
-              "name": "✅GOOGLE_PRIVATE_KEY",
-              "value": "={{ $json[\"✅GOOGLE_PRIVATE_KEY\"] || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "51f84e29-8590-46e0-bb22-c92f5900bcd7",
-              "name": "✅GOOGLE_SCOPE",
-              "value": "={{ $json[\"✅GOOGLE_SCOPE\"] || \"https://www.googleapis.com/auth/spreadsheets\" }}",
-              "type": "string"
-            },
-            {
-              "id": "297bd6d8-b645-41fa-baf6-9ac1a3b4a682",
-              "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"https://docs.google.com/spreadsheets/d/1vK8PB8jug1NakLBF81_lpEq66De_RbHe-6tG063ibnM/edit?gid=962294707#gid=962294707\" }}",
-              "type": "string"
-            },
-            {
-              "id": "c0aec1b6-f8fc-49fd-82aa-03fbb686df99",
-              "name": "✅SHEET_NAME",
-              "value": "={{ $json[\"✅SHEET_NAME\"] || \"N8N_DOWNLOAD\" }}",
-              "type": "string"
-            },
-            {
-              "id": "163475ec-2602-4c9e-9200-3277ef26934d",
-              "name": "✅RANGE",
-              "value": "={{ $json[\"✅RANGE\"] || \"A:BD\" }}",
-              "type": "string"
-            },
-            {
-              "id": "05c6613c-5ce9-418b-9067-8ca2a91dec71",
-              "name": "✅COLUMNS",
-              "value": "={{ $json[\"✅COLUMNS\"] || '[\"cost\", \"clicks\", \"impressions\", \"advertisedAsin\", \"advertisedSku\"]' }}",
-              "type": "string"
-            },
-            {
-              "id": "e05654b1-70f3-45f6-ba57-3f3b7bb1a8bf",
-              "name": "✅SPREADSHEET_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"1vK8PB8jug1NakLBF81_lpEq66De_RbHe-6tG063ibnM\" }}",
-              "type": "string"
-            },
-            {
-              "name": "✅AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"ATVPDKIKX0DER\" }}",
-              "type": "string",
-              "id": "67e27ab3-87d9-4ca2-bc01-21d681d1b080"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -2880,
-        720
-      ],
-      "id": "cf0346ef-113a-4bf8-9537-56adc7df7f82",
-      "name": "Set Credentials"
-    },
-    {
-      "parameters": {
-        "jsCode": "const crypto = require('crypto');\n\nfunction b64url(value) {\n  return Buffer.from(value)\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction getCredentials() {\n  try {\n    return $('Set Credentials').first().json || {};\n  } catch {\n    return $input.first().json || {};\n  }\n}\n\nconst input = $input.first().json || {};\nconst credentials = { ...getCredentials(), ...input };\nconst serviceAccountEmail = credentials['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'];\nconst privateKeyPem = String(credentials['✅GOOGLE_PRIVATE_KEY'] || '').replace(/\\n/g, '\n');\nconst scope = credentials['✅GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets.readonly';\n\nif (!serviceAccountEmail || !privateKeyPem) {\n  throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY');\n}\n\nconst now = Math.floor(Date.now() / 1000);\nconst encodedHeader = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));\nconst encodedPayload = b64url(JSON.stringify({\n  iss: serviceAccountEmail,\n  scope,\n  aud: 'https://oauth2.googleapis.com/token',\n  iat: now,\n  exp: now + 3600,\n}));\nconst signingInput = `${encodedHeader}.${encodedPayload}`;\nconst signature = crypto\n  .createSign('RSA-SHA256')\n  .update(signingInput)\n  .end()\n  .sign(privateKeyPem, 'base64')\n  .replace(/=/g, '')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_');\n\nreturn [{\n  json: {\n    ...input,\n    assertion: `${signingInput}.${signature}`,\n  },\n}];\n"
-      },
-      "id": "ccccc996-2d47-48fe-a659-6c8e16dc18de",
-      "name": "Build JWT Assertion",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -2208,
-        720
+        -3312,
+        144
       ]
     },
     {
@@ -1923,13 +1765,13 @@
         },
         "options": {}
       },
-      "id": "afc9b8b5-cf21-4e96-9860-7880ca67dd81",
+      "id": "e10c3d9e-eb8a-4ec5-9eb4-888d481f703b",
       "name": "Mint SP Access Token",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -1536,
-        720
+        -3536,
+        144
       ]
     },
     {
@@ -1940,16 +1782,193 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -3264,
-        320
+        -5104,
+        -32
       ],
-      "id": "101d5017-ed72-4189-96e8-75be455ffa35",
+      "id": "765d868a-9cbe-4150-8c7d-fda6959369c9",
       "name": "Webhook",
       "webhookId": "fb6e9b68-d6c5-4a22-9d4b-e9b00a06ffa4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nfunction b64url(value) {\n  return Buffer.from(value)\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction getCredentialsFromN8n() {\n  try {\n    return $('Set Credentials').first().json || {};\n  } catch {\n    return $input.first().json || {};\n  }\n}\n\nfunction normalizePrivateKey(raw) {\n  let value = String(raw || '').trim();\n\n  if (!value) {\n    return '';\n  }\n\n  if (\n    (value.startsWith('\"') && value.endsWith('\"')) ||\n    (value.startsWith(\"'\") && value.endsWith(\"'\"))\n  ) {\n    value = value.slice(1, -1);\n  }\n\n  value = value\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\r\\n/g, '\\n')\n    .trim();\n\n  if (!value.includes('BEGIN')) {\n    value = [\n      '-----BEGIN PRIVATE KEY-----',\n      value.replace(/\\s+/g, ''),\n      '-----END PRIVATE KEY-----',\n    ].join('\\n');\n  }\n\n  return value;\n}\n\nfunction createPrivateKeyOrThrow(privateKeyPem) {\n  try {\n    return crypto.createPrivateKey({\n      key: privateKeyPem,\n      format: 'pem',\n    });\n  } catch (error) {\n    const firstLine = privateKeyPem.split('\\n')[0] || '<empty>';\n    throw new Error(\n      `Invalid GOOGLE_PRIVATE_KEY format. First line: ${firstLine}. Original error: ${error.message}`\n    );\n  }\n}\n\nconst input = $input.first().json || {};\nconst credentials = { ...getCredentialsFromN8n(), ...input };\n\nconst serviceAccountEmail = String(credentials['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'] || '').trim();\nconst privateKeyPem = normalizePrivateKey(credentials['✅GOOGLE_PRIVATE_KEY']);\nconst scope = String(\n  credentials['✅GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets.readonly'\n).trim();\n\nif (!serviceAccountEmail || !privateKeyPem) {\n  throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY');\n}\n\nconst privateKey = createPrivateKeyOrThrow(privateKeyPem);\nconst now = Math.floor(Date.now() / 1000);\n\nconst encodedHeader = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));\nconst encodedPayload = b64url(\n  JSON.stringify({\n    iss: serviceAccountEmail,\n    scope,\n    aud: 'https://oauth2.googleapis.com/token',\n    iat: now,\n    exp: now + 3600,\n  })\n);\n\nconst signingInput = `${encodedHeader}.${encodedPayload}`;\nconst signature = crypto\n  .sign('RSA-SHA256', Buffer.from(signingInput, 'utf8'), privateKey)\n  .toString('base64')\n  .replace(/=/g, '')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_');\n\nreturn [\n  {\n    json: {\n      ...input,\n      assertion: `${signingInput}.${signature}`,\n    },\n  },\n];\n"
+      },
+      "id": "d80aadb5-6de0-4efa-97d4-3f96356988b2",
+      "name": "Build JWT Assertion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4192,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76a6c500-c2c0-4339-8299-682826c4452b",
+              "name": "✅START_DATE",
+              "value": "2026-04-18",
+              "type": "string"
+            },
+            {
+              "id": "2a1915cd-7949-44ff-952b-9ab2aa6365f5",
+              "name": "✅END_DATE",
+              "value": "2026-04-18",
+              "type": "string"
+            },
+            {
+              "id": "6944e5f6-f22f-4bf8-9746-13b9e5ee8f91",
+              "name": "INCLUDE_LIST",
+              "value": "refunds",
+              "type": "string"
+            },
+            {
+              "id": "d2a87c47-b55e-4641-90c9-4b7c204d8955",
+              "name": "✅AMAZON_ADS_CLIENT_ID",
+              "value": "<YOUR_AMAZON_ADS_CLIENT_ID>",
+              "type": "string"
+            },
+            {
+              "id": "f6bcc963-0897-455c-ac16-e86f3deca6ef",
+              "name": "✅AMAZON_ADS_CLIENT_SECRET",
+              "value": "<YOUR_AMAZON_ADS_CLIENT_SECRET>",
+              "type": "string"
+            },
+            {
+              "id": "6e513cbb-157d-4f5b-a18f-6f2b212157f5",
+              "name": "✅AMAZON_ADS_REFRESH_TOKEN",
+              "value": "<YOUR_AMAZON_ADS_REFRESH_TOKEN>",
+              "type": "string"
+            },
+            {
+              "id": "15f4bb08-6a83-4e2f-bf3f-706b362ee4af",
+              "name": "✅AMAZON_ADS_PROFILE_ID",
+              "value": "<YOUR_AMAZON_ADS_PROFILE_ID>",
+              "type": "string"
+            },
+            {
+              "id": "55f35d9b-4dd4-4594-af0c-08185938f2ac",
+              "name": "✅AMAZON_SP_CLIENT_ID",
+              "value": "<YOUR_AMAZON_SP_CLIENT_ID>",
+              "type": "string"
+            },
+            {
+              "id": "2aa06f79-f2f4-4d4f-8a4a-bf328f2de798",
+              "name": "✅AMAZON_SP_CLIENT_SECRET: ",
+              "value": "<YOUR_AMAZON_SP_CLIENT_SECRET>",
+              "type": "string"
+            },
+            {
+              "id": "518c7b45-f2de-42ad-b944-6342308f9e41",
+              "name": "✅AMAZON_SP_REFRESH_TOKEN",
+              "value": "<YOUR_AMAZON_SP_REFRESH_TOKEN>",
+              "type": "string"
+            },
+            {
+              "id": "d02eed0a-85e5-4723-97a0-2ef963c0cb91",
+              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL",
+              "value": "<YOUR_GOOGLE_SERVICE_ACCOUNT_EMAIL>",
+              "type": "string"
+            },
+            {
+              "id": "fe461a50-becf-4868-9675-eba1f00317b1",
+              "name": "✅GOOGLE_PRIVATE_KEY",
+              "value": "<YOUR_GOOGLE_PRIVATE_KEY_PEM>",
+              "type": "string"
+            },
+            {
+              "id": "51f84e29-8590-46e0-bb22-c92f5900bcd7",
+              "name": "✅GOOGLE_SCOPE",
+              "value": "https://www.googleapis.com/auth/spreadsheets",
+              "type": "string"
+            },
+            {
+              "id": "297bd6d8-b645-41fa-baf6-9ac1a3b4a682",
+              "name": "✅SPREADSHEET_URL_OR_ID",
+              "value": "https://docs.google.com/spreadsheets/d/<YOUR_SPREADSHEET_ID>/edit?gid=962294707#gid=962294707",
+              "type": "string"
+            },
+            {
+              "id": "c0aec1b6-f8fc-49fd-82aa-03fbb686df99",
+              "name": "✅SHEET_NAME",
+              "value": "N8N_DOWNLOAD",
+              "type": "string"
+            },
+            {
+              "id": "163475ec-2602-4c9e-9200-3277ef26934d",
+              "name": "✅RANGE",
+              "value": "A:BD",
+              "type": "string"
+            },
+            {
+              "id": "05c6613c-5ce9-418b-9067-8ca2a91dec71",
+              "name": "✅COLUMNS",
+              "value": "[\"cost\", \"clicks\", \"impressions\", \"advertisedAsin\", \"advertisedSku\"]",
+              "type": "string"
+            },
+            {
+              "id": "e05654b1-70f3-45f6-ba57-3f3b7bb1a8bf",
+              "name": "✅SPREADSHEET_ID",
+              "value": "<YOUR_SPREADSHEET_ID>",
+              "type": "string"
+            },
+            {
+              "name": "✅AMAZON_MARKETPLACE_ID",
+              "value": "ATVPDKIKX0DER",
+              "type": "string",
+              "id": "67e27ab3-87d9-4ca2-bc01-21d681d1b080"
+            },
+            {
+              "id": "5f93a848-a98a-43f6-9541-9b3e842e1c91",
+              "name": "MAX_RETRIES",
+              "value": "={{ $json.MAX_RETRIES || \"3\" }}",
+              "type": "string"
+            },
+            {
+              "id": "2b26179b-b518-4160-b6df-7963aba9ff54",
+              "name": "ENABLE_RETRY_WORKFLOW",
+              "value": "={{ $json.ENABLE_RETRY_WORKFLOW !== undefined &&   $json.ENABLE_RETRY_WORKFLOW !== null && $json.ENABLE_RETRY_WORKFLOW !== '' ?   String($json.ENABLE_RETRY_WORKFLOW) : 'true' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4896,
+        144
+      ],
+      "id": "91178c49-de82-4476-9321-89f344ce63d1",
+      "name": "Set Credentials"
     }
   ],
-  "pinData": {},
   "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Build Workflow Registry": {
       "main": [
         [
@@ -2001,7 +2020,7 @@
         ]
       ]
     },
-    "Record BSR Result": {
+    "Record BSR Skipped": {
       "main": [
         [
           {
@@ -2012,7 +2031,7 @@
         ]
       ]
     },
-    "Record BSR Skipped": {
+    "Record BSR Result": {
       "main": [
         [
           {
@@ -2063,7 +2082,7 @@
         ]
       ]
     },
-    "Record Ads Spend Result": {
+    "Record Ads Spend Skipped": {
       "main": [
         [
           {
@@ -2074,7 +2093,7 @@
         ]
       ]
     },
-    "Record Ads Spend Skipped": {
+    "Record Ads Spend Result": {
       "main": [
         [
           {
@@ -2125,7 +2144,7 @@
         ]
       ]
     },
-    "Record CTR Result": {
+    "Record CTR Skipped": {
       "main": [
         [
           {
@@ -2136,7 +2155,7 @@
         ]
       ]
     },
-    "Record CTR Skipped": {
+    "Record CTR Result": {
       "main": [
         [
           {
@@ -2187,7 +2206,7 @@
         ]
       ]
     },
-    "Record Refunds Result": {
+    "Record Refunds Skipped": {
       "main": [
         [
           {
@@ -2198,7 +2217,7 @@
         ]
       ]
     },
-    "Record Refunds Skipped": {
+    "Record Refunds Result": {
       "main": [
         [
           {
@@ -2249,7 +2268,7 @@
         ]
       ]
     },
-    "Record Sales PPC Result": {
+    "Record Sales PPC Skipped": {
       "main": [
         [
           {
@@ -2260,7 +2279,7 @@
         ]
       ]
     },
-    "Record Sales PPC Skipped": {
+    "Record Sales PPC Result": {
       "main": [
         [
           {
@@ -2311,7 +2330,7 @@
         ]
       ]
     },
-    "Record Clicks Result": {
+    "Record Clicks Skipped": {
       "main": [
         [
           {
@@ -2322,7 +2341,7 @@
         ]
       ]
     },
-    "Record Clicks Skipped": {
+    "Record Clicks Result": {
       "main": [
         [
           {
@@ -2373,7 +2392,7 @@
         ]
       ]
     },
-    "Record Units PPC Result": {
+    "Record Units PPC Skipped": {
       "main": [
         [
           {
@@ -2384,7 +2403,7 @@
         ]
       ]
     },
-    "Record Units PPC Skipped": {
+    "Record Units PPC Result": {
       "main": [
         [
           {
@@ -2435,7 +2454,7 @@
         ]
       ]
     },
-    "Record FBA FBM Stock Result": {
+    "Record FBA FBM Stock Skipped": {
       "main": [
         [
           {
@@ -2446,7 +2465,7 @@
         ]
       ]
     },
-    "Record FBA FBM Stock Skipped": {
+    "Record FBA FBM Stock Result": {
       "main": [
         [
           {
@@ -2497,7 +2516,7 @@
         ]
       ]
     },
-    "Record Sales Organic Result": {
+    "Record Sales Organic Skipped": {
       "main": [
         [
           {
@@ -2508,7 +2527,7 @@
         ]
       ]
     },
-    "Record Sales Organic Skipped": {
+    "Record Sales Organic Result": {
       "main": [
         [
           {
@@ -2559,7 +2578,7 @@
         ]
       ]
     },
-    "Record Units Organic Result": {
+    "Record Units Organic Skipped": {
       "main": [
         [
           {
@@ -2570,7 +2589,7 @@
         ]
       ]
     },
-    "Record Units Organic Skipped": {
+    "Record Units Organic Result": {
       "main": [
         [
           {
@@ -2621,7 +2640,7 @@
         ]
       ]
     },
-    "Record Reversal Reimbursement Result": {
+    "Record Reversal Reimbursement Skipped": {
       "main": [
         [
           {
@@ -2632,7 +2651,7 @@
         ]
       ]
     },
-    "Record Reversal Reimbursement Skipped": {
+    "Record Reversal Reimbursement Result": {
       "main": [
         [
           {
@@ -2683,7 +2702,7 @@
         ]
       ]
     },
-    "Record FBA Per Unit Fulfillment Fee Result": {
+    "Record FBA Per Unit Fulfillment Fee Skipped": {
       "main": [
         [
           {
@@ -2694,7 +2713,7 @@
         ]
       ]
     },
-    "Record FBA Per Unit Fulfillment Fee Skipped": {
+    "Record FBA Per Unit Fulfillment Fee Result": {
       "main": [
         [
           {
@@ -2778,66 +2797,22 @@
         ]
       ]
     },
-    "Attach Shared Auth Bundle": {
-      "main": [
-        [
-          {
-            "node": "Build Workflow Registry",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set Credentials": {
-      "main": [
-        [
-          {
-            "node": "Mint Amazon Access Token",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Set Credentials",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "When Executed by Another Workflow": {
-      "main": [
-        [
-          {
-            "node": "Set Credentials",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build JWT Assertion": {
-      "main": [
-        [
-          {
-            "node": "Mint Google Access Token",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Refresh Google Token": {
       "main": [
         [
           {
             "node": "Mint SP Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Shared Auth Bundle": {
+      "main": [
+        [
+          {
+            "node": "Build Workflow Registry",
             "type": "main",
             "index": 0
           }
@@ -2865,19 +2840,32 @@
           }
         ]
       ]
+    },
+    "Build JWT Assertion": {
+      "main": [
+        [
+          {
+            "node": "Mint Google Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "Mint Amazon Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
-  "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate",
-    "availableInMCP": true,
-    "callerPolicy": "workflowsFromSameOwner"
-  },
-  "versionId": "2d7a867e-2a41-4d18-a654-be7969e280a8",
+  "pinData": {},
   "meta": {
     "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
-  },
-  "id": "Hh8rWhCpyt6n8QHT",
-  "tags": []
+  }
 }

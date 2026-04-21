@@ -1,0 +1,316 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "path": "google-refresh-token-start",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "google_oauth_start_webhook",
+      "name": "Google OAuth Start Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        192
+      ],
+      "webhookId": "06143972-080e-4168-9226-91851e9b1ef4"
+    },
+    {
+      "parameters": {
+        "path": "google-refresh-token-callback",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "google_oauth_callback_webhook",
+      "name": "Google OAuth Callback Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        512
+      ],
+      "webhookId": "8045de76-a722-4c7e-b98d-c82cc07793d9"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "client-id-start",
+              "name": "✅GOOGLE_OAUTH_CLIENT_ID",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_OAUTH_CLIENT_ID>"
+            },
+            {
+              "id": "client-secret-start",
+              "name": "✅GOOGLE_OAUTH_CLIENT_SECRET",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_OAUTH_CLIENT_SECRET> "
+            },
+            {
+              "id": "scopes-start",
+              "name": "✅GOOGLE_OAUTH_SCOPES",
+              "type": "string",
+              "value": "https://www.googleapis.com/auth/drive"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "set_oauth_config_start",
+      "name": "Set OAuth Config Start",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "client-id-callback",
+              "name": "✅GOOGLE_OAUTH_CLIENT_ID",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_OAUTH_CLIENT_ID>"
+            },
+            {
+              "id": "client-secret-callback",
+              "name": "✅GOOGLE_OAUTH_CLIENT_SECRET",
+              "type": "string",
+              "value": "<YOUR_GOOGLE_OAUTH_CLIENT_SECRET> "
+            },
+            {
+              "id": "scopes-callback",
+              "name": "✅GOOGLE_OAUTH_SCOPES",
+              "type": "string",
+              "value": "https://www.googleapis.com/auth/drive"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "set_oauth_config_callback",
+      "name": "Set OAuth Config Callback",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst clientId = String(input['✅GOOGLE_OAUTH_CLIENT_ID'] || '').trim();\nconst clientSecret = String(input['✅GOOGLE_OAUTH_CLIENT_SECRET'] || '').trim();\nconst scopes = String(input['✅GOOGLE_OAUTH_SCOPES'] || 'https://www.googleapis.com/auth/drive').trim();\nif (!clientId || !clientSecret) {\n  throw new Error('Fill ✅GOOGLE_OAUTH_CLIENT_ID and ✅GOOGLE_OAUTH_CLIENT_SECRET first');\n}\nconst redirectUri = 'http://localhost:5678/webhook/google-refresh-token-callback';\nconst oauthParams = [\n  ['client_id', clientId],\n  ['redirect_uri', redirectUri],\n  ['response_type', 'code'],\n  ['scope', scopes],\n  ['access_type', 'offline'],\n  ['prompt', 'consent'],\n  ['include_granted_scopes', 'true'],\n].map(([key, value]) => encodeURIComponent(key) + '=' + encodeURIComponent(value)).join('&');\nreturn [{ json: { authUrl: 'https://accounts.google.com/o/oauth2/v2/auth?' + oauthParams } }];"
+      },
+      "id": "build_oauth_url",
+      "name": "Build OAuth URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "redirect",
+        "redirectURL": "={{ $json.authUrl }}",
+        "options": {
+          "responseCode": 302
+        }
+      },
+      "id": "redirect_to_google",
+      "name": "Redirect To Google Consent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        912,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst clientId = String(input['✅GOOGLE_OAUTH_CLIENT_ID'] || '').trim();\nconst clientSecret = String(input['✅GOOGLE_OAUTH_CLIENT_SECRET'] || '').trim();\nconst code = typeof query.code === 'string' ? query.code : Array.isArray(query.code) ? query.code[0] : '';\nif (!clientId || !clientSecret) {\n  throw new Error('Fill ✅GOOGLE_OAUTH_CLIENT_ID and ✅GOOGLE_OAUTH_CLIENT_SECRET first');\n}\nif (!code) {\n  throw new Error('Missing Google authorization code in callback');\n}\nreturn [{ json: { clientId, clientSecret, authCode: code, redirectUri: 'http://localhost:5678/webhook/google-refresh-token-callback' } }];"
+      },
+      "id": "prepare_callback_payload",
+      "name": "Prepare Callback Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth2.googleapis.com/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $json.clientId }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json.clientSecret }}"
+            },
+            {
+              "name": "code",
+              "value": "={{ $json.authCode }}"
+            },
+            {
+              "name": "grant_type",
+              "value": "authorization_code"
+            },
+            {
+              "name": "redirect_uri",
+              "value": "={{ $json.redirectUri }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "exchange_code_for_tokens",
+      "name": "Exchange Code For Tokens",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        912,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const token = $input.first().json;\nif (!token.refresh_token) {\n  throw new Error('Google did not return a refresh_token. Revoke the app or use prompt=consent with a fresh authorization attempt.');\n}\nreturn [{ json: {\n  ok: true,\n  message: 'Copy ✅GOOGLE_REFRESH_TOKEN into your other workflow.',\n  refresh_token: token.refresh_token,\n  access_token: token.access_token,\n  scope: token.scope,\n  token_type: token.token_type,\n  expires_in: token.expires_in\n} }];"
+      },
+      "id": "format_token_response",
+      "name": "Format Token Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond_with_tokens",
+      "name": "Respond With Tokens",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1360,
+        512
+      ]
+    }
+  ],
+  "connections": {
+    "Google OAuth Start Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set OAuth Config Start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google OAuth Callback Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set OAuth Config Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set OAuth Config Start": {
+      "main": [
+        [
+          {
+            "node": "Build OAuth URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set OAuth Config Callback": {
+      "main": [
+        [
+          {
+            "node": "Prepare Callback Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build OAuth URL": {
+      "main": [
+        [
+          {
+            "node": "Redirect To Google Consent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Callback Payload": {
+      "main": [
+        [
+          {
+            "node": "Exchange Code For Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exchange Code For Tokens": {
+      "main": [
+        [
+          {
+            "node": "Format Token Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Token Response": {
+      "main": [
+        [
+          {
+            "node": "Respond With Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  }
+}
