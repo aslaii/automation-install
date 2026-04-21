@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-04-17T05:50:24.324Z",
+  "createdAt": "2026-04-14T22:30:08.373Z",
+  "id": "TLMr85JcV4bwDySu",
   "name": "Get FBAPerUnitFulfillmentFee",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -10,45 +16,45 @@
         480
       ],
       "id": "9d2a857b-3e6d-4047-a47d-83102d93f384",
-      "name": "When clicking ‘Execute workflow’"
+      "name": "When clicking \u2018Execute workflow\u2019"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "name": "✅START_DATE",
-              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "name": "\u2705START_DATE",
+              "value": "={{ $json[\"\u2705START_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅END_DATE",
-              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "name": "\u2705END_DATE",
+              "value": "={{ $json[\"\u2705END_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SHEET_NAME",
-              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "name": "\u2705SHEET_NAME",
+              "value": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅RANGE",
-              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "name": "\u2705RANGE",
+              "value": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "name": "\u2705AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
               "type": "string"
             },
             {
@@ -73,11 +79,11 @@
       ],
       "id": "5eab61df-a8a5-46cc-be75-45c76a3ff1e7",
       "name": "Set Credentials",
-      "notes": "Use ✅START_DATE and ✅END_DATE for every run. Same-day runs are valid. This workflow keeps snapshot semantics and stores the chosen range as operator metadata while fee estimates stay per-SKU lookups."
+      "notes": "Use \u2705START_DATE and \u2705END_DATE for every run. Same-day runs are valid. This workflow keeps snapshot semantics and stores the chosen range as operator metadata while fee estimates stay per-SKU lookups."
     },
     {
       "parameters": {
-        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"✅RANGE\"])) }}",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"\u2705SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"\u2705SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"\u2705RANGE\"])) }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -105,7 +111,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"\u2705SPREADSHEET_ID\"] }}/values:batchUpdate",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -135,7 +141,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst headerRow = values[0] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'FBAFEE');\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and FBA_FEE columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [['']],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
+        "jsCode": "function colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $('Webhook Read Google Sheet').first().json || {};\nconst values = sheet.values || [];\nconst sheetName = $('Set Credentials').first().json['\u2705SHEET_NAME'];\n\nconst headerRow = values[0] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'FBAFEE');\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and FBA_FEE columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\nfor (let i = 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /^SKU$/i.test(sku) || /^IMG$/i.test(sku) || /_TOTALS$/i.test(sku)) continue;\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [['']],\n  });\n}\n\nreturn [{ json: { valueInputOption: 'USER_ENTERED', data } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -193,7 +199,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function sleep(ms) {\n  return new Promise((resolve) => setTimeout(resolve, ms));\n}\n\nfunction normalizePayload(payload) {\n  let current = payload;\n  if (typeof current === 'string') {\n    try { current = JSON.parse(current); } catch { return {}; }\n  }\n  if (current && typeof current === 'object' && typeof current.body === 'string') {\n    try { current = JSON.parse(current.body); } catch {}\n  } else if (current && typeof current === 'object' && current.body && typeof current.body === 'object') {\n    current = current.body;\n  }\n  return current && typeof current === 'object' ? current : {};\n}\n\nfunction amountOf(value) {\n  if (!value || typeof value !== 'object') return 0;\n  const amount = Number(value.Amount ?? value.amount ?? 0);\n  return Number.isFinite(amount) ? amount : 0;\n}\n\nfunction collectFeeDetails(container, acc) {\n  if (!container || typeof container !== 'object') return;\n  if (Array.isArray(container)) {\n    for (const item of container) collectFeeDetails(item, acc);\n    return;\n  }\n  if (container.FeeType || container.feeType) acc.push(container);\n  for (const child of Object.values(container)) collectFeeDetails(child, acc);\n}\n\nfunction getPerUnitFulfillmentFee(rawPayload) {\n  const payload = normalizePayload(rawPayload);\n  const feeRoot = payload.payload?.FeesEstimateResult?.FeesEstimate || payload.FeesEstimateResult?.FeesEstimate || payload.payload?.feesEstimateResult?.feesEstimate || payload.feesEstimateResult?.feesEstimate || payload;\n  const directList = feeRoot.FeeDetailList || feeRoot.feeDetailList || [];\n  const details = [];\n  collectFeeDetails(directList, details);\n  if (!details.length) collectFeeDetails(feeRoot, details);\n  let total = 0;\n  for (const detail of details) {\n    const type = String(detail.FeeType || detail.feeType || '').toLowerCase();\n    if (!type) continue;\n    if (type === 'fbafees') {\n      const top = amountOf(detail.FinalFee || detail.finalFee || detail.FeeAmount || detail.feeAmount);\n      if (top > 0) return Number(top.toFixed(2));\n    }\n    const isFulfillment = type.includes('fulfillment') || type.includes('pickandpack') || type.includes('weight') || type.includes('handling') || type.includes('fba');\n    const exclude = type.includes('referral') || type.includes('closing') || type.includes('commission') || type.includes('storage');\n    if (!isFulfillment || exclude) continue;\n    total += amountOf(detail.FinalFee || detail.finalFee || detail.FeeAmount || detail.feeAmount);\n  }\n  return Number(total.toFixed(2));\n}\n\nconst token = $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN;\nconst items = $input.all();\nconst output = [];\nfor (let index = 0; index < items.length; index++) {\n  const current = items[index].json || {};\n  const sku = String(current.sku || '').trim();\n  if (!sku) continue;\n  const body = {\n    FeesEstimateRequest: {\n      MarketplaceId: $('Set Credentials').first().json['✅AMAZON_MARKETPLACE_ID'],\n      IsAmazonFulfilled: true,\n      Identifier: `${current.rowNumber}-${sku}`,\n      PriceToEstimateFees: {\n        ListingPrice: { CurrencyCode: 'USD', Amount: Number(current.listingPrice || 1) },\n        Shipping: { CurrencyCode: 'USD', Amount: 0 },\n      },\n    },\n  };\n  let rawPayload = {};\n  for (let attempt = 0; attempt < 5; attempt++) {\n    try {\n      rawPayload = await this.helpers.httpRequest({\n        method: 'POST',\n        url: `https://sellingpartnerapi-na.amazon.com/products/fees/v0/listings/${encodeURIComponent(sku)}/feesEstimate`,\n        headers: {\n          'x-amz-access-token': token,\n          Accept: 'application/json',\n          'Content-Type': 'application/json',\n        },\n        body,\n        json: true,\n      });\n      break;\n    } catch (error) {\n      const statusCode = Number(error.statusCode || error.httpCode || error.response?.statusCode || 0);\n      const isRetryable = statusCode === 429 || statusCode === 503 || String(error.message || '').toLowerCase().includes('too many requests');\n      if (!isRetryable || attempt === 4) {\n        rawPayload = { error: { message: error.message || 'Request failed', statusCode } };\n        break;\n      }\n      await sleep(1500 * (attempt + 1));\n    }\n  }\n  const perUnitFee = getPerUnitFulfillmentFee(rawPayload);\n  const totalFee = Number((perUnitFee * Number(current.unitsSold || 0) * -1).toFixed(2));\n  output.push({\n    json: {\n      rowNumber: current.rowNumber,\n      sku,\n      perUnitFee,\n      unitsSold: current.unitsSold || 0,\n      totalFee,\n      debugRawPayload: index < 2 ? rawPayload : undefined,\n      debugNormalizedPayload: index < 2 ? normalizePayload(rawPayload) : undefined,\n      debugRequestBody: index < 2 ? body : undefined,\n    },\n  });\n  if (index < items.length - 1) await sleep(1300);\n}\nreturn output;"
+        "jsCode": "function sleep(ms) {\n  return new Promise((resolve) => setTimeout(resolve, ms));\n}\n\nfunction normalizePayload(payload) {\n  let current = payload;\n  if (typeof current === 'string') {\n    try { current = JSON.parse(current); } catch { return {}; }\n  }\n  if (current && typeof current === 'object' && typeof current.body === 'string') {\n    try { current = JSON.parse(current.body); } catch {}\n  } else if (current && typeof current === 'object' && current.body && typeof current.body === 'object') {\n    current = current.body;\n  }\n  return current && typeof current === 'object' ? current : {};\n}\n\nfunction amountOf(value) {\n  if (!value || typeof value !== 'object') return 0;\n  const amount = Number(value.Amount ?? value.amount ?? 0);\n  return Number.isFinite(amount) ? amount : 0;\n}\n\nfunction collectFeeDetails(container, acc) {\n  if (!container || typeof container !== 'object') return;\n  if (Array.isArray(container)) {\n    for (const item of container) collectFeeDetails(item, acc);\n    return;\n  }\n  if (container.FeeType || container.feeType) acc.push(container);\n  for (const child of Object.values(container)) collectFeeDetails(child, acc);\n}\n\nfunction getPerUnitFulfillmentFee(rawPayload) {\n  const payload = normalizePayload(rawPayload);\n  const feeRoot = payload.payload?.FeesEstimateResult?.FeesEstimate || payload.FeesEstimateResult?.FeesEstimate || payload.payload?.feesEstimateResult?.feesEstimate || payload.feesEstimateResult?.feesEstimate || payload;\n  const directList = feeRoot.FeeDetailList || feeRoot.feeDetailList || [];\n  const details = [];\n  collectFeeDetails(directList, details);\n  if (!details.length) collectFeeDetails(feeRoot, details);\n  let total = 0;\n  for (const detail of details) {\n    const type = String(detail.FeeType || detail.feeType || '').toLowerCase();\n    if (!type) continue;\n    if (type === 'fbafees') {\n      const top = amountOf(detail.FinalFee || detail.finalFee || detail.FeeAmount || detail.feeAmount);\n      if (top > 0) return Number(top.toFixed(2));\n    }\n    const isFulfillment = type.includes('fulfillment') || type.includes('pickandpack') || type.includes('weight') || type.includes('handling') || type.includes('fba');\n    const exclude = type.includes('referral') || type.includes('closing') || type.includes('commission') || type.includes('storage');\n    if (!isFulfillment || exclude) continue;\n    total += amountOf(detail.FinalFee || detail.finalFee || detail.FeeAmount || detail.feeAmount);\n  }\n  return Number(total.toFixed(2));\n}\n\nconst token = $('Set Credentials').first().json.AMAZON_ACCESS_TOKEN;\nconst items = $input.all();\nconst output = [];\nfor (let index = 0; index < items.length; index++) {\n  const current = items[index].json || {};\n  const sku = String(current.sku || '').trim();\n  if (!sku) continue;\n  const body = {\n    FeesEstimateRequest: {\n      MarketplaceId: $('Set Credentials').first().json['\u2705AMAZON_MARKETPLACE_ID'],\n      IsAmazonFulfilled: true,\n      Identifier: `${current.rowNumber}-${sku}`,\n      PriceToEstimateFees: {\n        ListingPrice: { CurrencyCode: 'USD', Amount: Number(current.listingPrice || 1) },\n        Shipping: { CurrencyCode: 'USD', Amount: 0 },\n      },\n    },\n  };\n  let rawPayload = {};\n  for (let attempt = 0; attempt < 5; attempt++) {\n    try {\n      rawPayload = await this.helpers.httpRequest({\n        method: 'POST',\n        url: `https://sellingpartnerapi-na.amazon.com/products/fees/v0/listings/${encodeURIComponent(sku)}/feesEstimate`,\n        headers: {\n          'x-amz-access-token': token,\n          Accept: 'application/json',\n          'Content-Type': 'application/json',\n        },\n        body,\n        json: true,\n      });\n      break;\n    } catch (error) {\n      const statusCode = Number(error.statusCode || error.httpCode || error.response?.statusCode || 0);\n      const isRetryable = statusCode === 429 || statusCode === 503 || String(error.message || '').toLowerCase().includes('too many requests');\n      if (!isRetryable || attempt === 4) {\n        rawPayload = { error: { message: error.message || 'Request failed', statusCode } };\n        break;\n      }\n      await sleep(1500 * (attempt + 1));\n    }\n  }\n  const perUnitFee = getPerUnitFulfillmentFee(rawPayload);\n  const totalFee = Number((perUnitFee * Number(current.unitsSold || 0) * -1).toFixed(2));\n  output.push({\n    json: {\n      rowNumber: current.rowNumber,\n      sku,\n      perUnitFee,\n      unitsSold: current.unitsSold || 0,\n      totalFee,\n      debugRawPayload: index < 2 ? rawPayload : undefined,\n      debugNormalizedPayload: index < 2 ? normalizePayload(rawPayload) : undefined,\n      debugRequestBody: index < 2 ? body : undefined,\n    },\n  });\n  if (index < items.length - 1) await sleep(1300);\n}\nreturn output;"
       },
       "id": "fetch-fba-fees",
       "name": "Fetch FBA Fees Sequentially",
@@ -222,38 +228,38 @@
         "assignments": {
           "assignments": [
             {
-              "name": "✅START_DATE",
-              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "name": "\u2705START_DATE",
+              "value": "={{ $json[\"\u2705START_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅END_DATE",
-              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "name": "\u2705END_DATE",
+              "value": "={{ $json[\"\u2705END_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SHEET_NAME",
-              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "name": "\u2705SHEET_NAME",
+              "value": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅RANGE",
-              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "name": "\u2705RANGE",
+              "value": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "name": "\u2705AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
               "type": "string"
             },
             {
@@ -295,7 +301,6 @@
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Code in JavaScript": {
       "main": [
@@ -341,7 +346,7 @@
         ]
       ]
     },
-    "When clicking ‘Execute workflow’": {
+    "When clicking \u2018Execute workflow\u2019": {
       "main": [
         [
           {
@@ -386,7 +391,6 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -394,10 +398,35 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
   "versionId": "3ca1a416-9a98-4cd5-8565-50c3e45ff759",
-  "meta": {
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
-  },
-  "id": "TLMr85JcV4bwDySu",
-  "tags": []
+  "activeVersionId": "3ca1a416-9a98-4cd5-8565-50c3e45ff759",
+  "versionCounter": 66,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-14T22:30:08.404Z",
+      "createdAt": "2026-04-14T22:30:08.404Z",
+      "role": "workflow:owner",
+      "workflowId": "TLMr85JcV4bwDySu",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "Version 3ca1a416",
+    "description": ""
+  }
 }

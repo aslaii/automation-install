@@ -1,4 +1,11 @@
 {
+  "updatedAt": "2026-04-21T02:34:46.580Z",
+  "createdAt": "2026-04-13T02:25:54.451Z",
+  "id": "mV21sXm6RdaCfPet",
+  "name": "Get Refund",
+  "description": "Fetches Amazon FBA returns report, parses refund counts by SKU, and writes to Google Sheet. Retries up to 3x on CANCELLED reports (reading retry count from SP If Retry Create node to persist across HTTP nodes) before erroring.",
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -836,9 +843,44 @@
       ]
     }
   },
-  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromAList",
+    "availableInMCP": true,
+    "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
+  },
+  "staticData": null,
   "meta": {
-    "aiBuilderAssisted": true,
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "ac69ef83-bb51-494c-b196-d26cd35108c8",
+  "activeVersionId": "ac69ef83-bb51-494c-b196-d26cd35108c8",
+  "versionCounter": 245,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-13T02:25:54.454Z",
+      "createdAt": "2026-04-13T02:25:54.454Z",
+      "role": "workflow:owner",
+      "workflowId": "mV21sXm6RdaCfPet",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "Version ac69ef83",
+    "description": ""
   }
 }

@@ -1,9 +1,16 @@
 {
+  "updatedAt": "2026-04-21T04:40:03.510Z",
+  "createdAt": "2026-04-16T21:24:50.262Z",
+  "id": "Hh8rWhCpyt6n8QHT",
+  "name": "Unified Amazon Metrics Orchestrator",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
       "id": "2d59206d-ecba-4b5b-bcf0-b3b4904b5e2f",
-      "name": "When clicking ‘Execute workflow’",
+      "name": "When clicking \u2018Execute workflow\u2019",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
@@ -16,10 +23,10 @@
         "workflowInputs": {
           "values": [
             {
-              "name": "✅START_DATE"
+              "name": "\u2705START_DATE"
             },
             {
-              "name": "✅END_DATE"
+              "name": "\u2705END_DATE"
             },
             {
               "name": "INCLUDE_LIST"
@@ -31,52 +38,52 @@
               "name": "ENABLE_RETRY_WORKFLOW"
             },
             {
-              "name": "✅AMAZON_ADS_CLIENT_ID"
+              "name": "\u2705AMAZON_ADS_CLIENT_ID"
             },
             {
-              "name": "✅AMAZON_ADS_CLIENT_SECRET"
+              "name": "\u2705AMAZON_ADS_CLIENT_SECRET"
             },
             {
-              "name": "✅AMAZON_ADS_REFRESH_TOKEN"
+              "name": "\u2705AMAZON_ADS_REFRESH_TOKEN"
             },
             {
-              "name": "✅AMAZON_ADS_PROFILE_ID"
+              "name": "\u2705AMAZON_ADS_PROFILE_ID"
             },
             {
-              "name": "✅AMAZON_SP_CLIENT_ID"
+              "name": "\u2705AMAZON_SP_CLIENT_ID"
             },
             {
-              "name": "✅AMAZON_SP_CLIENT_SECRET: "
+              "name": "\u2705AMAZON_SP_CLIENT_SECRET: "
             },
             {
-              "name": "✅AMAZON_SP_REFRESH_TOKEN"
+              "name": "\u2705AMAZON_SP_REFRESH_TOKEN"
             },
             {
-              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL"
+              "name": "\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL"
             },
             {
-              "name": "✅GOOGLE_PRIVATE_KEY"
+              "name": "\u2705GOOGLE_PRIVATE_KEY"
             },
             {
-              "name": "✅GOOGLE_SCOPE"
+              "name": "\u2705GOOGLE_SCOPE"
             },
             {
-              "name": "✅SPREADSHEET_URL_OR_ID"
+              "name": "\u2705SPREADSHEET_URL_OR_ID"
             },
             {
-              "name": "✅SPREADSHEET_ID"
+              "name": "\u2705SPREADSHEET_ID"
             },
             {
-              "name": "✅SHEET_NAME"
+              "name": "\u2705SHEET_NAME"
             },
             {
-              "name": "✅RANGE"
+              "name": "\u2705RANGE"
             },
             {
-              "name": "✅COLUMNS"
+              "name": "\u2705COLUMNS"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID"
+              "name": "\u2705AMAZON_MARKETPLACE_ID"
             }
           ]
         }
@@ -92,7 +99,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const registry = [\n  { metricKey: 'bsr', displayName: 'Get BSR', workflowId: 'zC5vJ22Tb7i4dli8', dateMode: 'snapshot-metadata' },\n  { metricKey: 'ads_spend', displayName: 'Get Ad Spend', workflowId: 'nWQo0Pz3qHzQO0My', dateMode: 'range-ready' },\n  { metricKey: 'ctr', displayName: 'Get CTR', workflowId: 'wJaKKBJzcgUUoahu', dateMode: 'range-ready' },\n  { metricKey: 'refunds', displayName: 'Get Refund', workflowId: 'mV21sXm6RdaCfPet', dateMode: 'range-ready' },\n  { metricKey: 'sales_ppc', displayName: 'Get Sales PPC', workflowId: 'PzN4mNPLpYAS85WV', dateMode: 'range-ready' },\n  { metricKey: 'clicks', displayName: 'Get Clicks', workflowId: 'iVZAWiAvfBrQVOpi', dateMode: 'range-ready' },\n  { metricKey: 'units_ppc', displayName: 'Get Units PPC', workflowId: '0D4iLq9dHrac09vy', dateMode: 'range-ready' },\n  { metricKey: 'fba_fbm_stock', displayName: 'Get FBA/FBM Stock', workflowId: 'T6pc0F0RULowHQu0', dateMode: 'snapshot-metadata' },\n  { metricKey: 'sales_organic', displayName: 'Get Sales Organic', workflowId: 'KTNa277JLZ8hDZ89', dateMode: 'range-ready' },\n  { metricKey: 'units_organic', displayName: 'Get Units Organic', workflowId: 'siWvymzWJu7Ns1VG', dateMode: 'range-ready' },\n  { metricKey: 'reversal_reimbursement', displayName: 'Get Reversal Reimbursement', workflowId: 'fsJgfd11tF3nPprY', dateMode: 'range-ready' },\n  { metricKey: 'fba_per_unit_fulfillment_fee', displayName: 'Get FBAPerUnitFulfillmentFee', workflowId: 'TLMr85JcV4bwDySu', dateMode: 'snapshot-metadata' },\n];\nconst raw = String($json.INCLUDE_LIST || '').trim();\nconst selectedMetrics = raw ? [...new Set(raw.split(',').map((value) => value.trim()).filter(Boolean))] : [];\nreturn [{\n  json: {\n    '✅START_DATE': $json['✅START_DATE'],\n    '✅END_DATE': $json['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': $json['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': $json['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': $json['✅SHEET_NAME'],\n    '✅RANGE': $json['✅RANGE'],\n    '✅COLUMNS': $json['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': $json['✅AMAZON_MARKETPLACE_ID'],\n    '✅AMAZON_ADS_CLIENT_ID': $json['✅AMAZON_ADS_CLIENT_ID'],\n    '✅AMAZON_ADS_CLIENT_SECRET': $json['✅AMAZON_ADS_CLIENT_SECRET'],\n    '✅AMAZON_ADS_REFRESH_TOKEN': $json['✅AMAZON_ADS_REFRESH_TOKEN'],\n    '✅AMAZON_ADS_PROFILE_ID': $json['✅AMAZON_ADS_PROFILE_ID'],\n    '✅AMAZON_SP_CLIENT_ID': $json['✅AMAZON_SP_CLIENT_ID'],\n    '✅AMAZON_SP_CLIENT_SECRET: ': $json['✅AMAZON_SP_CLIENT_SECRET: '],\n    '✅AMAZON_SP_REFRESH_TOKEN': $json['✅AMAZON_SP_REFRESH_TOKEN'],\n    '✅GOOGLE_SERVICE_ACCOUNT_EMAIL': $json['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '✅GOOGLE_PRIVATE_KEY': $json['✅GOOGLE_PRIVATE_KEY'],\n    '✅GOOGLE_SCOPE': $json['✅GOOGLE_SCOPE'],\n    INCLUDE_LIST: $json.INCLUDE_LIST || '',\n    MAX_RETRIES: $json.MAX_RETRIES || '3',\n    ENABLE_RETRY_WORKFLOW: $json.ENABLE_RETRY_WORKFLOW ?? 'true',\n    selectedMetrics,\n    runAll: selectedMetrics.length === 0,\n    auth: $json.auth,\n    summary: [],\n    registry,\n  },\n}];"
+        "jsCode": "const registry = [\n  { metricKey: 'bsr', displayName: 'Get BSR', workflowId: 'zC5vJ22Tb7i4dli8', dateMode: 'snapshot-metadata' },\n  { metricKey: 'ads_spend', displayName: 'Get Ad Spend', workflowId: 'nWQo0Pz3qHzQO0My', dateMode: 'range-ready' },\n  { metricKey: 'ctr', displayName: 'Get CTR', workflowId: 'wJaKKBJzcgUUoahu', dateMode: 'range-ready' },\n  { metricKey: 'refunds', displayName: 'Get Refund', workflowId: 'mV21sXm6RdaCfPet', dateMode: 'range-ready' },\n  { metricKey: 'sales_ppc', displayName: 'Get Sales PPC', workflowId: 'PzN4mNPLpYAS85WV', dateMode: 'range-ready' },\n  { metricKey: 'clicks', displayName: 'Get Clicks', workflowId: 'iVZAWiAvfBrQVOpi', dateMode: 'range-ready' },\n  { metricKey: 'units_ppc', displayName: 'Get Units PPC', workflowId: '0D4iLq9dHrac09vy', dateMode: 'range-ready' },\n  { metricKey: 'fba_fbm_stock', displayName: 'Get FBA/FBM Stock', workflowId: 'T6pc0F0RULowHQu0', dateMode: 'snapshot-metadata' },\n  { metricKey: 'sales_organic', displayName: 'Get Sales Organic', workflowId: 'KTNa277JLZ8hDZ89', dateMode: 'range-ready' },\n  { metricKey: 'units_organic', displayName: 'Get Units Organic', workflowId: 'siWvymzWJu7Ns1VG', dateMode: 'range-ready' },\n  { metricKey: 'reversal_reimbursement', displayName: 'Get Reversal Reimbursement', workflowId: 'fsJgfd11tF3nPprY', dateMode: 'range-ready' },\n  { metricKey: 'fba_per_unit_fulfillment_fee', displayName: 'Get FBAPerUnitFulfillmentFee', workflowId: 'TLMr85JcV4bwDySu', dateMode: 'snapshot-metadata' },\n];\nconst raw = String($json.INCLUDE_LIST || '').trim();\nconst selectedMetrics = raw ? [...new Set(raw.split(',').map((value) => value.trim()).filter(Boolean))] : [];\nreturn [{\n  json: {\n    '\u2705START_DATE': $json['\u2705START_DATE'],\n    '\u2705END_DATE': $json['\u2705END_DATE'],\n    '\u2705SPREADSHEET_URL_OR_ID': $json['\u2705SPREADSHEET_URL_OR_ID'],\n    '\u2705SPREADSHEET_ID': $json['\u2705SPREADSHEET_ID'],\n    '\u2705SHEET_NAME': $json['\u2705SHEET_NAME'],\n    '\u2705RANGE': $json['\u2705RANGE'],\n    '\u2705COLUMNS': $json['\u2705COLUMNS'],\n    '\u2705AMAZON_MARKETPLACE_ID': $json['\u2705AMAZON_MARKETPLACE_ID'],\n    '\u2705AMAZON_ADS_CLIENT_ID': $json['\u2705AMAZON_ADS_CLIENT_ID'],\n    '\u2705AMAZON_ADS_CLIENT_SECRET': $json['\u2705AMAZON_ADS_CLIENT_SECRET'],\n    '\u2705AMAZON_ADS_REFRESH_TOKEN': $json['\u2705AMAZON_ADS_REFRESH_TOKEN'],\n    '\u2705AMAZON_ADS_PROFILE_ID': $json['\u2705AMAZON_ADS_PROFILE_ID'],\n    '\u2705AMAZON_SP_CLIENT_ID': $json['\u2705AMAZON_SP_CLIENT_ID'],\n    '\u2705AMAZON_SP_CLIENT_SECRET: ': $json['\u2705AMAZON_SP_CLIENT_SECRET: '],\n    '\u2705AMAZON_SP_REFRESH_TOKEN': $json['\u2705AMAZON_SP_REFRESH_TOKEN'],\n    '\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL': $json['\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '\u2705GOOGLE_PRIVATE_KEY': $json['\u2705GOOGLE_PRIVATE_KEY'],\n    '\u2705GOOGLE_SCOPE': $json['\u2705GOOGLE_SCOPE'],\n    INCLUDE_LIST: $json.INCLUDE_LIST || '',\n    MAX_RETRIES: $json.MAX_RETRIES || '3',\n    ENABLE_RETRY_WORKFLOW: $json.ENABLE_RETRY_WORKFLOW ?? 'true',\n    selectedMetrics,\n    runAll: selectedMetrics.length === 0,\n    auth: $json.auth,\n    summary: [],\n    registry,\n  },\n}];"
       },
       "id": "2f5594d3-b46e-4d90-be5a-1ed5c7bf3e1b",
       "name": "Build Workflow Registry",
@@ -161,13 +168,13 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
             "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
             "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
@@ -278,14 +285,14 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705COLUMNS": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
             "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
             "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
@@ -398,14 +405,14 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705COLUMNS": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
             "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
             "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
@@ -518,13 +525,13 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
             "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
             "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
@@ -635,14 +642,14 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705COLUMNS": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
             "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
             "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
@@ -755,14 +762,14 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705COLUMNS": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
             "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
             "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
@@ -875,14 +882,14 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705COLUMNS": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.accessToken || \"\" }}",
             "AMAZON_ADS_CLIENT_ID": "={{ $json.auth?.amazon?.clientId || \"\" }}",
             "AMAZON_ADS_PROFILE_ID": "={{ $json.auth?.amazon?.profileId || \"\" }}",
@@ -995,13 +1002,13 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
             "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
             "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
@@ -1112,13 +1119,13 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
             "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
             "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
@@ -1229,13 +1236,13 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
             "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
             "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
@@ -1346,13 +1353,13 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
             "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
             "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
@@ -1463,13 +1470,13 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
             "AMAZON_ACCESS_TOKEN": "={{ $json.auth?.amazon?.spAccessToken || \"\" }}",
             "GOOGLE_ACCESS_TOKEN": "={{ $json.auth?.google?.accessToken || \"\" }}",
             "METRIC_KEY": "={{ $json.currentMetric?.metricKey || \"\" }}",
@@ -1524,7 +1531,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst summary = input.summary || [];\nconst failedMetrics = summary.filter((entry) => entry.status === 'failed');\nconst failedMetricKeys = [...new Set(failedMetrics.map((entry) => entry.metricKey).filter(Boolean))];\nconst enableRetryWorkflow = String(input.ENABLE_RETRY_WORKFLOW ?? 'true').toLowerCase() !== 'false';\nconst maxRetries = Math.max(1, Number(input.MAX_RETRIES || 3));\nreturn [{\n  json: {\n    summary,\n    failedMetrics,\n    failedMetricKeys,\n    '✅START_DATE': input['✅START_DATE'],\n    '✅END_DATE': input['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': input['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': input['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': input['✅SHEET_NAME'],\n    '✅RANGE': input['✅RANGE'],\n    '✅COLUMNS': input['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': input['✅AMAZON_MARKETPLACE_ID'],\n    '✅AMAZON_ADS_CLIENT_ID': input['✅AMAZON_ADS_CLIENT_ID'],\n    '✅AMAZON_ADS_CLIENT_SECRET': input['✅AMAZON_ADS_CLIENT_SECRET'],\n    '✅AMAZON_ADS_REFRESH_TOKEN': input['✅AMAZON_ADS_REFRESH_TOKEN'],\n    '✅AMAZON_ADS_PROFILE_ID': input['✅AMAZON_ADS_PROFILE_ID'],\n    '✅AMAZON_SP_CLIENT_ID': input['✅AMAZON_SP_CLIENT_ID'],\n    '✅AMAZON_SP_CLIENT_SECRET: ': input['✅AMAZON_SP_CLIENT_SECRET: '],\n    '✅AMAZON_SP_REFRESH_TOKEN': input['✅AMAZON_SP_REFRESH_TOKEN'],\n    '✅GOOGLE_SERVICE_ACCOUNT_EMAIL': input['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '✅GOOGLE_PRIVATE_KEY': input['✅GOOGLE_PRIVATE_KEY'],\n    '✅GOOGLE_SCOPE': input['✅GOOGLE_SCOPE'],\n    INCLUDE_LIST: input.INCLUDE_LIST || '',\n    MAX_RETRIES: String(maxRetries),\n    ENABLE_RETRY_WORKFLOW: enableRetryWorkflow ? 'true' : 'false',\n    shouldAutoRetry: enableRetryWorkflow && failedMetricKeys.length > 0,\n    orchestratorRunId: $execution.id,\n  },\n}];"
+        "jsCode": "const input = $input.first().json;\nconst summary = input.summary || [];\nconst failedMetrics = summary.filter((entry) => entry.status === 'failed');\nconst failedMetricKeys = [...new Set(failedMetrics.map((entry) => entry.metricKey).filter(Boolean))];\nconst enableRetryWorkflow = String(input.ENABLE_RETRY_WORKFLOW ?? 'true').toLowerCase() !== 'false';\nconst maxRetries = Math.max(1, Number(input.MAX_RETRIES || 3));\nreturn [{\n  json: {\n    summary,\n    failedMetrics,\n    failedMetricKeys,\n    '\u2705START_DATE': input['\u2705START_DATE'],\n    '\u2705END_DATE': input['\u2705END_DATE'],\n    '\u2705SPREADSHEET_URL_OR_ID': input['\u2705SPREADSHEET_URL_OR_ID'],\n    '\u2705SPREADSHEET_ID': input['\u2705SPREADSHEET_ID'],\n    '\u2705SHEET_NAME': input['\u2705SHEET_NAME'],\n    '\u2705RANGE': input['\u2705RANGE'],\n    '\u2705COLUMNS': input['\u2705COLUMNS'],\n    '\u2705AMAZON_MARKETPLACE_ID': input['\u2705AMAZON_MARKETPLACE_ID'],\n    '\u2705AMAZON_ADS_CLIENT_ID': input['\u2705AMAZON_ADS_CLIENT_ID'],\n    '\u2705AMAZON_ADS_CLIENT_SECRET': input['\u2705AMAZON_ADS_CLIENT_SECRET'],\n    '\u2705AMAZON_ADS_REFRESH_TOKEN': input['\u2705AMAZON_ADS_REFRESH_TOKEN'],\n    '\u2705AMAZON_ADS_PROFILE_ID': input['\u2705AMAZON_ADS_PROFILE_ID'],\n    '\u2705AMAZON_SP_CLIENT_ID': input['\u2705AMAZON_SP_CLIENT_ID'],\n    '\u2705AMAZON_SP_CLIENT_SECRET: ': input['\u2705AMAZON_SP_CLIENT_SECRET: '],\n    '\u2705AMAZON_SP_REFRESH_TOKEN': input['\u2705AMAZON_SP_REFRESH_TOKEN'],\n    '\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL': input['\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '\u2705GOOGLE_PRIVATE_KEY': input['\u2705GOOGLE_PRIVATE_KEY'],\n    '\u2705GOOGLE_SCOPE': input['\u2705GOOGLE_SCOPE'],\n    INCLUDE_LIST: input.INCLUDE_LIST || '',\n    MAX_RETRIES: String(maxRetries),\n    ENABLE_RETRY_WORKFLOW: enableRetryWorkflow ? 'true' : 'false',\n    shouldAutoRetry: enableRetryWorkflow && failedMetricKeys.length > 0,\n    orchestratorRunId: $execution.id,\n  },\n}];"
       },
       "id": "726d5d57-4b61-4df7-8baf-dd27092b7377",
       "name": "Final Summary",
@@ -1582,24 +1589,24 @@
           "value": {
             "FAILED_METRIC_KEYS": "={{ ($json.failedMetricKeys || []).join(',') }}",
             "MAX_RETRIES": "={{ $json.MAX_RETRIES || '3' }}",
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
-            "✅AMAZON_ADS_CLIENT_ID": "={{ $json[\"✅AMAZON_ADS_CLIENT_ID\"] || \"\" }}",
-            "✅AMAZON_ADS_CLIENT_SECRET": "={{ $json[\"✅AMAZON_ADS_CLIENT_SECRET\"] || \"\" }}",
-            "✅AMAZON_ADS_REFRESH_TOKEN": "={{ $json[\"✅AMAZON_ADS_REFRESH_TOKEN\"] || \"\" }}",
-            "✅AMAZON_ADS_PROFILE_ID": "={{ $json[\"✅AMAZON_ADS_PROFILE_ID\"] || \"\" }}",
-            "✅AMAZON_SP_CLIENT_ID": "={{ $json[\"✅AMAZON_SP_CLIENT_ID\"] || \"\" }}",
-            "✅AMAZON_SP_CLIENT_SECRET: ": "={{ $json[\"✅AMAZON_SP_CLIENT_SECRET: \"] || \"\" }}",
-            "✅AMAZON_SP_REFRESH_TOKEN": "={{ $json[\"✅AMAZON_SP_REFRESH_TOKEN\"] || \"\" }}",
-            "✅GOOGLE_SERVICE_ACCOUNT_EMAIL": "={{ $json[\"✅GOOGLE_SERVICE_ACCOUNT_EMAIL\"] || \"\" }}",
-            "✅GOOGLE_PRIVATE_KEY": "={{ $json[\"✅GOOGLE_PRIVATE_KEY\"] || \"\" }}",
-            "✅GOOGLE_SCOPE": "={{ $json[\"✅GOOGLE_SCOPE\"] || \"https://www.googleapis.com/auth/spreadsheets\" }}"
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705COLUMNS": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705AMAZON_ADS_CLIENT_ID": "={{ $json[\"\u2705AMAZON_ADS_CLIENT_ID\"] || \"\" }}",
+            "\u2705AMAZON_ADS_CLIENT_SECRET": "={{ $json[\"\u2705AMAZON_ADS_CLIENT_SECRET\"] || \"\" }}",
+            "\u2705AMAZON_ADS_REFRESH_TOKEN": "={{ $json[\"\u2705AMAZON_ADS_REFRESH_TOKEN\"] || \"\" }}",
+            "\u2705AMAZON_ADS_PROFILE_ID": "={{ $json[\"\u2705AMAZON_ADS_PROFILE_ID\"] || \"\" }}",
+            "\u2705AMAZON_SP_CLIENT_ID": "={{ $json[\"\u2705AMAZON_SP_CLIENT_ID\"] || \"\" }}",
+            "\u2705AMAZON_SP_CLIENT_SECRET: ": "={{ $json[\"\u2705AMAZON_SP_CLIENT_SECRET: \"] || \"\" }}",
+            "\u2705AMAZON_SP_REFRESH_TOKEN": "={{ $json[\"\u2705AMAZON_SP_REFRESH_TOKEN\"] || \"\" }}",
+            "\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL": "={{ $json[\"\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL\"] || \"\" }}",
+            "\u2705GOOGLE_PRIVATE_KEY": "={{ $json[\"\u2705GOOGLE_PRIVATE_KEY\"] || \"\" }}",
+            "\u2705GOOGLE_SCOPE": "={{ $json[\"\u2705GOOGLE_SCOPE\"] || \"https://www.googleapis.com/auth/spreadsheets\" }}"
           },
           "matchingColumns": [],
           "schema": [],
@@ -1646,15 +1653,15 @@
             },
             {
               "name": "refresh_token",
-              "value": "={{ $json[\"✅AMAZON_ADS_REFRESH_TOKEN\"] }}"
+              "value": "={{ $json[\"\u2705AMAZON_ADS_REFRESH_TOKEN\"] }}"
             },
             {
               "name": "client_id",
-              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_ID\"] }}"
+              "value": "={{ $json[\"\u2705AMAZON_ADS_CLIENT_ID\"] }}"
             },
             {
               "name": "client_secret",
-              "value": "={{ $json[\"✅AMAZON_ADS_CLIENT_SECRET\"] }}"
+              "value": "={{ $json[\"\u2705AMAZON_ADS_CLIENT_SECRET\"] }}"
             }
           ]
         },
@@ -1726,7 +1733,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const seed = $('Set Credentials').first().json;\nconst input = $input.first().json;\nconst issuedAt = new Date().toISOString();\n\nconst refreshBufferSeconds = Number(seed.AUTH_REFRESH_BUFFER_SECONDS || input.AUTH_REFRESH_BUFFER_SECONDS || 300);\n\nconst amazonAdsNode = $('Mint Amazon Access Token').first().json;\nconst googleNode = $('Mint Google Access Token').first().json;\nconst spNode = $('Mint SP Access Token').first().json;\n\nconst amazonExpiresIn = Number(amazonAdsNode.expires_in || 3600);\nconst googleExpiresIn = Number(googleNode.expires_in || 3600);\nconst spExpiresIn = Number(spNode.expires_in || 3600);\n\nreturn [{\n  json: {\n    ...seed,\n    ...input,\n    auth: {\n      amazon: {\n        accessToken: amazonAdsNode.access_token,\n        clientId: seed['✅AMAZON_ADS_CLIENT_ID'],\n        profileId: seed['✅AMAZON_ADS_PROFILE_ID'],\n        issuedAt,\n        expiresAt: new Date(Date.now() + amazonExpiresIn * 1000).toISOString(),\n        spAccessToken: spNode.access_token,\n        spIssuedAt: issuedAt,\n        spExpiresAt: new Date(Date.now() + spExpiresIn * 1000).toISOString(),\n      },\n      google: {\n        accessToken: googleNode.access_token,\n        scope: seed['✅GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets',\n        issuedAt: seed.googleIssuedAt || input.googleIssuedAt || issuedAt,\n        expiresAt: seed.googleExpiresAt || input.googleExpiresAt || new Date(Date.now() + googleExpiresIn * 1000).toISOString(),\n      },\n      meta: {\n        refreshBufferSeconds,\n      },\n    },\n  },\n}];"
+        "jsCode": "const seed = $('Set Credentials').first().json;\nconst input = $input.first().json;\nconst issuedAt = new Date().toISOString();\n\nconst refreshBufferSeconds = Number(seed.AUTH_REFRESH_BUFFER_SECONDS || input.AUTH_REFRESH_BUFFER_SECONDS || 300);\n\nconst amazonAdsNode = $('Mint Amazon Access Token').first().json;\nconst googleNode = $('Mint Google Access Token').first().json;\nconst spNode = $('Mint SP Access Token').first().json;\n\nconst amazonExpiresIn = Number(amazonAdsNode.expires_in || 3600);\nconst googleExpiresIn = Number(googleNode.expires_in || 3600);\nconst spExpiresIn = Number(spNode.expires_in || 3600);\n\nreturn [{\n  json: {\n    ...seed,\n    ...input,\n    auth: {\n      amazon: {\n        accessToken: amazonAdsNode.access_token,\n        clientId: seed['\u2705AMAZON_ADS_CLIENT_ID'],\n        profileId: seed['\u2705AMAZON_ADS_PROFILE_ID'],\n        issuedAt,\n        expiresAt: new Date(Date.now() + amazonExpiresIn * 1000).toISOString(),\n        spAccessToken: spNode.access_token,\n        spIssuedAt: issuedAt,\n        spExpiresAt: new Date(Date.now() + spExpiresIn * 1000).toISOString(),\n      },\n      google: {\n        accessToken: googleNode.access_token,\n        scope: seed['\u2705GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets',\n        issuedAt: seed.googleIssuedAt || input.googleIssuedAt || issuedAt,\n        expiresAt: seed.googleExpiresAt || input.googleExpiresAt || new Date(Date.now() + googleExpiresIn * 1000).toISOString(),\n      },\n      meta: {\n        refreshBufferSeconds,\n      },\n    },\n  },\n}];"
       },
       "id": "c63cb2e7-26f2-43ec-b31d-7df06cfcc5b6",
       "name": "Attach Shared Auth Bundle",
@@ -1751,15 +1758,15 @@
             },
             {
               "name": "refresh_token",
-              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_REFRESH_TOKEN\"] }}"
+              "value": "={{ $('Set Credentials').first().json[\"\u2705AMAZON_SP_REFRESH_TOKEN\"] }}"
             },
             {
               "name": "client_id",
-              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_CLIENT_ID\"] }}"
+              "value": "={{ $('Set Credentials').first().json[\"\u2705AMAZON_SP_CLIENT_ID\"] }}"
             },
             {
               "name": "client_secret",
-              "value": "={{ $('Set Credentials').first().json[\"✅AMAZON_SP_CLIENT_SECRET: \"] }}"
+              "value": "={{ $('Set Credentials').first().json[\"\u2705AMAZON_SP_CLIENT_SECRET: \"] }}"
             }
           ]
         },
@@ -1791,7 +1798,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const crypto = require('crypto');\n\nfunction b64url(value) {\n  return Buffer.from(value)\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction getCredentialsFromN8n() {\n  try {\n    return $('Set Credentials').first().json || {};\n  } catch {\n    return $input.first().json || {};\n  }\n}\n\nfunction normalizePrivateKey(raw) {\n  let value = String(raw || '').trim();\n\n  if (!value) {\n    return '';\n  }\n\n  if (\n    (value.startsWith('\"') && value.endsWith('\"')) ||\n    (value.startsWith(\"'\") && value.endsWith(\"'\"))\n  ) {\n    value = value.slice(1, -1);\n  }\n\n  value = value\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\r\\n/g, '\\n')\n    .trim();\n\n  if (!value.includes('BEGIN')) {\n    value = [\n      '-----BEGIN PRIVATE KEY-----',\n      value.replace(/\\s+/g, ''),\n      '-----END PRIVATE KEY-----',\n    ].join('\\n');\n  }\n\n  return value;\n}\n\nfunction createPrivateKeyOrThrow(privateKeyPem) {\n  try {\n    return crypto.createPrivateKey({\n      key: privateKeyPem,\n      format: 'pem',\n    });\n  } catch (error) {\n    const firstLine = privateKeyPem.split('\\n')[0] || '<empty>';\n    throw new Error(\n      `Invalid GOOGLE_PRIVATE_KEY format. First line: ${firstLine}. Original error: ${error.message}`\n    );\n  }\n}\n\nconst input = $input.first().json || {};\nconst credentials = { ...getCredentialsFromN8n(), ...input };\n\nconst serviceAccountEmail = String(credentials['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'] || '').trim();\nconst privateKeyPem = normalizePrivateKey(credentials['✅GOOGLE_PRIVATE_KEY']);\nconst scope = String(\n  credentials['✅GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets.readonly'\n).trim();\n\nif (!serviceAccountEmail || !privateKeyPem) {\n  throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY');\n}\n\nconst privateKey = createPrivateKeyOrThrow(privateKeyPem);\nconst now = Math.floor(Date.now() / 1000);\n\nconst encodedHeader = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));\nconst encodedPayload = b64url(\n  JSON.stringify({\n    iss: serviceAccountEmail,\n    scope,\n    aud: 'https://oauth2.googleapis.com/token',\n    iat: now,\n    exp: now + 3600,\n  })\n);\n\nconst signingInput = `${encodedHeader}.${encodedPayload}`;\nconst signature = crypto\n  .sign('RSA-SHA256', Buffer.from(signingInput, 'utf8'), privateKey)\n  .toString('base64')\n  .replace(/=/g, '')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_');\n\nreturn [\n  {\n    json: {\n      ...input,\n      assertion: `${signingInput}.${signature}`,\n    },\n  },\n];\n"
+        "jsCode": "const crypto = require('crypto');\n\nfunction b64url(value) {\n  return Buffer.from(value)\n    .toString('base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n}\n\nfunction getCredentialsFromN8n() {\n  try {\n    return $('Set Credentials').first().json || {};\n  } catch {\n    return $input.first().json || {};\n  }\n}\n\nfunction normalizePrivateKey(raw) {\n  let value = String(raw || '').trim();\n\n  if (!value) {\n    return '';\n  }\n\n  if (\n    (value.startsWith('\"') && value.endsWith('\"')) ||\n    (value.startsWith(\"'\") && value.endsWith(\"'\"))\n  ) {\n    value = value.slice(1, -1);\n  }\n\n  value = value\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\r\\n/g, '\\n')\n    .trim();\n\n  if (!value.includes('BEGIN')) {\n    value = [\n      'REDACTED',\n    ].join('\\n');\n  }\n\n  return value;\n}\n\nfunction createPrivateKeyOrThrow(privateKeyPem) {\n  try {\n    return crypto.createPrivateKey({\n      key: privateKeyPem,\n      format: 'pem',\n    });\n  } catch (error) {\n    const firstLine = privateKeyPem.split('\\n')[0] || '<empty>';\n    throw new Error(\n      `Invalid GOOGLE_PRIVATE_KEY format. First line: ${firstLine}. Original error: ${error.message}`\n    );\n  }\n}\n\nconst input = $input.first().json || {};\nconst credentials = { ...getCredentialsFromN8n(), ...input };\n\nconst serviceAccountEmail = String(credentials['\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL'] || '').trim();\nconst privateKeyPem = normalizePrivateKey(credentials['\u2705GOOGLE_PRIVATE_KEY']);\nconst scope = String(\n  credentials['\u2705GOOGLE_SCOPE'] || 'https://www.googleapis.com/auth/spreadsheets.readonly'\n).trim();\n\nif (!serviceAccountEmail || !privateKeyPem) {\n  throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY');\n}\n\nconst privateKey = createPrivateKeyOrThrow(privateKeyPem);\nconst now = Math.floor(Date.now() / 1000);\n\nconst encodedHeader = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));\nconst encodedPayload = b64url(\n  JSON.stringify({\n    iss: serviceAccountEmail,\n    scope,\n    aud: 'https://oauth2.googleapis.com/token',\n    iat: now,\n    exp: now + 3600,\n  })\n);\n\nconst signingInput = `${encodedHeader}.${encodedPayload}`;\nconst signature = crypto\n  .sign('RSA-SHA256', Buffer.from(signingInput, 'utf8'), privateKey)\n  .toString('base64')\n  .replace(/=/g, '')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_');\n\nreturn [\n  {\n    json: {\n      ...input,\n      assertion: `${signingInput}.${signature}`,\n    },\n  },\n];\n"
       },
       "id": "d80aadb5-6de0-4efa-97d4-3f96356988b2",
       "name": "Build JWT Assertion",
@@ -1808,114 +1815,114 @@
           "assignments": [
             {
               "id": "76a6c500-c2c0-4339-8299-682826c4452b",
-              "name": "✅START_DATE",
+              "name": "\u2705START_DATE",
               "value": "2026-04-18",
               "type": "string"
             },
             {
               "id": "2a1915cd-7949-44ff-952b-9ab2aa6365f5",
-              "name": "✅END_DATE",
+              "name": "\u2705END_DATE",
               "value": "2026-04-18",
               "type": "string"
             },
             {
               "id": "6944e5f6-f22f-4bf8-9746-13b9e5ee8f91",
               "name": "INCLUDE_LIST",
-              "value": "refunds",
+              "value": "={{ $json.INCLUDE_LIST || \"\" }}",
               "type": "string"
             },
             {
               "id": "d2a87c47-b55e-4641-90c9-4b7c204d8955",
-              "name": "✅AMAZON_ADS_CLIENT_ID",
-              "value": "<YOUR_AMAZON_ADS_CLIENT_ID>",
+              "name": "\u2705AMAZON_ADS_CLIENT_ID",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "f6bcc963-0897-455c-ac16-e86f3deca6ef",
-              "name": "✅AMAZON_ADS_CLIENT_SECRET",
-              "value": "<YOUR_AMAZON_ADS_CLIENT_SECRET>",
+              "name": "\u2705AMAZON_ADS_CLIENT_SECRET",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "6e513cbb-157d-4f5b-a18f-6f2b212157f5",
-              "name": "✅AMAZON_ADS_REFRESH_TOKEN",
-              "value": "<YOUR_AMAZON_ADS_REFRESH_TOKEN>",
+              "name": "\u2705AMAZON_ADS_REFRESH_TOKEN",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "15f4bb08-6a83-4e2f-bf3f-706b362ee4af",
-              "name": "✅AMAZON_ADS_PROFILE_ID",
-              "value": "<YOUR_AMAZON_ADS_PROFILE_ID>",
+              "name": "\u2705AMAZON_ADS_PROFILE_ID",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "55f35d9b-4dd4-4594-af0c-08185938f2ac",
-              "name": "✅AMAZON_SP_CLIENT_ID",
-              "value": "<YOUR_AMAZON_SP_CLIENT_ID>",
+              "name": "\u2705AMAZON_SP_CLIENT_ID",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "2aa06f79-f2f4-4d4f-8a4a-bf328f2de798",
-              "name": "✅AMAZON_SP_CLIENT_SECRET: ",
-              "value": "<YOUR_AMAZON_SP_CLIENT_SECRET>",
+              "name": "\u2705AMAZON_SP_CLIENT_SECRET: ",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "518c7b45-f2de-42ad-b944-6342308f9e41",
-              "name": "✅AMAZON_SP_REFRESH_TOKEN",
-              "value": "<YOUR_AMAZON_SP_REFRESH_TOKEN>",
+              "name": "\u2705AMAZON_SP_REFRESH_TOKEN",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "d02eed0a-85e5-4723-97a0-2ef963c0cb91",
-              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL",
-              "value": "<YOUR_GOOGLE_SERVICE_ACCOUNT_EMAIL>",
+              "name": "\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "fe461a50-becf-4868-9675-eba1f00317b1",
-              "name": "✅GOOGLE_PRIVATE_KEY",
-              "value": "<YOUR_GOOGLE_PRIVATE_KEY_PEM>",
+              "name": "\u2705GOOGLE_PRIVATE_KEY",
+              "value": "REDACTED",
               "type": "string"
             },
             {
               "id": "51f84e29-8590-46e0-bb22-c92f5900bcd7",
-              "name": "✅GOOGLE_SCOPE",
+              "name": "\u2705GOOGLE_SCOPE",
               "value": "https://www.googleapis.com/auth/spreadsheets",
               "type": "string"
             },
             {
               "id": "297bd6d8-b645-41fa-baf6-9ac1a3b4a682",
-              "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "https://docs.google.com/spreadsheets/d/<YOUR_SPREADSHEET_ID>/edit?gid=962294707#gid=962294707",
+              "name": "\u2705SPREADSHEET_URL_OR_ID",
+              "value": "https://docs.google.com/spreadsheets/d/1vK8PB8jug1NakLBF81_lpEq66De_RbHe-6tG063ibnM/edit?gid=962294707#gid=962294707",
               "type": "string"
             },
             {
               "id": "c0aec1b6-f8fc-49fd-82aa-03fbb686df99",
-              "name": "✅SHEET_NAME",
+              "name": "\u2705SHEET_NAME",
               "value": "N8N_DOWNLOAD",
               "type": "string"
             },
             {
               "id": "163475ec-2602-4c9e-9200-3277ef26934d",
-              "name": "✅RANGE",
+              "name": "\u2705RANGE",
               "value": "A:BD",
               "type": "string"
             },
             {
               "id": "05c6613c-5ce9-418b-9067-8ca2a91dec71",
-              "name": "✅COLUMNS",
+              "name": "\u2705COLUMNS",
               "value": "[\"cost\", \"clicks\", \"impressions\", \"advertisedAsin\", \"advertisedSku\"]",
               "type": "string"
             },
             {
               "id": "e05654b1-70f3-45f6-ba57-3f3b7bb1a8bf",
-              "name": "✅SPREADSHEET_ID",
-              "value": "<YOUR_SPREADSHEET_ID>",
+              "name": "\u2705SPREADSHEET_ID",
+              "value": "1vK8PB8jug1NakLBF81_lpEq66De_RbHe-6tG063ibnM",
               "type": "string"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID",
+              "name": "\u2705AMAZON_MARKETPLACE_ID",
               "value": "ATVPDKIKX0DER",
               "type": "string",
               "id": "67e27ab3-87d9-4ca2-bc01-21d681d1b080"
@@ -1947,7 +1954,7 @@
     }
   ],
   "connections": {
-    "When clicking ‘Execute workflow’": {
+    "When clicking \u2018Execute workflow\u2019": {
       "main": [
         [
           {
@@ -2864,8 +2871,41 @@
       ]
     }
   },
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": null,
   "pinData": {},
-  "meta": {
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  "versionId": "feb7d404-263b-4b39-b23a-010835b9466c",
+  "activeVersionId": "feb7d404-263b-4b39-b23a-010835b9466c",
+  "versionCounter": 99,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-16T21:24:50.267Z",
+      "createdAt": "2026-04-16T21:24:50.267Z",
+      "role": "workflow:owner",
+      "workflowId": "Hh8rWhCpyt6n8QHT",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "Version feb7d404",
+    "description": ""
   }
 }

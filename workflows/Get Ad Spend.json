@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-04-17T05:44:40.678Z",
+  "createdAt": "2026-04-12T23:21:21.568Z",
+  "id": "nWQo0Pz3qHzQO0My",
   "name": "Get Ad Spend",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
@@ -10,50 +16,50 @@
         224
       ],
       "id": "d24dd15e-535d-4096-b3cb-4679b10836e7",
-      "name": "When clicking ‘Execute workflow’"
+      "name": "When clicking \u2018Execute workflow\u2019"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "name": "✅START_DATE",
-              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "name": "\u2705START_DATE",
+              "value": "={{ $json[\"\u2705START_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅END_DATE",
-              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "name": "\u2705END_DATE",
+              "value": "={{ $json[\"\u2705END_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SHEET_NAME",
-              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "name": "\u2705SHEET_NAME",
+              "value": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅RANGE",
-              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "name": "\u2705RANGE",
+              "value": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅COLUMNS",
-              "value": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+              "name": "\u2705COLUMNS",
+              "value": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "name": "\u2705AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
               "type": "string"
             },
             {
@@ -199,7 +205,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"name\": \"SKU_Ads_Spend_{{$now.toISO()}}\",\n  \"startDate\": \"{{ $('Set Credentials').first().json['✅START_DATE'] }}\",\n  \"endDate\": \"{{ $('Set Credentials').first().json['✅END_DATE'] }}\",\n  \"configuration\": {\n    \"adProduct\": \"SPONSORED_PRODUCTS\",\n    \"reportTypeId\": \"spAdvertisedProduct\",\n    \"format\": \"GZIP_JSON\",\n    \"timeUnit\": \"DAILY\",\n    \"groupBy\": [\"advertiser\"],\n    \"columns\": {{ $('Set Credentials').first().json[\"✅COLUMNS\"] }}\n  }\n}",
+        "jsonBody": "={\n  \"name\": \"SKU_Ads_Spend_{{$now.toISO()}}\",\n  \"startDate\": \"{{ $('Set Credentials').first().json['\u2705START_DATE'] }}\",\n  \"endDate\": \"{{ $('Set Credentials').first().json['\u2705END_DATE'] }}\",\n  \"configuration\": {\n    \"adProduct\": \"SPONSORED_PRODUCTS\",\n    \"reportTypeId\": \"spAdvertisedProduct\",\n    \"format\": \"GZIP_JSON\",\n    \"timeUnit\": \"DAILY\",\n    \"groupBy\": [\"advertiser\"],\n    \"columns\": {{ $('Set Credentials').first().json[\"\u2705COLUMNS\"] }}\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -308,7 +314,7 @@
     },
     {
       "parameters": {
-        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"✅SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"✅SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"✅RANGE\"])) }}",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Set Credentials').item.json[\"\u2705SPREADSHEET_ID\"] }}/values/{{ encodeURIComponent(($('Set Credentials').item.json[\"\u2705SHEET_NAME\"]) + '!' + ($('Set Credentials').item.json[\"\u2705RANGE\"])) }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -336,7 +342,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"✅SPREADSHEET_ID\"] }}/values:batchUpdate",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $node[\"Set Credentials\"].json[\"\u2705SPREADSHEET_ID\"] }}/values:batchUpdate",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -366,7 +372,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $json;\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['✅SHEET_NAME'];\n\nconst adsBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n  const cost = toNumber(row.cost);\n  adsBySku.set(sku, Number(((adsBySku.get(sku) || 0) + cost).toFixed(2)));\n}\n\nconst headerRowIdx = 0;\nconst headerRow = values[headerRowIdx] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'ADSPEND');\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and AD_SPEND columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\n\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /_TOTALS$/i.test(sku)) continue;\n  if (!adsBySku.has(sku)) continue;\n\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[Number((adsBySku.get(sku) || 0).toFixed(2))]],\n  });\n}\n\nreturn [{\n  json: {\n    valueInputOption: 'USER_ENTERED',\n    data,\n  },\n}];\n"
+        "jsCode": "function toNumber(v) {\n  if (v === null || v === undefined) return 0;\n  const s = String(v).replace(/[$,%\\s,]/g, '');\n  const n = Number(s);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction colToA1(colIndex1Based) {\n  let n = colIndex1Based;\n  let out = '';\n  while (n > 0) {\n    const m = (n - 1) % 26;\n    out = String.fromCharCode(65 + m) + out;\n    n = Math.floor((n - 1) / 26);\n  }\n  return out;\n}\n\nfunction normalizeHeader(value) {\n  return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();\n}\n\nconst sheet = $json;\nconst values = sheet.values || [];\nconst reportData = $('Extract from File').first().json.data || [];\nconst sheetName = $('Set Credentials').first().json['\u2705SHEET_NAME'];\n\nconst adsBySku = new Map();\nfor (const row of reportData) {\n  const sku = String(row.advertisedSku || '').trim();\n  if (!sku) continue;\n  const cost = toNumber(row.cost);\n  adsBySku.set(sku, Number(((adsBySku.get(sku) || 0) + cost).toFixed(2)));\n}\n\nconst headerRowIdx = 0;\nconst headerRow = values[headerRowIdx] || [];\nconst skuCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'SKU');\nconst targetCol = headerRow.findIndex((cell) => normalizeHeader(cell) === 'ADSPEND');\n\nif (skuCol === -1 || targetCol === -1) {\n  throw new Error('Could not find SKU and AD_SPEND columns');\n}\n\nconst targetColA1 = colToA1(targetCol + 1);\nconst data = [];\n\nfor (let i = headerRowIdx + 1; i < values.length; i++) {\n  const row = values[i] || [];\n  const sku = String(row[skuCol] || '').trim();\n  if (!sku || /_TOTALS$/i.test(sku)) continue;\n  if (!adsBySku.has(sku)) continue;\n\n  data.push({\n    range: `${sheetName}!${targetColA1}${i + 1}`,\n    values: [[Number((adsBySku.get(sku) || 0).toFixed(2))]],\n  });\n}\n\nreturn [{\n  json: {\n    valueInputOption: 'USER_ENTERED',\n    data,\n  },\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -440,43 +446,43 @@
         "assignments": {
           "assignments": [
             {
-              "name": "✅START_DATE",
-              "value": "={{ $json[\"✅START_DATE\"] || \"\" }}",
+              "name": "\u2705START_DATE",
+              "value": "={{ $json[\"\u2705START_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅END_DATE",
-              "value": "={{ $json[\"✅END_DATE\"] || \"\" }}",
+              "name": "\u2705END_DATE",
+              "value": "={{ $json[\"\u2705END_DATE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_URL_OR_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_URL_OR_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SPREADSHEET_ID",
-              "value": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
+              "name": "\u2705SPREADSHEET_ID",
+              "value": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅SHEET_NAME",
-              "value": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
+              "name": "\u2705SHEET_NAME",
+              "value": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅RANGE",
-              "value": "={{ $json[\"✅RANGE\"] || \"\" }}",
+              "name": "\u2705RANGE",
+              "value": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅COLUMNS",
-              "value": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
+              "name": "\u2705COLUMNS",
+              "value": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
               "type": "string"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID",
-              "value": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+              "name": "\u2705AMAZON_MARKETPLACE_ID",
+              "value": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
               "type": "string"
             },
             {
@@ -529,7 +535,6 @@
       "notes": "write-health-check"
     }
   ],
-  "pinData": {},
   "connections": {
     "Wait": {
       "main": [
@@ -666,7 +671,7 @@
         ]
       ]
     },
-    "When clicking ‘Execute workflow’": {
+    "When clicking \u2018Execute workflow\u2019": {
       "main": [
         [
           {
@@ -722,7 +727,6 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -730,11 +734,37 @@
     "availableInMCP": true,
     "callerIds": "GtrUp6wKVHsU5Nwu,Hh8rWhCpyt6n8QHT"
   },
-  "versionId": "09edb40c-e4e9-4b3c-bdb9-2cd65079002b",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+    "templateCredsSetupCompleted": true
   },
-  "id": "nWQo0Pz3qHzQO0My",
-  "tags": []
+  "pinData": {},
+  "versionId": "09edb40c-e4e9-4b3c-bdb9-2cd65079002b",
+  "activeVersionId": "09edb40c-e4e9-4b3c-bdb9-2cd65079002b",
+  "versionCounter": 308,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-12T23:21:21.576Z",
+      "createdAt": "2026-04-12T23:21:21.576Z",
+      "role": "workflow:owner",
+      "workflowId": "nWQo0Pz3qHzQO0My",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "Version 09edb40c",
+    "description": ""
+  }
 }

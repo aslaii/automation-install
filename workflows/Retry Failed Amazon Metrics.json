@@ -1,9 +1,16 @@
 {
+  "updatedAt": "2026-04-20T22:55:18.972Z",
+  "createdAt": "2026-04-20T07:19:01.530Z",
+  "id": "7qKcWP6U0y0xES06",
+  "name": "Retry Failed Amazon Metrics",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
       "id": "90331a7f-4920-4b5a-b906-e5b6850ab5f3",
-      "name": "When clicking ‘Execute workflow’",
+      "name": "When clicking \u2018Execute workflow\u2019",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
@@ -25,58 +32,58 @@
               "name": "RETRY_ROUND"
             },
             {
-              "name": "✅START_DATE"
+              "name": "\u2705START_DATE"
             },
             {
-              "name": "✅END_DATE"
+              "name": "\u2705END_DATE"
             },
             {
-              "name": "✅AMAZON_ADS_CLIENT_ID"
+              "name": "\u2705AMAZON_ADS_CLIENT_ID"
             },
             {
-              "name": "✅AMAZON_ADS_CLIENT_SECRET"
+              "name": "\u2705AMAZON_ADS_CLIENT_SECRET"
             },
             {
-              "name": "✅AMAZON_ADS_REFRESH_TOKEN"
+              "name": "\u2705AMAZON_ADS_REFRESH_TOKEN"
             },
             {
-              "name": "✅AMAZON_ADS_PROFILE_ID"
+              "name": "\u2705AMAZON_ADS_PROFILE_ID"
             },
             {
-              "name": "✅AMAZON_SP_CLIENT_ID"
+              "name": "\u2705AMAZON_SP_CLIENT_ID"
             },
             {
-              "name": "✅AMAZON_SP_CLIENT_SECRET: "
+              "name": "\u2705AMAZON_SP_CLIENT_SECRET: "
             },
             {
-              "name": "✅AMAZON_SP_REFRESH_TOKEN"
+              "name": "\u2705AMAZON_SP_REFRESH_TOKEN"
             },
             {
-              "name": "✅GOOGLE_SERVICE_ACCOUNT_EMAIL"
+              "name": "\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL"
             },
             {
-              "name": "✅GOOGLE_PRIVATE_KEY"
+              "name": "\u2705GOOGLE_PRIVATE_KEY"
             },
             {
-              "name": "✅GOOGLE_SCOPE"
+              "name": "\u2705GOOGLE_SCOPE"
             },
             {
-              "name": "✅SPREADSHEET_URL_OR_ID"
+              "name": "\u2705SPREADSHEET_URL_OR_ID"
             },
             {
-              "name": "✅SPREADSHEET_ID"
+              "name": "\u2705SPREADSHEET_ID"
             },
             {
-              "name": "✅SHEET_NAME"
+              "name": "\u2705SHEET_NAME"
             },
             {
-              "name": "✅RANGE"
+              "name": "\u2705RANGE"
             },
             {
-              "name": "✅COLUMNS"
+              "name": "\u2705COLUMNS"
             },
             {
-              "name": "✅AMAZON_MARKETPLACE_ID"
+              "name": "\u2705AMAZON_MARKETPLACE_ID"
             }
           ]
         }
@@ -92,7 +99,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function normalizeMetricKeys(raw) {\n  if (Array.isArray(raw)) {\n    return raw.map((value) => String(value).trim()).filter(Boolean);\n  }\n  if (typeof raw === 'string') {\n    return raw.split(',').map((value) => value.trim()).filter(Boolean);\n  }\n  return [];\n}\n\nconst input = $input.first().json || {};\nconst remainingFailedMetricKeys = [...new Set(normalizeMetricKeys(input.FAILED_METRIC_KEYS ?? input.failedMetricKeys))];\nconst maxRetries = Math.max(1, Number(input.MAX_RETRIES || input.maxRetries || 3));\nconst retryRound = Math.max(1, Number(input.RETRY_ROUND || input.retryRound || 1));\n\nreturn [{\n  json: {\n    '✅START_DATE': input['✅START_DATE'],\n    '✅END_DATE': input['✅END_DATE'],\n    '✅SPREADSHEET_URL_OR_ID': input['✅SPREADSHEET_URL_OR_ID'],\n    '✅SPREADSHEET_ID': input['✅SPREADSHEET_ID'],\n    '✅SHEET_NAME': input['✅SHEET_NAME'],\n    '✅RANGE': input['✅RANGE'],\n    '✅COLUMNS': input['✅COLUMNS'],\n    '✅AMAZON_MARKETPLACE_ID': input['✅AMAZON_MARKETPLACE_ID'],\n    '✅AMAZON_ADS_CLIENT_ID': input['✅AMAZON_ADS_CLIENT_ID'],\n    '✅AMAZON_ADS_CLIENT_SECRET': input['✅AMAZON_ADS_CLIENT_SECRET'],\n    '✅AMAZON_ADS_REFRESH_TOKEN': input['✅AMAZON_ADS_REFRESH_TOKEN'],\n    '✅AMAZON_ADS_PROFILE_ID': input['✅AMAZON_ADS_PROFILE_ID'],\n    '✅AMAZON_SP_CLIENT_ID': input['✅AMAZON_SP_CLIENT_ID'],\n    '✅AMAZON_SP_CLIENT_SECRET: ': input['✅AMAZON_SP_CLIENT_SECRET: '],\n    '✅AMAZON_SP_REFRESH_TOKEN': input['✅AMAZON_SP_REFRESH_TOKEN'],\n    '✅GOOGLE_SERVICE_ACCOUNT_EMAIL': input['✅GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '✅GOOGLE_PRIVATE_KEY': input['✅GOOGLE_PRIVATE_KEY'],\n    '✅GOOGLE_SCOPE': input['✅GOOGLE_SCOPE'],\n    remainingFailedMetricKeys,\n    retryRound,\n    maxRetries,\n    attempts: [],\n    finalSummary: Array.isArray(input.summary) ? input.summary : [],\n    completed: remainingFailedMetricKeys.length === 0,\n  },\n}];"
+        "jsCode": "function normalizeMetricKeys(raw) {\n  if (Array.isArray(raw)) {\n    return raw.map((value) => String(value).trim()).filter(Boolean);\n  }\n  if (typeof raw === 'string') {\n    return raw.split(',').map((value) => value.trim()).filter(Boolean);\n  }\n  return [];\n}\n\nconst input = $input.first().json || {};\nconst remainingFailedMetricKeys = [...new Set(normalizeMetricKeys(input.FAILED_METRIC_KEYS ?? input.failedMetricKeys))];\nconst maxRetries = Math.max(1, Number(input.MAX_RETRIES || input.maxRetries || 3));\nconst retryRound = Math.max(1, Number(input.RETRY_ROUND || input.retryRound || 1));\n\nreturn [{\n  json: {\n    '\u2705START_DATE': input['\u2705START_DATE'],\n    '\u2705END_DATE': input['\u2705END_DATE'],\n    '\u2705SPREADSHEET_URL_OR_ID': input['\u2705SPREADSHEET_URL_OR_ID'],\n    '\u2705SPREADSHEET_ID': input['\u2705SPREADSHEET_ID'],\n    '\u2705SHEET_NAME': input['\u2705SHEET_NAME'],\n    '\u2705RANGE': input['\u2705RANGE'],\n    '\u2705COLUMNS': input['\u2705COLUMNS'],\n    '\u2705AMAZON_MARKETPLACE_ID': input['\u2705AMAZON_MARKETPLACE_ID'],\n    '\u2705AMAZON_ADS_CLIENT_ID': input['\u2705AMAZON_ADS_CLIENT_ID'],\n    '\u2705AMAZON_ADS_CLIENT_SECRET': input['\u2705AMAZON_ADS_CLIENT_SECRET'],\n    '\u2705AMAZON_ADS_REFRESH_TOKEN': input['\u2705AMAZON_ADS_REFRESH_TOKEN'],\n    '\u2705AMAZON_ADS_PROFILE_ID': input['\u2705AMAZON_ADS_PROFILE_ID'],\n    '\u2705AMAZON_SP_CLIENT_ID': input['\u2705AMAZON_SP_CLIENT_ID'],\n    '\u2705AMAZON_SP_CLIENT_SECRET: ': input['\u2705AMAZON_SP_CLIENT_SECRET: '],\n    '\u2705AMAZON_SP_REFRESH_TOKEN': input['\u2705AMAZON_SP_REFRESH_TOKEN'],\n    '\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL': input['\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL'],\n    '\u2705GOOGLE_PRIVATE_KEY': input['\u2705GOOGLE_PRIVATE_KEY'],\n    '\u2705GOOGLE_SCOPE': input['\u2705GOOGLE_SCOPE'],\n    remainingFailedMetricKeys,\n    retryRound,\n    maxRetries,\n    attempts: [],\n    finalSummary: Array.isArray(input.summary) ? input.summary : [],\n    completed: remainingFailedMetricKeys.length === 0,\n  },\n}];"
       },
       "id": "31c655e7-4933-4940-a40b-2b9ef521b127",
       "name": "Initialize Retry State",
@@ -161,24 +168,24 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "✅START_DATE": "={{ $json[\"✅START_DATE\"] }}",
-            "✅END_DATE": "={{ $json[\"✅END_DATE\"] }}",
-            "✅SPREADSHEET_URL_OR_ID": "={{ $json[\"✅SPREADSHEET_URL_OR_ID\"] || \"\" }}",
-            "✅SPREADSHEET_ID": "={{ $json[\"✅SPREADSHEET_ID\"] || \"\" }}",
-            "✅SHEET_NAME": "={{ $json[\"✅SHEET_NAME\"] || \"\" }}",
-            "✅RANGE": "={{ $json[\"✅RANGE\"] || \"\" }}",
-            "✅COLUMNS": "={{ $json[\"✅COLUMNS\"] || \"\" }}",
-            "✅AMAZON_MARKETPLACE_ID": "={{ $json[\"✅AMAZON_MARKETPLACE_ID\"] || \"\" }}",
-            "✅AMAZON_ADS_CLIENT_ID": "={{ $json[\"✅AMAZON_ADS_CLIENT_ID\"] || \"\" }}",
-            "✅AMAZON_ADS_CLIENT_SECRET": "={{ $json[\"✅AMAZON_ADS_CLIENT_SECRET\"] || \"\" }}",
-            "✅AMAZON_ADS_REFRESH_TOKEN": "={{ $json[\"✅AMAZON_ADS_REFRESH_TOKEN\"] || \"\" }}",
-            "✅AMAZON_ADS_PROFILE_ID": "={{ $json[\"✅AMAZON_ADS_PROFILE_ID\"] || \"\" }}",
-            "✅AMAZON_SP_CLIENT_ID": "={{ $json[\"✅AMAZON_SP_CLIENT_ID\"] || \"\" }}",
-            "✅AMAZON_SP_CLIENT_SECRET: ": "={{ $json[\"✅AMAZON_SP_CLIENT_SECRET: \"] || \"\" }}",
-            "✅AMAZON_SP_REFRESH_TOKEN": "={{ $json[\"✅AMAZON_SP_REFRESH_TOKEN\"] || \"\" }}",
-            "✅GOOGLE_SERVICE_ACCOUNT_EMAIL": "={{ $json[\"✅GOOGLE_SERVICE_ACCOUNT_EMAIL\"] || \"\" }}",
-            "✅GOOGLE_PRIVATE_KEY": "={{ $json[\"✅GOOGLE_PRIVATE_KEY\"] || \"\" }}",
-            "✅GOOGLE_SCOPE": "={{ $json[\"✅GOOGLE_SCOPE\"] || \"https://www.googleapis.com/auth/spreadsheets\" }}",
+            "\u2705START_DATE": "={{ $json[\"\u2705START_DATE\"] }}",
+            "\u2705END_DATE": "={{ $json[\"\u2705END_DATE\"] }}",
+            "\u2705SPREADSHEET_URL_OR_ID": "={{ $json[\"\u2705SPREADSHEET_URL_OR_ID\"] || \"\" }}",
+            "\u2705SPREADSHEET_ID": "={{ $json[\"\u2705SPREADSHEET_ID\"] || \"\" }}",
+            "\u2705SHEET_NAME": "={{ $json[\"\u2705SHEET_NAME\"] || \"\" }}",
+            "\u2705RANGE": "={{ $json[\"\u2705RANGE\"] || \"\" }}",
+            "\u2705COLUMNS": "={{ $json[\"\u2705COLUMNS\"] || \"\" }}",
+            "\u2705AMAZON_MARKETPLACE_ID": "={{ $json[\"\u2705AMAZON_MARKETPLACE_ID\"] || \"\" }}",
+            "\u2705AMAZON_ADS_CLIENT_ID": "={{ $json[\"\u2705AMAZON_ADS_CLIENT_ID\"] || \"\" }}",
+            "\u2705AMAZON_ADS_CLIENT_SECRET": "={{ $json[\"\u2705AMAZON_ADS_CLIENT_SECRET\"] || \"\" }}",
+            "\u2705AMAZON_ADS_REFRESH_TOKEN": "={{ $json[\"\u2705AMAZON_ADS_REFRESH_TOKEN\"] || \"\" }}",
+            "\u2705AMAZON_ADS_PROFILE_ID": "={{ $json[\"\u2705AMAZON_ADS_PROFILE_ID\"] || \"\" }}",
+            "\u2705AMAZON_SP_CLIENT_ID": "={{ $json[\"\u2705AMAZON_SP_CLIENT_ID\"] || \"\" }}",
+            "\u2705AMAZON_SP_CLIENT_SECRET: ": "={{ $json[\"\u2705AMAZON_SP_CLIENT_SECRET: \"] || \"\" }}",
+            "\u2705AMAZON_SP_REFRESH_TOKEN": "={{ $json[\"\u2705AMAZON_SP_REFRESH_TOKEN\"] || \"\" }}",
+            "\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL": "={{ $json[\"\u2705GOOGLE_SERVICE_ACCOUNT_EMAIL\"] || \"\" }}",
+            "\u2705GOOGLE_PRIVATE_KEY": "={{ $json[\"\u2705GOOGLE_PRIVATE_KEY\"] || \"\" }}",
+            "\u2705GOOGLE_SCOPE": "={{ $json[\"\u2705GOOGLE_SCOPE\"] || \"https://www.googleapis.com/auth/spreadsheets\" }}",
             "INCLUDE_LIST": "={{ $json.INCLUDE_LIST || \"\" }}",
             "MAX_RETRIES": "={{ $json.MAX_RETRIES || '3' }}",
             "ENABLE_RETRY_WORKFLOW": "false"
@@ -276,7 +283,7 @@
     }
   ],
   "connections": {
-    "When clicking ‘Execute workflow’": {
+    "When clicking \u2018Execute workflow\u2019": {
       "main": [
         [
           {
@@ -390,8 +397,42 @@
       ]
     }
   },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": null,
   "pinData": {},
-  "meta": {
-    "instanceId": "582e8f3a4e2edb0b797050b4677cdb96bfd5ec1eea24ec30e2a8c807e54934cd"
+  "versionId": "ebbf2e0d-77e3-4e1b-8766-12c4d5806d70",
+  "activeVersionId": "ebbf2e0d-77e3-4e1b-8766-12c4d5806d70",
+  "versionCounter": 9,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-20T07:19:01.539Z",
+      "createdAt": "2026-04-20T07:19:01.539Z",
+      "role": "workflow:owner",
+      "workflowId": "7qKcWP6U0y0xES06",
+      "projectId": "A9JoI2uB9gEuVNGo",
+      "project": {
+        "updatedAt": "2026-04-12T23:15:35.657Z",
+        "createdAt": "2026-04-12T23:15:20.662Z",
+        "id": "A9JoI2uB9gEuVNGo",
+        "name": "Jericho jericho@blazintech.net <jericho@blazintech.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e7c4876f-874b-42f0-baa1-c60e258e7170"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "Version ebbf2e0d",
+    "description": ""
   }
 }
